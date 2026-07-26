@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../modules/foundation/foundation_workspace.dart';
+import '../modules/foundation/pages/workspaces/foundation_workspace.dart';
 
 class ChariTaskApp extends StatelessWidget {
   const ChariTaskApp({super.key});
@@ -11,10 +11,7 @@ class ChariTaskApp extends StatelessWidget {
       title: 'ChariTask',
       debugShowCheckedModeBanner: false,
 
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.deepPurple,
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.deepPurple),
 
       home: const FoundationWorkspace(),
     );
