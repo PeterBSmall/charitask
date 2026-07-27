@@ -18,21 +18,32 @@ class CTWorkspaceModules extends StatelessWidget {
   Widget build(BuildContext context) {
     return CTWorkspaceSection(
       title: title,
-      child: Wrap(
-        spacing: 20,
-        runSpacing: 20,
-        children: modules
-            .map(
-              (module) => CTWorkspaceModuleTile(
-                icon: module.icon,
-                title: module.title,
-                subtitle: module.subtitle,
-                progress: module.progress,
-                color: module.color,
-                onTap: module.onTap,
-              ),
-            )
-            .toList(),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const spacing = 20.0;
+
+          final tileWidth = (constraints.maxWidth - spacing) / 2;
+
+          return Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: modules
+                .map(
+                  (module) => SizedBox(
+                    width: tileWidth,
+                    child: CTWorkspaceModuleTile(
+                      icon: module.icon,
+                      title: module.title,
+                      subtitle: module.subtitle,
+                      progress: module.progress,
+                      color: module.color,
+                      onTap: module.onTap,
+                    ),
+                  ),
+                )
+                .toList(),
+          );
+        },
       ),
     );
   }

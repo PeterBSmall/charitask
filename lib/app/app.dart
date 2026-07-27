@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../modules/foundation/pages/workspaces/foundation_workspace.dart';
 
+import 'package:charitask/shared/theme/app_scrollbar_theme.dart';
+
 class ChariTaskApp extends StatelessWidget {
   const ChariTaskApp({super.key});
 
@@ -11,7 +13,12 @@ class ChariTaskApp extends StatelessWidget {
       title: 'ChariTask',
       debugShowCheckedModeBanner: false,
 
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.deepPurple),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.deepPurple,
+
+        scrollbarTheme: AppScrollbarTheme.light,
+      ),
 
       home: const FoundationWorkspace(),
     );

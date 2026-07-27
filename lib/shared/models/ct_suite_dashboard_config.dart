@@ -1,35 +1,43 @@
 import 'package:flutter/material.dart';
 
 class CTSuiteDashboardConfig {
-  /// Dashboard Sections
+  /// Workspace Sections
   final Widget hero;
   final Widget metrics;
-  final Widget quickActions;
-  final Widget modules;
+
+  /// Main Workspace Content
+  final Widget primaryContent;
+  final Widget secondaryContent;
+
+  /// Activity
   final Widget activity;
 
-  /// Section Titles
-  final String quickActionsTitle;
-  final String quickActionsSubtitle;
+  /// Primary Section
+  final String primaryTitle;
+  final String primarySubtitle;
 
-  final String modulesTitle;
-  final String modulesSubtitle;
+  /// Secondary Section
+  final String secondaryTitle;
+  final String secondarySubtitle;
 
+  /// Activity Section
   final String activityTitle;
   final String activitySubtitle;
 
   const CTSuiteDashboardConfig({
     required this.hero,
     required this.metrics,
-    required this.quickActions,
-    required this.modules,
+
+    required this.primaryContent,
+    required this.secondaryContent,
+
     required this.activity,
 
-    this.quickActionsTitle = 'Quick Actions',
-    this.quickActionsSubtitle = 'Common tasks to help you get started.',
+    this.primaryTitle = 'Primary',
+    this.primarySubtitle = '',
 
-    required this.modulesTitle,
-    required this.modulesSubtitle,
+    this.secondaryTitle = 'Secondary',
+    this.secondarySubtitle = '',
 
     this.activityTitle = 'Recent Activity',
     this.activitySubtitle = 'Latest updates across this suite.',

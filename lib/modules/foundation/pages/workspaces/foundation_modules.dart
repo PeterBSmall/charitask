@@ -6,8 +6,8 @@ import 'package:charitask/shared/theme/app_colors.dart';
 const foundationModules = [
   CTWorkspaceModule(
     icon: Icons.business,
-    title: 'Organization',
-    subtitle: 'Organization Profile',
+    title: 'Org',
+    subtitle: 'Profile',
     progress: 1.0,
     color: AppColors.missionPurple,
   ),

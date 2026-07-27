@@ -16,42 +16,37 @@ class CTMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 108,
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.large),
         boxShadow: AppShadows.small,
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Row(
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: AppColors.missionPurple.withOpacity(.12),
-              borderRadius: BorderRadius.circular(AppRadius.medium),
-            ),
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: AppColors.missionPurple.withOpacity(.10),
             child: Icon(metric.icon, color: AppColors.missionPurple),
           ),
 
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(width: AppSpacing.lg),
 
-          Text(
-            metric.label,
-            style: AppTypography.caption,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(metric.value, style: AppTypography.headline),
 
-          const SizedBox(height: 2),
+                const SizedBox(height: 4),
 
-          Text(
-            metric.label,
-            style: AppTypography.caption,
-            textAlign: TextAlign.center,
+                Text(metric.label, style: AppTypography.caption),
+              ],
+            ),
           ),
         ],
       ),
