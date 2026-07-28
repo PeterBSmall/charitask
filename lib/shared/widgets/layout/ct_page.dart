@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
+import '../../design_system/foundations/app_colors.dart';
+import '../../design_system/foundations/app_spacing.dart';
 import 'ct_page_header.dart';
 
 class CTPage extends StatelessWidget {

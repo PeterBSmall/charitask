@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/data/foundation_suite.dart';
-import 'package:charitask/shared/theme/app_spacing.dart';
+import 'package:charitask/shared/design_system/foundations/app_spacing.dart';
 import 'package:charitask/shared/widgets/cards/ct_module_card.dart';
 
 class FoundationModules extends StatelessWidget {

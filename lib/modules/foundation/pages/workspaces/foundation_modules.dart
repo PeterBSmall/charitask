@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/models/ct_workspace_module.dart';
-import 'package:charitask/shared/theme/app_colors.dart';
+import 'package:charitask/shared/design_system/foundations/app_colors.dart';
 
 const foundationModules = [
   CTWorkspaceModule(

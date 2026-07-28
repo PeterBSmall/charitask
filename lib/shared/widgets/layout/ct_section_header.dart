@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
+import '../../design_system/foundations/app_spacing.dart';
+import '../../design_system/foundations/app_typography.dart';
 
 class CTSectionHeader extends StatelessWidget {
   final String title;

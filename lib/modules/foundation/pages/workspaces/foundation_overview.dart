@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/models/ct_workspace_overview_config.dart';
-import 'package:charitask/shared/theme/app_colors.dart';
+import 'package:charitask/shared/design_system/foundations/app_colors.dart';
 
 final foundationOverview = CTWorkspaceOverviewConfig(
   // Identity
-  icon: Icons.account_balance,
+  icon: Icons.account_balance_rounded,
   suiteName: 'Foundation',
 
-  // Greeting
+  // Mission Hero
   greeting: 'Good Morning, Peter.',
-
-  welcomeMessage: 'Let\'s continue strengthening your organization.',
-
-  organizationName: 'Habitat for Humanity of Cape Cod',
 
   mission: 'Organizations create possibility.',
 
+  welcomeMessage:
+      'Build the structure that supports every mission, every person, and every opportunity to serve.',
+
+  organizationName: 'Habitat for Humanity of Cape Cod',
+
   // Progress
   progress: .72,
-  nextStep: 'Continue Setup → Complete Locations',
+  nextStep: 'Complete Organization Setup',
 
   // Actions
   primaryButtonLabel: 'Continue Setup',

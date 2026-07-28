@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/ct_suite_dashboard_config.dart';
-import '../../theme/app_spacing.dart';
+import '../../design_system/foundations/app_spacing.dart';
 import '../layout/ct_section_header.dart';
 import 'package:charitask/shared/widgets/workspace/ct_workspace_panel.dart';
 

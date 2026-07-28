@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/models/ct_metric.dart';
-import 'package:charitask/shared/theme/app_colors.dart';
-import 'package:charitask/shared/theme/app_radius.dart';
-import 'package:charitask/shared/theme/app_shadows.dart';
-import 'package:charitask/shared/theme/app_spacing.dart';
-import 'package:charitask/shared/theme/app_typography.dart';
+import 'package:charitask/shared/design_system/foundations/app_colors.dart';
+import 'package:charitask/shared/design_system/foundations/app_radius.dart';
+import 'package:charitask/shared/design_system/foundations/app_shadows.dart';
+import 'package:charitask/shared/design_system/foundations/app_spacing.dart';
+import 'package:charitask/shared/design_system/foundations/app_typography.dart';
 
 class CTMetricCard extends StatelessWidget {
   final CTMetric metric;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import '../foundations/app_colors.dart';
 
 class AppScrollbarTheme {
   static ScrollbarThemeData get light {

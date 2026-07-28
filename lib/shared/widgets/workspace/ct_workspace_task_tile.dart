@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
+import '../../design_system/foundations/app_colors.dart';
+import '../../design_system/foundations/app_spacing.dart';
+import '../../design_system/foundations/app_typography.dart';
 
 class CTWorkspaceTaskTile extends StatelessWidget {
   final IconData icon;

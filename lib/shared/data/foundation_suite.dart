@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/suite_definition.dart';
-import '../theme/app_colors.dart';
+import '../design_system/foundations/app_colors.dart';
 
 const foundationSuite = SuiteDefinition(
   id: 'foundation',

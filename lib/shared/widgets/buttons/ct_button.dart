@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
-import '../../theme/app_spacing.dart';
+import '../../design_system/foundations/app_colors.dart';
+import '../../design_system/foundations/app_radius.dart';
+import '../../design_system/foundations/app_spacing.dart';
 
 class CTButton extends StatelessWidget {
   final String label;
