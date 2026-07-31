@@ -1,5 +1,7 @@
 import '../decision_result.dart';
 import '../workspace_context.dart';
+import 'package:flutter/material.dart';
+import '../unlock_item.dart';
 
 class FoundationEvaluator {
   const FoundationEvaluator();
@@ -23,11 +25,27 @@ class FoundationEvaluator {
 
         estimatedTime: '2 minutes',
 
-        benefits: [
-          'People',
-          'Volunteer Scheduling',
-          'Resource Planning',
-          'Reporting',
+        unlocks: const [
+          UnlockItem(
+            icon: Icons.people,
+            title: 'People',
+            description: 'Manage employees and volunteers.',
+          ),
+          UnlockItem(
+            icon: Icons.calendar_month,
+            title: 'Scheduling',
+            description: 'Coordinate people and projects.',
+          ),
+          UnlockItem(
+            icon: Icons.inventory_2_outlined,
+            title: 'Resources',
+            description: 'Track equipment and shared assets.',
+          ),
+          UnlockItem(
+            icon: Icons.analytics_outlined,
+            title: 'Reporting',
+            description: 'Measure progress and organizational impact.',
+          ),
         ],
 
         progress: 0.33,
@@ -46,11 +64,29 @@ class FoundationEvaluator {
         priority: DecisionPriority.high,
         estimatedTime: '2 minutes',
 
-        benefits: [
-          'Organize people into teams',
-          'Enable scheduling by group',
-          'Assign roles more effectively',
-          'Improve communication',
+        unlocks: const [
+          UnlockItem(
+            icon: Icons.groups_outlined,
+            title: 'Teams',
+            description:
+                'Organize employees and volunteers into meaningful groups.',
+          ),
+          UnlockItem(
+            icon: Icons.calendar_month_outlined,
+            title: 'Group Scheduling',
+            description: 'Schedule entire teams instead of individual people.',
+          ),
+          UnlockItem(
+            icon: Icons.badge_outlined,
+            title: 'Roles',
+            description:
+                'Assign responsibilities and permissions more effectively.',
+          ),
+          UnlockItem(
+            icon: Icons.forum_outlined,
+            title: 'Communication',
+            description: 'Keep departments and volunteer teams connected.',
+          ),
         ],
       );
     }

@@ -122,33 +122,75 @@ class CTWorkspaceHero extends StatelessWidget {
 
           if (nextStep != null)
             SizedBox(
-              width: 260,
+              width: 340,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Next Step',
+                    'NEXT STEP',
                     style: AppTypography.caption.copyWith(
                       color: Colors.white70,
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xl),
-                  Text(
-                    subtitle,
-                    style: AppTypography.body.copyWith(color: Colors.white70),
-                  ),
-                  Text(
-                    nextStep!,
-                    style: AppTypography.body.copyWith(
-                      color: Colors.white,
+                      letterSpacing: 2,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
 
+                  const SizedBox(height: AppSpacing.lg),
+
+                  Text(
+                    nextStep!,
+                    style: AppTypography.titleLarge.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  Text(
+                    'Locations are the foundation for assigning people, volunteers, schedules, and resources.',
+                    style: AppTypography.body.copyWith(
+                      color: Colors.white70,
+                      height: 1.45,
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.lg),
+
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.schedule,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      Text(
+                        'Estimated time • 2 minutes',
+                        style: AppTypography.body.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text('Continue Setup'),
+                    ),
+                  ),
+
                   if (progress != null) ...[
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.xl),
 
                     ClipRRect(
                       borderRadius: BorderRadius.circular(100),
@@ -156,7 +198,9 @@ class CTWorkspaceHero extends StatelessWidget {
                         value: progress,
                         minHeight: 8,
                         backgroundColor: Colors.white24,
-                        valueColor: const AlwaysStoppedAnimation(Colors.white),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
                       ),
                     ),
                   ],

@@ -9,7 +9,7 @@ class CTUnlocksSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (guidance.benefits.isEmpty) {
+    if (guidance.unlocks.isEmpty) {
       return const SizedBox();
     }
 
@@ -17,25 +17,53 @@ class CTUnlocksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '✨ What This Unlocks',
+          '✨ What You\'ll Unlock',
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
 
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: guidance.benefits.map((benefit) {
-            return Chip(
-              avatar: const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 18,
+          spacing: 16,
+          runSpacing: 16,
+          children: guidance.unlocks.map((item) {
+            return SizedBox(
+              width: 220,
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.shade300),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(item.icon, size: 30, color: Colors.deepPurple),
+
+                      const SizedBox(height: 16),
+
+                      Text(
+                        item.title,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        item.description,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              label: Text(benefit),
             );
           }).toList(),
         ),

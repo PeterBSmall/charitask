@@ -12,63 +12,57 @@ class CTSuiteDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = ScrollController();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Hero
+        config.hero,
 
-    return Scrollbar(
-      controller: controller,
-      thumbVisibility: true,
-      trackVisibility: true,
-      interactive: true,
-      child: ListView(
-        controller: controller,
-        children: [
-          // Hero
-          config.hero,
+        const SizedBox(height: AppSpacing.xl),
 
-          const SizedBox(height: AppSpacing.xl),
+        // Metrics
+        config.metrics,
 
-          // Metrics
-          config.metrics,
+        const SizedBox(height: AppSpacing.xxl),
 
-          const SizedBox(height: AppSpacing.xxl),
-
-          // Workspace Columns
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: CTWorkspacePanel(
-                  title: config.primaryTitle,
-                  subtitle: config.primarySubtitle,
-                  child: config.primaryContent,
-                ),
+        // Workspace Columns
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: CTWorkspacePanel(
+                title: config.primaryTitle,
+                subtitle: config.primarySubtitle,
+                child: config.primaryContent,
               ),
+            ),
 
-              const SizedBox(width: AppSpacing.xl),
+            const SizedBox(width: AppSpacing.xl),
 
-              Expanded(
-                child: CTWorkspacePanel(
-                  title: config.secondaryTitle,
-                  subtitle: config.secondarySubtitle,
-                  child: config.secondaryContent,
-                ),
+            Expanded(
+              child: CTWorkspacePanel(
+                title: config.secondaryTitle,
+                subtitle: config.secondarySubtitle,
+                child: config.secondaryContent,
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
 
-          // Activity
-          CTSectionHeader(
-            title: config.activityTitle,
-            subtitle: config.activitySubtitle,
-          ),
+        const SizedBox(height: AppSpacing.xxl),
 
-          const SizedBox(height: AppSpacing.lg),
+        // Activity
+        CTSectionHeader(
+          title: config.activityTitle,
+          subtitle: config.activitySubtitle,
+        ),
 
-          config.activity,
+        const SizedBox(height: AppSpacing.lg),
 
-          const SizedBox(height: AppSpacing.xxl),
-        ],
-      ),
+        config.activity,
+
+        const SizedBox(height: AppSpacing.xxl),
+      ],
     );
   }
 }

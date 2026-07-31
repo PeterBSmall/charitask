@@ -1,3 +1,5 @@
+import 'unlock_item.dart';
+
 class DecisionResult {
   final String greeting;
   final String summary;
@@ -10,8 +12,7 @@ class DecisionResult {
 
   final String estimatedTime;
 
-  final List<String> benefits;
-
+  final List<UnlockItem> unlocks;
   final double progress;
 
   final String progressLabel;
@@ -26,7 +27,7 @@ class DecisionResult {
 
     this.priority = DecisionPriority.normal,
     this.estimatedTime = '',
-    this.benefits = const [],
+    this.unlocks = const [],
 
     this.progress = 0,
     this.progressLabel = '',
