@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
-class CTOnboardingPhoto extends StatelessWidget {
+class CTJourneyPhoto extends StatelessWidget {
   final ImageProvider image;
+  final String title;
+  final String caption;
 
-  const CTOnboardingPhoto({super.key, required this.image});
+  const CTJourneyPhoto({
+    super.key,
+    required this.image,
+    this.title = 'Welcome to ChariTask',
+    this.caption = 'Technology built for organizations that make a difference.',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +35,11 @@ class CTOnboardingPhoto extends StatelessWidget {
             ),
           ),
 
-          const Positioned(
+          Positioned(
             left: 40,
             right: 40,
             bottom: 40,
-            child: _PhotoCaption(),
+            child: _JourneyPhotoCaption(title: title, caption: caption),
           ),
         ],
       ),
@@ -40,8 +47,11 @@ class CTOnboardingPhoto extends StatelessWidget {
   }
 }
 
-class _PhotoCaption extends StatelessWidget {
-  const _PhotoCaption();
+class _JourneyPhotoCaption extends StatelessWidget {
+  final String title;
+  final String caption;
+
+  const _JourneyPhotoCaption({required this.title, required this.caption});
 
   @override
   Widget build(BuildContext context) {
@@ -49,19 +59,23 @@ class _PhotoCaption extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Welcome to ChariTask',
-          style: TextStyle(
+          title,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 34,
             fontWeight: FontWeight.w700,
           ),
         ),
 
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
 
         Text(
-          'Technology built for organizations that make a difference.',
-          style: TextStyle(color: Colors.white70, fontSize: 18, height: 1.5),
+          caption,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 18,
+            height: 1.5,
+          ),
         ),
       ],
     );

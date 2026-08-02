@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'ct_onboarding_card.dart';
-
-class CTOnboardingShell extends StatelessWidget {
+class CTJourneyShell extends StatelessWidget {
   final Widget leftPanel;
   final Widget rightPanel;
 
-  const CTOnboardingShell({
+  const CTJourneyShell({
     super.key,
     required this.leftPanel,
     required this.rightPanel,

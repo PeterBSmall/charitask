@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'ct_onboarding_constants.dart';
+import 'ct_journey_constants.dart';
 
-class CTOnboardingQuestion extends StatelessWidget {
+class CTJourneyQuestion extends StatelessWidget {
   final String title;
   final String question;
   final String subtitle;
 
-  const CTOnboardingQuestion({
+  const CTJourneyQuestion({
     super.key,
     required this.title,
     required this.question,
@@ -24,30 +24,30 @@ class CTOnboardingQuestion extends StatelessWidget {
           style: const TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.w800,
-            color: CTOnboardingColors.text,
+            color: CTJourneyColors.text,
             height: 1.05,
           ),
         ),
 
-        const SizedBox(height: CTOnboardingSpacing.badgeSpacing),
+        const SizedBox(height: CTJourneySpacing.badgeSpacing),
 
         Text(
           question,
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: CTOnboardingColors.text,
+            color: CTJourneyColors.text,
           ),
         ),
 
-        const SizedBox(height: CTOnboardingSpacing.questionSpacing),
+        const SizedBox(height: CTJourneySpacing.questionSpacing),
 
         Text(
           subtitle,
           style: const TextStyle(
             fontSize: 17,
             height: 1.6,
-            color: CTOnboardingColors.subtitle,
+            color: CTJourneyColors.subtitle,
           ),
         ),
       ],

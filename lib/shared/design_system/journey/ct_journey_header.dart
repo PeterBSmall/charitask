@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'ct_onboarding_badge.dart';
-import 'ct_onboarding_question.dart';
+import 'ct_journey_badge.dart';
 
-class CTOnboardingHeader extends StatelessWidget {
+class CTJourneyHeader extends StatelessWidget {
   final String title;
   final String question;
   final String subtitle;
   final IconData icon;
 
-  const CTOnboardingHeader({
+  const CTJourneyHeader({
     super.key,
     required this.title,
     required this.question,
@@ -37,7 +36,7 @@ class CTOnboardingHeader extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CTOnboardingBadge(icon: icon),
+            CTJourneyBadge(icon: icon),
 
             const SizedBox(width: 20),
 

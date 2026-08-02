@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-class CTOnboardingButton extends StatelessWidget {
+import 'ct_journey_constants.dart';
+
+class CTJourneyButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final bool enabled;
 
-  const CTOnboardingButton({
+  const CTJourneyButton({
     super.key,
     required this.text,
     required this.onPressed,
@@ -16,14 +18,14 @@ class CTOnboardingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 58,
+      height: CTJourneySizes.buttonHeight,
       child: FilledButton(
         onPressed: enabled ? onPressed : null,
         style: FilledButton.styleFrom(
-          backgroundColor: const Color(0xFF6C4CF1),
+          backgroundColor: CTJourneyColors.purple,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(CTJourneySizes.buttonRadius),
           ),
           textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),

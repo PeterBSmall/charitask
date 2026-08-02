@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-class CTOnboardingProgress extends StatelessWidget {
+import 'ct_journey_constants.dart';
+
+class CTJourneyProgress extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
 
-  const CTOnboardingProgress({
+  const CTJourneyProgress({
     super.key,
     required this.currentStep,
     required this.totalSteps,
@@ -26,7 +28,7 @@ class CTOnboardingProgress extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 2,
-                color: Color(0xFF6C4CF5),
+                color: CTJourneyColors.purple,
               ),
             ),
 
@@ -37,7 +39,7 @@ class CTOnboardingProgress extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF8B8B9A),
+                color: CTJourneyColors.subtitle,
               ),
             ),
           ],
@@ -51,7 +53,9 @@ class CTOnboardingProgress extends StatelessWidget {
             value: progress,
             minHeight: 10,
             backgroundColor: const Color(0xFFE8E7FB),
-            valueColor: const AlwaysStoppedAnimation(Color(0xFF6C4CF5)),
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              CTJourneyColors.purple,
+            ),
           ),
         ),
       ],

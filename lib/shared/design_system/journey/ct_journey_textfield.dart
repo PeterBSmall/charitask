@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-class CTOnboardingTextField extends StatelessWidget {
+import 'ct_journey_constants.dart';
+
+class CTJourneyTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final IconData? prefixIcon;
   final TextInputAction textInputAction;
   final ValueChanged<String>? onSubmitted;
 
-  const CTOnboardingTextField({
+  const CTJourneyTextField({
     super.key,
     required this.controller,
     required this.hintText,
@@ -25,7 +27,7 @@ class CTOnboardingTextField extends StatelessWidget {
       style: const TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w500,
-        color: Color(0xFF1F2937),
+        color: CTJourneyColors.text,
       ),
       decoration: InputDecoration(
         hintText: hintText,
@@ -43,16 +45,21 @@ class CTOnboardingTextField extends StatelessWidget {
           vertical: 20,
         ),
 
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(CTJourneySizes.textFieldRadius),
+        ),
 
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.2),
+          borderRadius: BorderRadius.circular(CTJourneySizes.textFieldRadius),
+          borderSide: const BorderSide(
+            color: CTJourneyColors.border,
+            width: 1.2,
+          ),
         ),
 
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF6C4CF5), width: 2),
+          borderRadius: BorderRadius.circular(CTJourneySizes.textFieldRadius),
+          borderSide: const BorderSide(color: CTJourneyColors.purple, width: 2),
         ),
       ),
     );
