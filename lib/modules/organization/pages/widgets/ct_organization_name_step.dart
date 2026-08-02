@@ -30,8 +30,12 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
     super.initState();
 
     _organizationController = TextEditingController(
-      text: widget.journeyController.organizationName,
+      text: widget.journeyController.organization.identity.name,
     );
+
+    _organizationController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -50,7 +54,7 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
         const SizedBox(height: CTJourneySpacing.progressToHeader),
 
         CTJourneyHeader(
-          title: 'Hello, ${widget.journeyController.firstName}.',
+          title: 'Hello ${widget.journeyController.firstName}',
           question: "What's the name of your organization?",
           subtitle:
               'This will become the home for your people, locations, volunteers, and mission.',
@@ -78,13 +82,15 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
 
         CTJourneyButton(
           text: 'Continue',
-          onPressed: () {
-            widget.journeyController.updateOrganizationName(
-              _organizationController.text.trim(),
-            );
+          onPressed: _organizationController.text.trim().isEmpty
+              ? null
+              : () {
+                  widget.journeyController.updateOrganizationName(
+                    _organizationController.text.trim(),
+                  );
 
-            widget.onContinue();
-          },
+                  widget.onContinue();
+                },
         ),
       ],
     );

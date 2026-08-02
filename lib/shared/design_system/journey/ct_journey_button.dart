@@ -4,14 +4,12 @@ import 'ct_journey_constants.dart';
 
 class CTJourneyButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
-  final bool enabled;
+  final VoidCallback? onPressed;
 
   const CTJourneyButton({
     super.key,
     required this.text,
     required this.onPressed,
-    this.enabled = true,
   });
 
   @override
@@ -20,10 +18,14 @@ class CTJourneyButton extends StatelessWidget {
       width: double.infinity,
       height: CTJourneySizes.buttonHeight,
       child: FilledButton(
-        onPressed: enabled ? onPressed : null,
+        onPressed: onPressed,
         style: FilledButton.styleFrom(
           backgroundColor: CTJourneyColors.purple,
+          disabledBackgroundColor: CTJourneyColors.purple.withValues(
+            alpha: 0.35,
+          ),
           foregroundColor: Colors.white,
+          disabledForegroundColor: Colors.white70,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(CTJourneySizes.buttonRadius),
           ),
