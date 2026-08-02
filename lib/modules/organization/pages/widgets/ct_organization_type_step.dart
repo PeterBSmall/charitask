@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'package:charitask/domain/organization/organization_type.dart';
+
 import 'package:charitask/shared/design_system/journey/ct_journey_button.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_constants.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_progress.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_selection_card.dart';
 
 class CTOrganizationTypeStep extends StatefulWidget {
   final VoidCallback onContinue;
@@ -20,7 +23,7 @@ class CTOrganizationTypeStep extends StatefulWidget {
 }
 
 class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
-  String? _selectedType;
+  OrganizationType? _selectedType;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +43,45 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
 
         const SizedBox(height: 28),
 
-        // We'll build the cards next.
+        Column(
+          children: [
+            CTJourneySelectionCard(
+              icon: Icons.favorite_outline,
+              title: 'Nonprofit',
+              subtitle: 'Charities and mission-driven organizations',
+              selected: _selectedType == OrganizationType.nonprofit,
+              onTap: () {
+                setState(() {
+                  _selectedType = OrganizationType.nonprofit;
+                });
+              },
+            ),
+
+            CTJourneySelectionCard(
+              icon: Icons.church_outlined,
+              title: 'Church',
+              subtitle: 'Faith-based organizations',
+              selected: _selectedType == OrganizationType.church,
+              onTap: () {
+                setState(() {
+                  _selectedType = OrganizationType.church;
+                });
+              },
+            ),
+
+            CTJourneySelectionCard(
+              icon: Icons.school_outlined,
+              title: 'School',
+              subtitle: 'Public or private educational organizations',
+              selected: _selectedType == OrganizationType.school,
+              onTap: () {
+                setState(() {
+                  _selectedType = OrganizationType.school;
+                });
+              },
+            ),
+          ],
+        ),
         const Spacer(),
 
         Row(
@@ -57,7 +98,9 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
             Expanded(
               child: CTJourneyButton(
                 text: 'Continue',
-                onPressed: widget.onContinue,
+                onPressed: () {
+                  widget.onContinue();
+                },
               ),
             ),
           ],

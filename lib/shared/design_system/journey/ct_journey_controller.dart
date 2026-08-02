@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:charitask/domain/organization/organization.dart';
+import 'package:charitask/domain/organization/organization_type.dart';
 
 class CTJourneyController extends ChangeNotifier {
   int currentStep = 0;
 
-  String organizationName = '';
-  String organizationType = '';
+  final Organization organization = Organization();
+
   String organizationLocation = '';
   String firstName = '';
 
@@ -26,12 +28,12 @@ class CTJourneyController extends ChangeNotifier {
   }
 
   void updateOrganizationName(String value) {
-    organizationName = value;
+    organization.identity.name = value;
     notifyListeners();
   }
 
-  void updateOrganizationType(String value) {
-    organizationType = value;
+  void updateOrganizationType(OrganizationType value) {
+    organization.identity.type = value;
     notifyListeners();
   }
 
