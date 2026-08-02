@@ -2,19 +2,36 @@ import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/design_system/journey/ct_journey_button.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_constants.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_progress.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_textfield.dart';
 
 class CTWelcomeStep1 extends StatefulWidget {
-  const CTWelcomeStep1({super.key});
+  final CTJourneyController journeyController;
+  final VoidCallback onContinue;
+
+  const CTWelcomeStep1({
+    super.key,
+    required this.journeyController,
+    required this.onContinue,
+  });
 
   @override
   State<CTWelcomeStep1> createState() => _CTWelcomeStep1State();
 }
 
 class _CTWelcomeStep1State extends State<CTWelcomeStep1> {
-  final TextEditingController _nameController = TextEditingController();
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nameController = TextEditingController(
+      text: widget.journeyController.firstName,
+    );
+  }
 
   @override
   void dispose() {
@@ -50,7 +67,11 @@ class _CTWelcomeStep1State extends State<CTWelcomeStep1> {
         CTJourneyButton(
           text: 'Continue',
           onPressed: () {
-            // Step 2 will go here
+            widget.journeyController.updateFirstName(
+              _nameController.text.trim(),
+            );
+
+            widget.onContinue();
           },
         ),
       ],

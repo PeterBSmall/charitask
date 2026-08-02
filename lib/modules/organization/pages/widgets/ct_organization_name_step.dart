@@ -2,22 +2,37 @@ import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/design_system/journey/ct_journey_button.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_constants.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_info_card.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_progress.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_textfield.dart';
 
 class CTOrganizationNameStep extends StatefulWidget {
+  final CTJourneyController journeyController;
   final VoidCallback onContinue;
 
-  const CTOrganizationNameStep({super.key, required this.onContinue});
+  const CTOrganizationNameStep({
+    super.key,
+    required this.journeyController,
+    required this.onContinue,
+  });
 
   @override
   State<CTOrganizationNameStep> createState() => _CTOrganizationNameStepState();
 }
 
 class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
-  final TextEditingController _organizationController = TextEditingController();
+  late final TextEditingController _organizationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _organizationController = TextEditingController(
+      text: widget.journeyController.organizationName,
+    );
+  }
 
   @override
   void dispose() {
@@ -35,7 +50,7 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
         const SizedBox(height: CTJourneySpacing.progressToHeader),
 
         CTJourneyHeader(
-          title: 'Hello Peter.',
+          title: 'Hello, ${widget.journeyController.firstName}.',
           question: "What's the name of your organization?",
           subtitle:
               'This will become the home for your people, locations, volunteers, and mission.',
@@ -61,7 +76,16 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
 
         const Spacer(),
 
-        CTJourneyButton(text: 'Continue', onPressed: widget.onContinue),
+        CTJourneyButton(
+          text: 'Continue',
+          onPressed: () {
+            widget.journeyController.updateOrganizationName(
+              _organizationController.text.trim(),
+            );
+
+            widget.onContinue();
+          },
+        ),
       ],
     );
   }
