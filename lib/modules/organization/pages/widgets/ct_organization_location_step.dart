@@ -6,17 +6,20 @@ import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_info_card.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_progress.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_textfield.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 class CTOrganizationLocationStep extends StatefulWidget {
   final VoidCallback onContinue;
   final VoidCallback onBack;
 
+  final CTJourneyController journeyController;
+
   const CTOrganizationLocationStep({
     super.key,
+    required this.journeyController,
     required this.onContinue,
     required this.onBack,
   });
-
   @override
   State<CTOrganizationLocationStep> createState() =>
       _CTOrganizationLocationStepState();
@@ -24,7 +27,20 @@ class CTOrganizationLocationStep extends StatefulWidget {
 
 class _CTOrganizationLocationStepState
     extends State<CTOrganizationLocationStep> {
-  final TextEditingController _locationController = TextEditingController();
+  late final TextEditingController _locationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _locationController = TextEditingController(
+      text: widget.journeyController.organizationLocation,
+    );
+
+    _locationController.addListener(() {
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -82,7 +98,15 @@ class _CTOrganizationLocationStepState
             Expanded(
               child: CTJourneyButton(
                 text: 'Continue',
-                onPressed: widget.onContinue,
+                onPressed: _locationController.text.trim().isEmpty
+                    ? null
+                    : () {
+                        widget.journeyController.updateOrganizationLocation(
+                          _locationController.text.trim(),
+                        );
+
+                        widget.onContinue();
+                      },
               ),
             ),
           ],

@@ -31,6 +31,10 @@ class _CTWelcomeStep1State extends State<CTWelcomeStep1> {
     _nameController = TextEditingController(
       text: widget.journeyController.firstName,
     );
+
+    _nameController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -66,13 +70,15 @@ class _CTWelcomeStep1State extends State<CTWelcomeStep1> {
 
         CTJourneyButton(
           text: 'Continue',
-          onPressed: () {
-            widget.journeyController.updateFirstName(
-              _nameController.text.trim(),
-            );
+          onPressed: _nameController.text.trim().isEmpty
+              ? null
+              : () {
+                  widget.journeyController.updateFirstName(
+                    _nameController.text.trim(),
+                  );
 
-            widget.onContinue();
-          },
+                  widget.onContinue();
+                },
         ),
       ],
     );

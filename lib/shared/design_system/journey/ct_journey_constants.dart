@@ -33,13 +33,17 @@ class CTJourneyColors {
 
   static const Color purple = Color(0xFF6C4CF5);
 
-  static const Color text = Color(0xFF1F2937);
-
+  static const Color title = Color(0xFF1F2937);
+  static const Color body = Color(0xFF374151);
   static const Color subtitle = Color(0xFF7C8596);
 
+  static const Color surface = Colors.white;
   static const Color border = Color(0xFFE5E7EB);
 
   static const Color badgeBackground = Color(0xFFF5F1FF);
-
   static const Color badgeBorder = Color(0xFFE5DDFF);
+
+  static const Color success = Color(0xFF16A34A);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFDC2626);
 }

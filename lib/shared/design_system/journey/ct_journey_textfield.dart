@@ -27,18 +27,21 @@ class CTJourneyTextField extends StatelessWidget {
       style: const TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w500,
-        color: CTJourneyColors.text,
+        color: CTJourneyColors.title,
       ),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 17),
+        hintStyle: const TextStyle(
+          color: CTJourneyColors.subtitle,
+          fontSize: 17,
+        ),
 
         prefixIcon: prefixIcon == null
             ? null
-            : Icon(prefixIcon, color: const Color(0xFF9CA3AF), size: 22),
+            : Icon(prefixIcon, color: CTJourneyColors.subtitle, size: 22),
 
         filled: true,
-        fillColor: Colors.white,
+        fillColor: CTJourneyColors.surface,
 
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 22,

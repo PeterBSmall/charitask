@@ -7,17 +7,20 @@ import 'package:charitask/shared/design_system/journey/ct_journey_constants.dart
 import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_progress.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_selection_card.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 class CTOrganizationTypeStep extends StatefulWidget {
   final VoidCallback onContinue;
   final VoidCallback onBack;
 
+  final CTJourneyController journeyController;
+
   const CTOrganizationTypeStep({
     super.key,
+    required this.journeyController,
     required this.onContinue,
     required this.onBack,
   });
-
   @override
   State<CTOrganizationTypeStep> createState() => _CTOrganizationTypeStepState();
 }
@@ -98,9 +101,15 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
             Expanded(
               child: CTJourneyButton(
                 text: 'Continue',
-                onPressed: () {
-                  widget.onContinue();
-                },
+                onPressed: _selectedType == null
+                    ? null
+                    : () {
+                        widget.journeyController.updateOrganizationType(
+                          _selectedType!,
+                        );
+
+                        widget.onContinue();
+                      },
               ),
             ),
           ],
