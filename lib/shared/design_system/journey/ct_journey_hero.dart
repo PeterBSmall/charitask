@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
-class CTJourneyPhoto extends StatelessWidget {
+class CTJourneyHero extends StatelessWidget {
   final ImageProvider image;
   final String title;
-  final String caption;
+  final String subtitle;
 
-  const CTJourneyPhoto({
+  const CTJourneyHero({
     super.key,
     required this.image,
     this.title = 'Welcome to ChariTask',
-    this.caption = 'Technology built for organizations that make a difference.',
+    this.subtitle =
+        'Technology built for organizations that make a difference.',
   });
 
   @override
@@ -38,8 +39,8 @@ class CTJourneyPhoto extends StatelessWidget {
           Positioned(
             left: 40,
             right: 40,
-            bottom: 40,
-            child: _JourneyPhotoCaption(title: title, caption: caption),
+            bottom: 60,
+            child: _JourneyHeroContent(title: title, subtitle: subtitle),
           ),
         ],
       ),
@@ -47,11 +48,11 @@ class CTJourneyPhoto extends StatelessWidget {
   }
 }
 
-class _JourneyPhotoCaption extends StatelessWidget {
+class _JourneyHeroContent extends StatelessWidget {
   final String title;
-  final String caption;
+  final String subtitle;
 
-  const _JourneyPhotoCaption({required this.title, required this.caption});
+  const _JourneyHeroContent({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +71,7 @@ class _JourneyPhotoCaption extends StatelessWidget {
         const SizedBox(height: 12),
 
         Text(
-          caption,
+          subtitle,
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 18,

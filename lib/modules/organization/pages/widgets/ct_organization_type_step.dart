@@ -46,46 +46,79 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
 
         const SizedBox(height: 28),
 
-        Column(
-          children: [
-            CTJourneySelectionCard(
-              icon: Icons.favorite_outline,
-              title: 'Nonprofit',
-              subtitle: 'Charities and mission-driven organizations',
-              selected: _selectedType == OrganizationType.nonprofit,
-              onTap: () {
-                setState(() {
-                  _selectedType = OrganizationType.nonprofit;
-                });
-              },
-            ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                CTJourneySelectionCard(
+                  icon: Icons.favorite_outline,
+                  title: 'Nonprofit',
+                  subtitle:
+                      'Mission-driven organizations serving their communities.',
+                  selected: _selectedType == OrganizationType.nonprofit,
+                  onTap: () {
+                    setState(() {
+                      _selectedType = OrganizationType.nonprofit;
+                    });
+                  },
+                ),
 
-            CTJourneySelectionCard(
-              icon: Icons.church_outlined,
-              title: 'Church',
-              subtitle: 'Faith-based organizations',
-              selected: _selectedType == OrganizationType.church,
-              onTap: () {
-                setState(() {
-                  _selectedType = OrganizationType.church;
-                });
-              },
-            ),
+                CTJourneySelectionCard(
+                  icon: Icons.church_outlined,
+                  title: 'Church / Faith Organization',
+                  subtitle:
+                      'Faith communities connecting people through worship and service.',
+                  selected: _selectedType == OrganizationType.church,
+                  onTap: () {
+                    setState(() {
+                      _selectedType = OrganizationType.church;
+                    });
+                  },
+                ),
 
-            CTJourneySelectionCard(
-              icon: Icons.school_outlined,
-              title: 'School',
-              subtitle: 'Public or private educational organizations',
-              selected: _selectedType == OrganizationType.school,
-              onTap: () {
-                setState(() {
-                  _selectedType = OrganizationType.school;
-                });
-              },
+                CTJourneySelectionCard(
+                  icon: Icons.school_outlined,
+                  title: 'School / Educational Organization',
+                  subtitle:
+                      'Organizations dedicated to education and lifelong learning.',
+                  selected: _selectedType == OrganizationType.school,
+                  onTap: () {
+                    setState(() {
+                      _selectedType = OrganizationType.school;
+                    });
+                  },
+                ),
+
+                CTJourneySelectionCard(
+                  icon: Icons.account_balance_outlined,
+                  title: 'Municipality / Public Service',
+                  subtitle:
+                      'Serving citizens through public programs and community services.',
+                  selected: _selectedType == OrganizationType.municipality,
+                  onTap: () {
+                    setState(() {
+                      _selectedType = OrganizationType.municipality;
+                    });
+                  },
+                ),
+
+                CTJourneySelectionCard(
+                  icon: Icons.business_outlined,
+                  title: 'Business / Company',
+                  subtitle:
+                      'Purpose-driven companies creating positive impact.',
+                  selected: _selectedType == OrganizationType.business,
+                  onTap: () {
+                    setState(() {
+                      _selectedType = OrganizationType.business;
+                    });
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        const Spacer(),
+        const SizedBox(height: 20),
 
         Row(
           children: [

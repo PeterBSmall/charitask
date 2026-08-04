@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/design_system/journey/ct_journey_card.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
-import 'package:charitask/shared/design_system/journey/ct_journey_photo.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_hero.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_shell.dart';
 
 typedef CTJourneyStepBuilder =
@@ -14,13 +15,13 @@ typedef CTJourneyStepBuilder =
 
 class CTJourneyEngine extends StatefulWidget {
   final CTJourneyController controller;
-  final ImageProvider photo;
+  final List<CTJourneyChapter> chapters;
   final List<CTJourneyStepBuilder> steps;
 
   const CTJourneyEngine({
     super.key,
     required this.controller,
-    required this.photo,
+    required this.chapters,
     required this.steps,
   });
 
@@ -47,8 +48,14 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
 
   @override
   Widget build(BuildContext context) {
+    final chapter = widget.chapters[widget.controller.currentStep];
+
     return CTJourneyShell(
-      leftPanel: CTJourneyPhoto(image: widget.photo),
+      leftPanel: CTJourneyHero(
+        image: chapter.image,
+        title: chapter.title,
+        subtitle: chapter.subtitle,
+      ),
       rightPanel: CTJourneyCard(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),

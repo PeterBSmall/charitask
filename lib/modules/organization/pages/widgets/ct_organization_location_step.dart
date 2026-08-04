@@ -58,14 +58,14 @@ class _CTOrganizationLocationStepState
         const SizedBox(height: CTJourneySpacing.progressToHeader),
 
         CTJourneyHeader(
-          title: 'Hello Peter.',
+          title: 'Hello ${widget.journeyController.firstName}.',
           question: 'Where is your organization located?',
           subtitle:
-              'This helps us personalize your experience and prepare for future location features.',
+              'Start with your primary location. You can always add more later.',
           icon: Icons.location_on_outlined,
         ),
 
-        const SizedBox(height: CTJourneySpacing.headerToField),
+        const SizedBox(height: 18),
 
         CTJourneyTextField(
           controller: _locationController,
@@ -77,9 +77,9 @@ class _CTOrganizationLocationStepState
 
         const CTJourneyInfoCard(
           icon: Icons.info_outline_rounded,
-          title: 'You can always add more locations.',
+          title: 'Your organization can grow with you.',
           message:
-              'This is simply your primary location. Additional campuses, stores, offices, or sites can be added later.',
+              'Start with your primary location today. Additional offices, campuses, stores, or service areas can be added anytime.',
         ),
 
         const Spacer(),

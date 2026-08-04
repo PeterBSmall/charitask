@@ -8,6 +8,7 @@ import 'package:charitask/modules/organization/pages/widgets/ct_organization_loc
 
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -16,7 +17,36 @@ class OnboardingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CTJourneyEngine(
       controller: CTJourneyController(),
-      photo: const AssetImage('assets/images/onboarding/welcome_people.jpg'),
+      chapters: const [
+        // Chapter 1 - Welcome
+        CTJourneyChapter(
+          image: AssetImage('assets/images/onboarding/welcome_people.jpg'),
+          title: 'Welcome to ChariTask',
+          subtitle:
+              'Technology built for organizations that make a difference.',
+        ),
+
+        // Chapter 2 - Organization Setup
+        CTJourneyChapter(
+          image: AssetImage('assets/images/onboarding/organization_setup.jpg'),
+          title: 'Organizations create possibility.',
+          subtitle: 'Every great mission begins with a strong foundation.',
+        ),
+
+        // Chapter 3 - Organization Setup
+        CTJourneyChapter(
+          image: AssetImage('assets/images/onboarding/welcome_people.jpg'),
+          title: 'Organizations create possibility.',
+          subtitle: 'Every great mission begins with a strong foundation.',
+        ),
+
+        // Chapter 4 - Organization Setup
+        CTJourneyChapter(
+          image: AssetImage('assets/images/onboarding/welcome_people.jpg'),
+          title: 'Organizations create possibility.',
+          subtitle: 'Every great mission begins with a strong foundation.',
+        ),
+      ],
       steps: [
         // Chapter 1 - Welcome
         (controller, next, back) =>
