@@ -1,13 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:charitask/shared/models/ct_journey_hero_data.dart';
 
 class CTJourneyChapter {
-  final ImageProvider image;
-  final String title;
-  final String subtitle;
+  final CTJourneyHeroData hero;
 
-  const CTJourneyChapter({
-    required this.image,
-    required this.title,
-    required this.subtitle,
-  });
+  const CTJourneyChapter({required this.hero});
 }

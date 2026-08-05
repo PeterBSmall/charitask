@@ -9,6 +9,8 @@ import 'package:charitask/modules/organization/pages/widgets/ct_organization_loc
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
+import 'package:charitask/shared/data/ct_journey_heroes.dart';
+import 'package:charitask/shared/data/ct_journey_heroes.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -18,35 +20,13 @@ class OnboardingScreen extends StatelessWidget {
     return CTJourneyEngine(
       controller: CTJourneyController(),
       chapters: const [
-        // Chapter 1 - Welcome
-        CTJourneyChapter(
-          image: AssetImage('assets/images/onboarding/welcome_people.jpg'),
-          title: 'Welcome to ChariTask',
-          subtitle:
-              'Technology built for organizations that make a difference.',
-        ),
+        CTJourneyChapter(hero: CTJourneyHeroes.welcome),
 
-        // Chapter 2 - Organization Name
-        CTJourneyChapter(
-          image: AssetImage('assets/images/onboarding/organization_setup.jpg'),
-          title: 'Organizations create possibility.',
-          subtitle: 'Every great mission begins with a strong foundation.',
-        ),
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationSetup),
 
-        // Chapter 3 - Organization Type
-        CTJourneyChapter(
-          image: AssetImage('assets/images/onboarding/organization_type.png'),
-          title: 'Every mission is unique.',
-          subtitle:
-              'The way your organization serves its community helps ChariTask personalize your workspace from day one.',
-        ),
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationType),
 
-        // Chapter 4 - Organization Location
-        CTJourneyChapter(
-          image: AssetImage('assets/images/onboarding/welcome_people.jpg'),
-          title: 'Organizations create possibility.',
-          subtitle: 'Every great mission begins with a strong foundation.',
-        ),
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationLocation),
       ],
       steps: [
         // Chapter 1 - Welcome

@@ -51,11 +51,7 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
     final chapter = widget.chapters[widget.controller.currentStep];
 
     return CTJourneyShell(
-      leftPanel: CTJourneyHero(
-        image: chapter.image,
-        title: chapter.title,
-        subtitle: chapter.subtitle,
-      ),
+      leftPanel: CTJourneyHero(hero: chapter.hero),
       rightPanel: CTJourneyCard(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),

@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:charitask/shared/models/ct_journey_hero_data.dart';
 
 class CTJourneyHero extends StatelessWidget {
-  final ImageProvider image;
-  final String title;
-  final String subtitle;
+  final CTJourneyHeroData hero;
 
-  const CTJourneyHero({
-    super.key,
-    required this.image,
-    this.title = 'Welcome to ChariTask',
-    this.subtitle =
-        'Technology built for organizations that make a difference.',
-  });
+  const CTJourneyHero({super.key, required this.hero});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +15,7 @@ class CTJourneyHero extends StatelessWidget {
         children: [
           Transform.scale(
             scale: 1.07,
-            child: Image(image: image, fit: BoxFit.cover),
+            child: Image.asset(hero.imageAsset, fit: BoxFit.cover),
           ),
 
           DecoratedBox(
@@ -45,7 +38,10 @@ class CTJourneyHero extends StatelessWidget {
             left: 40,
             right: 40,
             bottom: 90,
-            child: _JourneyHeroContent(title: title, subtitle: subtitle),
+            child: _JourneyHeroContent(
+              title: hero.title,
+              subtitle: hero.subtitle,
+            ),
           ),
         ],
       ),
