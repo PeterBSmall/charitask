@@ -26,21 +26,22 @@ class OnboardingScreen extends StatelessWidget {
               'Technology built for organizations that make a difference.',
         ),
 
-        // Chapter 2 - Organization Setup
+        // Chapter 2 - Organization Name
         CTJourneyChapter(
           image: AssetImage('assets/images/onboarding/organization_setup.jpg'),
           title: 'Organizations create possibility.',
           subtitle: 'Every great mission begins with a strong foundation.',
         ),
 
-        // Chapter 3 - Organization Setup
+        // Chapter 3 - Organization Type
         CTJourneyChapter(
-          image: AssetImage('assets/images/onboarding/welcome_people.jpg'),
-          title: 'Organizations create possibility.',
-          subtitle: 'Every great mission begins with a strong foundation.',
+          image: AssetImage('assets/images/onboarding/organization_type.png'),
+          title: 'Every mission is unique.',
+          subtitle:
+              'The way your organization serves its community helps ChariTask personalize your workspace from day one.',
         ),
 
-        // Chapter 4 - Organization Setup
+        // Chapter 4 - Organization Location
         CTJourneyChapter(
           image: AssetImage('assets/images/onboarding/welcome_people.jpg'),
           title: 'Organizations create possibility.',

@@ -8,6 +8,7 @@ import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_progress.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_selection_card.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
+import 'package:charitask/shared/data/organization/organization_types.dart';
 
 class CTOrganizationTypeStep extends StatefulWidget {
   final VoidCallback onContinue;
@@ -47,75 +48,24 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
         const SizedBox(height: 28),
 
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                CTJourneySelectionCard(
-                  icon: Icons.favorite_outline,
-                  title: 'Nonprofit',
-                  subtitle:
-                      'Mission-driven organizations serving their communities.',
-                  selected: _selectedType == OrganizationType.nonprofit,
-                  onTap: () {
-                    setState(() {
-                      _selectedType = OrganizationType.nonprofit;
-                    });
-                  },
-                ),
+          child: ListView.builder(
+            padding: const EdgeInsets.only(right: 8),
+            itemCount: organizationTypes.length,
+            itemBuilder: (context, index) {
+              final option = organizationTypes[index];
 
-                CTJourneySelectionCard(
-                  icon: Icons.church_outlined,
-                  title: 'Church / Faith Organization',
-                  subtitle:
-                      'Faith communities connecting people through worship and service.',
-                  selected: _selectedType == OrganizationType.church,
-                  onTap: () {
-                    setState(() {
-                      _selectedType = OrganizationType.church;
-                    });
-                  },
-                ),
-
-                CTJourneySelectionCard(
-                  icon: Icons.school_outlined,
-                  title: 'School / Educational Organization',
-                  subtitle:
-                      'Organizations dedicated to education and lifelong learning.',
-                  selected: _selectedType == OrganizationType.school,
-                  onTap: () {
-                    setState(() {
-                      _selectedType = OrganizationType.school;
-                    });
-                  },
-                ),
-
-                CTJourneySelectionCard(
-                  icon: Icons.account_balance_outlined,
-                  title: 'Municipality / Public Service',
-                  subtitle:
-                      'Serving citizens through public programs and community services.',
-                  selected: _selectedType == OrganizationType.municipality,
-                  onTap: () {
-                    setState(() {
-                      _selectedType = OrganizationType.municipality;
-                    });
-                  },
-                ),
-
-                CTJourneySelectionCard(
-                  icon: Icons.business_outlined,
-                  title: 'Business / Company',
-                  subtitle:
-                      'Purpose-driven companies creating positive impact.',
-                  selected: _selectedType == OrganizationType.business,
-                  onTap: () {
-                    setState(() {
-                      _selectedType = OrganizationType.business;
-                    });
-                  },
-                ),
-              ],
-            ),
+              return CTJourneySelectionCard(
+                icon: option.icon,
+                title: option.title,
+                subtitle: option.subtitle,
+                selected: _selectedType == option.type,
+                onTap: () {
+                  setState(() {
+                    _selectedType = option.type;
+                  });
+                },
+              );
+            },
           ),
         ),
         const SizedBox(height: 20),

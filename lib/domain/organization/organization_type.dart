@@ -4,6 +4,10 @@ enum OrganizationType {
   school,
   municipality,
   business,
+  healthcare,
+  artsCulture,
+  foundation,
+  association,
   communityGroup,
   other,
 }

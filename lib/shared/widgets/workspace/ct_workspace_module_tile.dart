@@ -5,6 +5,8 @@ import '../../design_system/foundations/app_radius.dart';
 import '../../design_system/foundations/app_shadows.dart';
 import '../../design_system/foundations/app_spacing.dart';
 import '../../design_system/foundations/app_typography.dart';
+import '../../design_system/foundations/app_motion.dart';
+import '../../design_system/foundations/app_curves.dart';
 
 class CTWorkspaceModuleTile extends StatefulWidget {
   final IconData icon;
@@ -38,8 +40,8 @@ class _CTWorkspaceModuleTileState extends State<CTWorkspaceModuleTile> {
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: AnimatedSlide(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
+        duration: AppMotion.fast,
+        curve: AppCurves.standard,
         offset: _hovering ? const Offset(0, -.015) : Offset.zero,
         child: Material(
           color: Colors.transparent,
@@ -48,8 +50,8 @@ class _CTWorkspaceModuleTileState extends State<CTWorkspaceModuleTile> {
             borderRadius: BorderRadius.circular(AppRadius.large),
             onTap: widget.onTap,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
+              duration: AppMotion.fast,
+              curve: AppCurves.standard,
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -72,11 +74,11 @@ class _CTWorkspaceModuleTileState extends State<CTWorkspaceModuleTile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AnimatedScale(
-                        duration: const Duration(milliseconds: 180),
+                        duration: AppMotion.fast,
                         scale: _hovering ? 1.05 : 1,
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          curve: Curves.easeOut,
+                          duration: AppMotion.fast,
+                          curve: AppCurves.standard,
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
@@ -86,8 +88,8 @@ class _CTWorkspaceModuleTileState extends State<CTWorkspaceModuleTile> {
                             ),
                           ),
                           child: AnimatedScale(
-                            duration: const Duration(milliseconds: 180),
-                            curve: Curves.easeOut,
+                            duration: AppMotion.fast,
+                            curve: AppCurves.standard,
                             scale: _hovering ? 1.08 : 1.0,
                             child: Icon(
                               widget.icon,
@@ -171,7 +173,8 @@ class _CTWorkspaceModuleTileState extends State<CTWorkspaceModuleTile> {
                       const Spacer(),
 
                       AnimatedSlide(
-                        duration: const Duration(milliseconds: 180),
+                        duration: AppMotion.fast,
+
                         offset: _hovering ? const Offset(.25, 0) : Offset.zero,
                         child: const Icon(
                           Icons.arrow_forward_ios_rounded,
