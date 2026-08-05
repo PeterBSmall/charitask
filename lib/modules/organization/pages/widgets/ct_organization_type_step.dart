@@ -63,6 +63,8 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
                   setState(() {
                     _selectedType = option.type;
                   });
+
+                  widget.journeyController.updateOrganizationType(option.type);
                 },
               );
             },

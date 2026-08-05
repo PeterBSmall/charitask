@@ -28,4 +28,11 @@ class CTJourneyHeroes {
     title: 'Organizations create possibility.',
     subtitle: 'Every great mission begins with a strong foundation.',
   );
+
+  static const church = CTJourneyHeroData(
+    imageAsset: 'assets/images/onboarding/faith_group.png',
+    title: 'Building faith through service.',
+    subtitle:
+        'Coordinate ministries, volunteers, events, and outreach—so you can spend more time serving people.',
+  );
 }

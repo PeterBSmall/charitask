@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_card.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
-import 'package:charitask/shared/design_system/journey/ct_journey_hero.dart';
+import 'package:charitask/shared/design_system/hero/ct_hero.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_shell.dart';
 
 typedef CTJourneyStepBuilder =
@@ -34,6 +34,7 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
     if (widget.controller.currentStep < widget.steps.length - 1) {
       setState(() {
         widget.controller.nextStep();
+        _updateChapterHero();
       });
     }
   }
@@ -42,6 +43,7 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
     if (widget.controller.currentStep > 0) {
       setState(() {
         widget.controller.previousStep();
+        _updateChapterHero();
       });
     }
   }
@@ -51,7 +53,12 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
     final chapter = widget.chapters[widget.controller.currentStep];
 
     return CTJourneyShell(
-      leftPanel: CTJourneyHero(hero: chapter.hero),
+      leftPanel: AnimatedBuilder(
+        animation: widget.controller,
+        builder: (context, child) {
+          return CTHero(hero: widget.controller.currentHero);
+        },
+      ),
       rightPanel: CTJourneyCard(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
@@ -63,5 +70,19 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
         ),
       ),
     );
+  }
+
+  void _updateChapterHero() {
+    widget.controller.setChapterHero(
+      widget.chapters[widget.controller.currentStep].hero,
+    );
+
+    widget.controller.setContextHero(null);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateChapterHero();
   }
 }

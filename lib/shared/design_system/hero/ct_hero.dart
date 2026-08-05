@@ -1,38 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:charitask/shared/models/ct_journey_hero_data.dart';
+import 'package:charitask/shared/design_system/hero/ct_hero_image.dart';
+import 'package:charitask/shared/design_system/hero/ct_hero_gradient.dart';
+import 'package:charitask/shared/design_system/hero/ct_hero.dart';
 
-class CTJourneyHero extends StatelessWidget {
+class CTHero extends StatelessWidget {
   final CTJourneyHeroData hero;
 
-  const CTJourneyHero({super.key, required this.hero});
+  const CTHero({super.key, required this.hero});
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('------------------------------');
+    debugPrint('CTHero');
+    debugPrint('Title : ${hero.title}');
+    debugPrint('Image : ${hero.imageAsset}');
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(32),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Transform.scale(
-            scale: 1.07,
-            child: Image.asset(hero.imageAsset, fit: BoxFit.cover),
-          ),
+          CTHeroImage(hero: hero),
 
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 0.40, 0.70, 1.0],
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(.05),
-                  Colors.black.withOpacity(.25),
-                  Colors.black.withOpacity(.72),
-                ],
-              ),
-            ),
-          ),
+          const CTHeroGradient(),
 
           Positioned(
             left: 40,
