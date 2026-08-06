@@ -3,6 +3,8 @@ import 'package:charitask/domain/organization/organization.dart';
 import 'package:charitask/domain/organization/organization_type.dart';
 import 'package:charitask/shared/data/ct_journey_heroes.dart';
 import 'package:charitask/shared/models/ct_journey_hero_data.dart';
+import 'package:charitask/domain/organization/organization_size.dart';
+import 'package:charitask/domain/organization/organization_mission.dart';
 
 class CTJourneyController extends ChangeNotifier {
   int currentStep = 0;
@@ -47,11 +49,57 @@ class CTJourneyController extends ChangeNotifier {
         setContextHero(CTJourneyHeroes.church);
         break;
 
-      default:
-        setContextHero(null);
+      case OrganizationType.nonprofit:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.school:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.municipality:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.business:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.healthcare:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.artsCulture:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.foundation:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.association:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.communityGroup:
+        setContextHero(CTJourneyHeroes.organizationType);
+        break;
+
+      case OrganizationType.other:
+        setContextHero(CTJourneyHeroes.organizationType);
         break;
     }
 
+    notifyListeners();
+  }
+
+  void updateOrganizationSize(OrganizationSize value) {
+    organization.identity.size = value;
+    notifyListeners();
+  }
+
+  void updateOrganizationMission(OrganizationMission value) {
+    organization.identity.mission = value;
     notifyListeners();
   }
 
@@ -61,11 +109,15 @@ class CTJourneyController extends ChangeNotifier {
   }
 
   void setChapterHero(CTJourneyHeroData hero) {
+    debugPrint('setChapterHero -> ${hero.title}');
+
     chapterHero = hero;
     notifyListeners();
   }
 
   void setContextHero(CTJourneyHeroData? hero) {
+    debugPrint('setContextHero -> ${hero?.title ?? "NULL"}');
+
     contextHero = hero;
     notifyListeners();
   }

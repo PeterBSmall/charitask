@@ -10,7 +10,9 @@ import 'package:charitask/shared/design_system/journey/ct_journey_controller.dar
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 import 'package:charitask/shared/data/ct_journey_heroes.dart';
-import 'package:charitask/shared/data/ct_journey_heroes.dart';
+import 'package:charitask/modules/organization/pages/widgets/ct_organization_size_step.dart';
+import 'package:charitask/modules/organization/pages/widgets/ct_organization_mission_step.dart';
+import 'package:charitask/modules/organization/pages/widgets/ct_organization_complete_step.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -27,6 +29,14 @@ class OnboardingScreen extends StatelessWidget {
         CTJourneyChapter(hero: CTJourneyHeroes.organizationType),
 
         CTJourneyChapter(hero: CTJourneyHeroes.organizationLocation),
+
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationLocation), // Size
+
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationLocation), // Mission
+
+        CTJourneyChapter(
+          hero: CTJourneyHeroes.organizationLocation,
+        ), // Complete
       ],
       steps: [
         // Chapter 1 - Welcome
@@ -50,9 +60,29 @@ class OnboardingScreen extends StatelessWidget {
         // Chapter 4 - Organization Location
         (controller, next, back) => CTOrganizationLocationStep(
           journeyController: controller,
-          onContinue: () {
-            debugPrint('Organization setup complete!');
-            // TODO: Launch People Journey
+          onContinue: next,
+          onBack: back,
+        ),
+
+        // Chapter 5 - Organization Size
+        (controller, next, back) => CTOrganizationSizeStep(
+          journeyController: controller,
+          onContinue: next,
+          onBack: back,
+        ),
+
+        // Chapter 6 - Organization Mission
+        (controller, next, back) => CTOrganizationMissionStep(
+          journeyController: controller,
+          onContinue: next,
+          onBack: back,
+        ),
+
+        // Chapter 7 - Complete
+        (controller, next, back) => CTOrganizationCompleteStep(
+          onEnterWorkspace: () {
+            debugPrint('Launch Workspace!');
+            // TODO: Navigate to Workspace
           },
           onBack: back,
         ),
