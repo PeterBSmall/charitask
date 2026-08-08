@@ -14,11 +14,9 @@ const businessProfile = CTMissionProfile(
 
   actionButton: 'Build My Team',
 
-  examples: [
-    'Small Business',
-    'Startup',
-    'Manufacturer',
-    'Professional Services',
-    'Corporate Office',
+  highlights: [
+    'Employee Management',
+    'Team Scheduling',
+    'Projects & Communication',
   ],
 );

@@ -4,8 +4,9 @@ import 'package:charitask/shared/models/ct_journey_hero_data.dart';
 
 class CTHeroText extends StatelessWidget {
   final CTJourneyHeroData hero;
+  final List<String> highlights;
 
-  const CTHeroText({super.key, required this.hero});
+  const CTHeroText({super.key, required this.hero, this.highlights = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class CTHeroText extends StatelessWidget {
     return Positioned(
       left: 40,
       right: 40,
-      bottom: 90,
+      bottom: 135,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -44,6 +45,46 @@ class CTHeroText extends StatelessWidget {
               shadows: shadow,
             ),
           ),
+
+          if (highlights.isNotEmpty) ...[
+            const SizedBox(height: 24),
+
+            Container(
+              width: 72,
+              height: 1,
+              color: Colors.white.withOpacity(.35),
+            ),
+
+            const SizedBox(height: 22),
+
+            ...highlights.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: Text(
+                        item,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

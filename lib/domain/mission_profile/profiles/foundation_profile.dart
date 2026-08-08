@@ -14,11 +14,5 @@ const foundationProfile = CTMissionProfile(
 
   actionButton: 'Fund Great Work',
 
-  examples: [
-    'Community Foundation',
-    'Private Foundation',
-    'Family Foundation',
-    'Corporate Foundation',
-    'Grantmaker',
-  ],
+  highlights: ['Grant Management', 'Funding Programs', 'Impact Measurement'],
 );

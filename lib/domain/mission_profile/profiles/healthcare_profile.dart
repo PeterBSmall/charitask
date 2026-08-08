@@ -14,11 +14,9 @@ const healthcareProfile = CTMissionProfile(
 
   actionButton: 'Start Caring',
 
-  examples: [
-    'Hospital',
-    'Clinic',
-    'Medical Practice',
-    'Health Center',
-    'Hospice',
+  highlights: [
+    'Care Team Coordination',
+    'Volunteer Management',
+    'Scheduling & Patient Programs',
   ],
 );

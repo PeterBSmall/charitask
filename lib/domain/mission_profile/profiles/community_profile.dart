@@ -14,11 +14,5 @@ const communityProfile = CTMissionProfile(
 
   actionButton: 'Grow Our Community',
 
-  examples: [
-    'Neighborhood Group',
-    'Community Coalition',
-    'Civic Organization',
-    'Local Initiative',
-    'Volunteer Group',
-  ],
+  highlights: ['Community Projects', 'Volunteer Coordination', 'Local Events'],
 );

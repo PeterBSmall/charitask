@@ -14,11 +14,9 @@ const membershipProfile = CTMissionProfile(
 
   actionButton: 'Support Our Members',
 
-  examples: [
-    'Professional Association',
-    'Chamber of Commerce',
-    'Trade Association',
-    'Sports League',
-    'Membership Organization',
+  highlights: [
+    'Member Engagement',
+    'Events & Communications',
+    'Membership Management',
   ],
 );

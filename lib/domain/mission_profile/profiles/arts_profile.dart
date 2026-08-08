@@ -14,11 +14,9 @@ const artsProfile = CTMissionProfile(
 
   actionButton: 'Inspire Our Community',
 
-  examples: [
-    'Museum',
-    'Arts Center',
-    'Performing Arts',
-    'Cultural Organization',
-    'Community Theater',
+  highlights: [
+    'Programs & Workshops',
+    'Events & Exhibits',
+    'Artist & Volunteer Coordination',
   ],
 );

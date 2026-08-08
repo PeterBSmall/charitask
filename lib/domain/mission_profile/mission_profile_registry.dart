@@ -10,6 +10,7 @@ import 'profiles/foundation_profile.dart';
 import 'profiles/membership_profile.dart';
 import 'profiles/community_profile.dart';
 import 'profiles/arts_profile.dart';
+import 'profiles/school_profile.dart';
 
 class CTMissionProfiles {
   static const nonprofit = nonprofitProfile;
@@ -29,6 +30,9 @@ class CTMissionProfiles {
 
       case OrganizationType.church:
         return church;
+
+      case OrganizationType.school:
+        return schoolProfile;
 
       case OrganizationType.business:
         return business;

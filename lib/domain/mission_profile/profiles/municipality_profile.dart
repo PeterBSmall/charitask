@@ -14,5 +14,9 @@ const municipalityProfile = CTMissionProfile(
 
   actionButton: 'Serve My Community',
 
-  examples: ['Town', 'City', 'County', 'Public Works', 'Parks & Recreation'],
+  highlights: [
+    'Department Coordination',
+    'Community Services',
+    'Events & Public Engagement',
+  ],
 );

@@ -14,11 +14,9 @@ const nonprofitProfile = CTMissionProfile(
 
   actionButton: 'Start My Mission',
 
-  examples: [
-    'Habitat for Humanity',
-    'Food Bank',
-    'Youth Program',
-    'Community Services',
-    'Advocacy Organization',
+  highlights: [
+    'Volunteer Management',
+    'Projects & Missions',
+    'Events & Outreach',
   ],
 );

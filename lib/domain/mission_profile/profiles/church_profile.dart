@@ -14,5 +14,9 @@ const churchProfile = CTMissionProfile(
 
   actionButton: 'Start Our Ministry',
 
-  examples: ['Church', 'Parish', 'Synagogue', 'Mosque', 'Faith Community'],
+  highlights: [
+    'Ministry Management',
+    'Volunteer Coordination',
+    'Worship & Events',
+  ],
 );

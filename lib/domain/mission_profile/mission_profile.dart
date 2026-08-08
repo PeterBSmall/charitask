@@ -10,13 +10,13 @@ class CTMissionProfile {
   /// Primary call-to-action button text.
   final String actionButton;
 
-  /// Example organizations shown during onboarding.
-  final List<String> examples;
+  /// Key capabilities shown in the hero panel.
+  final List<String> highlights;
 
   const CTMissionProfile({
     required this.type,
     required this.hero,
     required this.actionButton,
-    required this.examples,
+    required this.highlights,
   });
 }

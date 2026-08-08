@@ -40,9 +40,10 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
 
         CTJourneyHeader(
           title: 'Hello Peter.',
-          question: 'What best describes your organization?',
-          subtitle: 'This helps ChariTask tailor your experience.',
-          icon: Icons.apartment_outlined,
+          question: 'How do you serve your community?',
+          subtitle:
+              'Select the organization that best represents your mission. We\'ll personalize ChariTask to match the way you work.',
+          icon: Icons.favorite_outline,
         ),
 
         const SizedBox(height: 28),
@@ -85,7 +86,9 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
 
             Expanded(
               child: CTJourneyButton(
-                text: 'Continue',
+                text: _selectedType == null
+                    ? 'Continue'
+                    : widget.journeyController.missionProfile.actionButton,
                 onPressed: _selectedType == null
                     ? null
                     : () {
