@@ -1,4 +1,3 @@
-import 'package:charitask/shared/design_system/forms/ct_place_result_card.dart';
 import 'package:charitask/shared/models/ct_place.dart';
 
 class CTPlace {

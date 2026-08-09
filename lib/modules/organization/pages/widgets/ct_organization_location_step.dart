@@ -5,8 +5,10 @@ import 'package:charitask/shared/design_system/journey/ct_journey_constants.dart
 import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_info_card.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_progress.dart';
-import 'package:charitask/shared/design_system/journey/ct_journey_textfield.dart';
+
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
+import 'package:charitask/shared/design_system/forms/ct_place_field.dart';
+import 'package:charitask/shared/models/ct_place.dart';
 
 class CTOrganizationLocationStep extends StatefulWidget {
   final VoidCallback onContinue;
@@ -67,10 +69,11 @@ class _CTOrganizationLocationStepState
 
         const SizedBox(height: 18),
 
-        CTJourneyTextField(
+        CTLocationField(
           controller: _locationController,
-          hintText: 'City, State or ZIP Code',
-          prefixIcon: Icons.location_on_outlined,
+          onChanged: (CTPlace place) {
+            // Google-selected location.
+          },
         ),
 
         const SizedBox(height: 24),
