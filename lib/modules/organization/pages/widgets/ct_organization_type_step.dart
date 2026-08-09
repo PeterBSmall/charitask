@@ -75,14 +75,15 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
 
         Row(
           children: [
-            Expanded(
+            SizedBox(
+              width: 200,
               child: OutlinedButton(
                 onPressed: widget.onBack,
                 child: const Text('Back'),
               ),
             ),
 
-            const SizedBox(width: 16),
+            const SizedBox(width: 20),
 
             Expanded(
               child: CTJourneyButton(

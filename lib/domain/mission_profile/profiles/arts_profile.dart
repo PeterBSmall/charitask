@@ -10,6 +10,7 @@ const artsProfile = CTMissionProfile(
     title: 'Creativity inspires community.',
     subtitle:
         'Coordinate artists, volunteers, events, exhibits, and programs that bring people together.',
+    missionTag: 'Built for Creative Communities',
   ),
 
   actionButton: 'Inspire Our Community',

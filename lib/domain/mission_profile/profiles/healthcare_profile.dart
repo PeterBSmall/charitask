@@ -10,6 +10,7 @@ const healthcareProfile = CTMissionProfile(
     title: 'Care begins with connection.',
     subtitle:
         'Coordinate caregivers, volunteers, schedules, and patient-focused programs from one secure workspace.',
+    missionTag: 'Built for Care Teams',
   ),
 
   actionButton: 'Start Caring',

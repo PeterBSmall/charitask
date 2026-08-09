@@ -10,6 +10,7 @@ const foundationProfile = CTMissionProfile(
     title: 'Fueling missions that matter.',
     subtitle:
         'Evaluate grants, collaborate with partners, and maximize the impact of every investment.',
+    missionTag: 'Built for Grantmaking',
   ),
 
   actionButton: 'Fund Great Work',

@@ -10,6 +10,7 @@ const membershipProfile = CTMissionProfile(
     title: 'Strengthening your membership.',
     subtitle:
         'Keep members engaged, manage events, and build lasting relationships from one connected platform.',
+    missionTag: 'Built for Membership Organizations',
   ),
 
   actionButton: 'Support Our Members',

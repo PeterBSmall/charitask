@@ -10,6 +10,7 @@ const municipalityProfile = CTMissionProfile(
     title: 'Serving communities together.',
     subtitle:
         'Coordinate departments, staff, volunteers, and community initiatives from one shared platform.',
+    missionTag: 'Built for Public Service',
   ),
 
   actionButton: 'Serve My Community',

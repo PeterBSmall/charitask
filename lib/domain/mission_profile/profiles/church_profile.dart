@@ -10,6 +10,7 @@ const churchProfile = CTMissionProfile(
     title: 'Building faith through service.',
     subtitle:
         'Coordinate ministries, volunteers, events, and outreach—so you can spend more time serving people.',
+    missionTag: 'Built for Faith Communities',
   ),
 
   actionButton: 'Start Our Ministry',

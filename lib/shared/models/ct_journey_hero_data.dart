@@ -5,6 +5,8 @@ class CTJourneyHeroData {
     required this.imageAsset,
     required this.title,
     required this.subtitle,
+    required this.missionTag,
+
     this.overlayOpacity = .45,
     this.alignment = Alignment.center,
     this.imageScale = 1.0,
@@ -13,6 +15,7 @@ class CTJourneyHeroData {
   final String imageAsset;
   final String title;
   final String subtitle;
+  final String missionTag;
 
   final double overlayOpacity;
   final Alignment alignment;

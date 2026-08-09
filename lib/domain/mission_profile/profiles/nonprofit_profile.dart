@@ -10,6 +10,7 @@ const nonprofitProfile = CTMissionProfile(
     title: 'Every mission is unique.',
     subtitle:
         'The way your organization serves its community helps ChariTask personalize your workspace from day one.',
+    missionTag: 'Built for Nonprofit Missions',
   ),
 
   actionButton: 'Start My Mission',

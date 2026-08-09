@@ -10,6 +10,7 @@ const schoolProfile = CTMissionProfile(
     title: 'Learning builds stronger communities.',
     subtitle:
         'Coordinate staff, volunteers, students, events, and programs from one connected workspace.',
+    missionTag: 'Built for Educational Communities',
   ),
 
   actionButton: 'Build Our School',

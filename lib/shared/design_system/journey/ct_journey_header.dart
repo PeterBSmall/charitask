@@ -4,15 +4,15 @@ import 'ct_journey_badge.dart';
 
 class CTJourneyHeader extends StatelessWidget {
   final String title;
-  final String question;
-  final String subtitle;
+  final String? question;
+  final String? subtitle;
   final IconData icon;
 
   const CTJourneyHeader({
     super.key,
     required this.title,
-    required this.question,
-    required this.subtitle,
+    this.question,
+    this.subtitle,
     required this.icon,
   });
 
@@ -31,43 +31,50 @@ class CTJourneyHeader extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 26),
+        if ((question?.isNotEmpty ?? false) ||
+            (subtitle?.isNotEmpty ?? false)) ...[
+          const SizedBox(height: 26),
 
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CTJourneyBadge(icon: icon),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CTJourneyBadge(icon: icon),
 
-            const SizedBox(width: 20),
+              const SizedBox(width: 20),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    question,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1F2937),
-                    ),
-                  ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (question?.isNotEmpty ?? false)
+                      Text(
+                        question!,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
 
-                  const SizedBox(height: 10),
+                    if ((question?.isNotEmpty ?? false) &&
+                        (subtitle?.isNotEmpty ?? false))
+                      const SizedBox(height: 10),
 
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      height: 1.6,
-                      color: Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
+                    if (subtitle?.isNotEmpty ?? false)
+                      Text(
+                        subtitle!,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          height: 1.6,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ],
     );
   }

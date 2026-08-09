@@ -80,10 +80,8 @@ class OnboardingScreen extends StatelessWidget {
 
         // Chapter 7 - Complete
         (controller, next, back) => CTOrganizationCompleteStep(
-          onEnterWorkspace: () {
-            debugPrint('Launch Workspace!');
-            // TODO: Navigate to Workspace
-          },
+          controller: controller,
+          onEnterWorkspace: next,
           onBack: back,
         ),
       ],

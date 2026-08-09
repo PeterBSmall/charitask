@@ -9,6 +9,12 @@ class CTHeroImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('========================');
+    debugPrint('CTHeroImage');
+    debugPrint('imageAsset: ${hero.imageAsset}');
+    debugPrint('title: ${hero.title}');
+    debugPrint('========================');
+
     return Positioned.fill(
       child: Transform.scale(
         scale: hero.imageScale,

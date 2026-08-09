@@ -10,6 +10,7 @@ const businessProfile = CTMissionProfile(
     title: 'Great teams build great organizations.',
     subtitle:
         'Bring employees, projects, communication, and operations together in one connected workspace.',
+    missionTag: 'Built for Purpose-Driven Teams',
   ),
 
   actionButton: 'Build My Team',

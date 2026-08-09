@@ -10,6 +10,7 @@ const communityProfile = CTMissionProfile(
     title: 'Communities grow together.',
     subtitle:
         'Bring neighbors, volunteers, and local initiatives together to make a lasting difference.',
+    missionTag: 'Built for Community Impact',
   ),
 
   actionButton: 'Grow Our Community',

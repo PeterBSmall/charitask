@@ -56,10 +56,7 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
       leftPanel: AnimatedBuilder(
         animation: widget.controller,
         builder: (context, child) {
-          return CTHero(
-            hero: widget.controller.currentHero,
-            highlights: widget.controller.missionProfile.highlights,
-          );
+          return CTHero(hero: widget.controller.currentHero);
         },
       ),
       rightPanel: CTJourneyCard(
