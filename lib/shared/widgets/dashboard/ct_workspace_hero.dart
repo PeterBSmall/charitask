@@ -140,8 +140,9 @@ class CTWorkspaceHero extends StatelessWidget {
 
                   Text(
                     nextStep!,
-                    style: AppTypography.titleLarge.copyWith(
+                    style: AppTypography.body.copyWith(
                       color: Colors.white,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       height: 1.2,
                     ),

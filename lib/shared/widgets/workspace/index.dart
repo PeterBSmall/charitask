@@ -5,7 +5,3 @@ export 'ct_workspace_task_tile.dart';
 
 export 'ct_workspace_modules.dart';
 export 'ct_workspace_module_tile.dart';
-
-export 'ct_workspace_activity.dart';
-
-export 'ct_workspace_progress.dart';

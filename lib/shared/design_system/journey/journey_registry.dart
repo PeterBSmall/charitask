@@ -11,7 +11,7 @@ class JourneyRegistry {
       case JourneyType.nonprofit:
         return JourneyDefinition(
           type: JourneyType.nonprofit,
-          hero: CTJourneyHeroes.nonprofit,
+          hero: CTJourneyHeroes.organizationSetup,
         );
 
       default:

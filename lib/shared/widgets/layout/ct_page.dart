@@ -42,7 +42,7 @@ class CTPage extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xl),
                   ],
 
-                  Expanded(child: child),
+                  Expanded(child: SingleChildScrollView(child: child)),
                 ],
               ),
             ),

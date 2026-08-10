@@ -24,7 +24,7 @@ class CTJourneyQuestion extends StatelessWidget {
           style: const TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.w800,
-            color: CTJourneyColors.text,
+            color: CTJourneyColors.title,
             height: 1.05,
           ),
         ),
@@ -36,7 +36,7 @@ class CTJourneyQuestion extends StatelessWidget {
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: CTJourneyColors.text,
+            color: CTJourneyColors.title,
           ),
         ),
 

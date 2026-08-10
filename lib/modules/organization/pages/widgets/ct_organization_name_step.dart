@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/design_system/journey/ct_journey_button.dart';
-import 'package:charitask/shared/design_system/journey/ct_journey_constants.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_header.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_info_card.dart';
@@ -35,13 +34,16 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
       text: widget.journeyController.organization.identity.name,
     );
 
-    _organizationController.addListener(() {
-      setState(() {});
-    });
+    _organizationController.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _organizationController.removeListener(_onTextChanged);
     _organizationController.dispose();
     super.dispose();
   }
@@ -51,46 +53,59 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const CTJourneyProgress(
-          journeyTitle: 'Organization Setup',
-          currentStep: 2,
-          totalSteps: 7,
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CTJourneyProgress(
+                  journeyTitle: 'Organization Setup',
+                  currentStep: 2,
+                  totalSteps: 7,
+                ),
+
+                const SizedBox(height: 18),
+
+                CTJourneyHeader(
+                  title: 'Hello ${widget.journeyController.firstName}',
+                  question: "What's the name of your organization?",
+                  subtitle:
+                      'This will become the home for your people, teams, locations, volunteers, and mission.',
+                  icon: Icons.business_outlined,
+                ),
+
+                const SizedBox(height: 18),
+
+                CTJourneyTextField(
+                  controller: _organizationController,
+                  hintText: 'Enter organization name',
+                  prefixIcon: Icons.business_outlined,
+                ),
+
+                const SizedBox(height: 18),
+
+                const CTJourneyInfoCard(
+                  icon: Icons.info_outline_rounded,
+                  title: 'Your organization can always evolve.',
+                  message:
+                      'Choose the name people know you by today. You can always update it later in Organization Settings.',
+                ),
+              ],
+            ),
+          ),
         ),
 
-        const SizedBox(height: CTJourneySpacing.progressToHeader),
-
-        CTJourneyHeader(
-          title: 'Hello ${widget.journeyController.firstName}',
-          question: "What's the name of your organization?",
-          subtitle:
-              'This will become the home for your people, teams, locations, volunteers, and mission.',
-          icon: Icons.business_outlined,
-        ),
-
-        const SizedBox(height: CTJourneySpacing.headerToField),
-
-        CTJourneyTextField(
-          controller: _organizationController,
-          hintText: 'Enter organization name',
-          prefixIcon: Icons.business_outlined,
-        ),
-
-        const SizedBox(height: 24),
-
-        const CTJourneyInfoCard(
-          icon: Icons.info_outline_rounded,
-          title: 'Your organization can always evolve.',
-          message:
-              'Choose the name people know you by today. You can always update it later in Organization Settings.',
-        ),
-
-        const Spacer(),
+        const SizedBox(height: 16),
 
         Row(
           children: [
             Expanded(
               child: OutlinedButton(
                 onPressed: widget.onBack,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 52),
+                ),
                 child: const Text('Back'),
               ),
             ),

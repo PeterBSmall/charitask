@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:charitask/shared/models/ct_metric.dart';
 import 'package:charitask/shared/widgets/dashboard/index.dart';
 
 class FoundationMetrics extends StatelessWidget {
@@ -9,13 +10,25 @@ class FoundationMetrics extends StatelessWidget {
   Widget build(BuildContext context) {
     return CTMetricsGrid(
       children: const [
-        CTMetricCard(icon: Icons.people, title: 'People', value: '148'),
+        CTMetricCard(
+          metric: CTMetric(icon: Icons.people, label: 'People', value: '148'),
+        ),
 
-        CTMetricCard(icon: Icons.groups, title: 'Groups', value: '12'),
+        CTMetricCard(
+          metric: CTMetric(icon: Icons.groups, label: 'Groups', value: '12'),
+        ),
 
-        CTMetricCard(icon: Icons.location_on, title: 'Locations', value: '4'),
+        CTMetricCard(
+          metric: CTMetric(
+            icon: Icons.location_on,
+            label: 'Locations',
+            value: '4',
+          ),
+        ),
 
-        CTMetricCard(icon: Icons.widgets, title: 'Suites', value: '7'),
+        CTMetricCard(
+          metric: CTMetric(icon: Icons.widgets, label: 'Suites', value: '7'),
+        ),
       ],
     );
   }

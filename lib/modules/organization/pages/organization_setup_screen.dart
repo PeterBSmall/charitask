@@ -4,6 +4,8 @@ import 'package:charitask/modules/organization/pages/widgets/ct_organization_loc
 import 'package:charitask/modules/organization/pages/widgets/ct_organization_name_step.dart';
 import 'package:charitask/modules/organization/pages/widgets/ct_organization_type_step.dart';
 
+import 'package:charitask/shared/data/ct_journey_heroes.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 
@@ -14,7 +16,13 @@ class OrganizationSetupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CTJourneyEngine(
       controller: CTJourneyController(),
-      photo: const AssetImage('assets/images/onboarding/welcome_people.jpg'),
+
+      chapters: const [
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationSetup),
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationSetup),
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationType),
+      ],
+
       steps: [
         (journeyController, next, back) => CTOrganizationNameStep(
           journeyController: journeyController,
@@ -32,7 +40,6 @@ class OrganizationSetupScreen extends StatelessWidget {
           journeyController: journeyController,
           onContinue: () {
             debugPrint('Organization setup complete!');
-            // TODO: Launch People Journey
           },
           onBack: back,
         ),
