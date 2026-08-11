@@ -10,12 +10,16 @@ import 'package:charitask/shared/design_system/journey/ct_journey_controller.dar
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 
 class OrganizationSetupScreen extends StatelessWidget {
-  const OrganizationSetupScreen({super.key});
+  final VoidCallback? onComplete;
+
+  const OrganizationSetupScreen({super.key, this.onComplete});
 
   @override
   Widget build(BuildContext context) {
     return CTJourneyEngine(
       controller: CTJourneyController(),
+
+      onComplete: onComplete,
 
       chapters: const [
         CTJourneyChapter(hero: CTJourneyHeroes.organizationSetup),
@@ -38,9 +42,7 @@ class OrganizationSetupScreen extends StatelessWidget {
 
         (journeyController, next, back) => CTOrganizationLocationStep(
           journeyController: journeyController,
-          onContinue: () {
-            debugPrint('Organization setup complete!');
-          },
+          onContinue: next,
           onBack: back,
         ),
       ],

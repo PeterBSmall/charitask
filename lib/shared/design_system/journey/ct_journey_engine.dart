@@ -17,12 +17,14 @@ class CTJourneyEngine extends StatefulWidget {
   final CTJourneyController controller;
   final List<CTJourneyChapter> chapters;
   final List<CTJourneyStepBuilder> steps;
+  final VoidCallback? onComplete;
 
   const CTJourneyEngine({
     super.key,
     required this.controller,
     required this.chapters,
     required this.steps,
+    this.onComplete,
   });
 
   @override
@@ -31,11 +33,22 @@ class CTJourneyEngine extends StatefulWidget {
 
 class _CTJourneyEngineState extends State<CTJourneyEngine> {
   void _next() {
+    debugPrint(
+      'CTJourneyEngine _next() - currentStep: ${widget.controller.currentStep}, '
+      'totalSteps: ${widget.steps.length}',
+    );
+
     if (widget.controller.currentStep < widget.steps.length - 1) {
+      debugPrint('CTJourneyEngine advancing to next step.');
+
       setState(() {
         widget.controller.nextStep();
         _updateChapterHero();
       });
+    } else {
+      debugPrint('CTJourneyEngine COMPLETE - calling onComplete.');
+
+      widget.onComplete?.call();
     }
   }
 
@@ -50,8 +63,6 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
 
   @override
   Widget build(BuildContext context) {
-    final chapter = widget.chapters[widget.controller.currentStep];
-
     return CTJourneyShell(
       leftPanel: AnimatedBuilder(
         animation: widget.controller,

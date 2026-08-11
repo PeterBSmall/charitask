@@ -104,8 +104,17 @@ class _CTOrganizationLocationStepState
                 onPressed: _locationController.text.trim().isEmpty
                     ? null
                     : () {
+                        debugPrint(
+                          'CTOrganizationLocationStep: Continue pressed with location: '
+                          '${_locationController.text.trim()}',
+                        );
+
                         widget.journeyController.updateOrganizationLocation(
                           _locationController.text.trim(),
+                        );
+
+                        debugPrint(
+                          'CTOrganizationLocationStep: calling onContinue.',
                         );
 
                         widget.onContinue();

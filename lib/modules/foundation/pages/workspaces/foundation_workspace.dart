@@ -10,6 +10,6 @@ class FoundationWorkspace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CTPage(child: const CTSuiteDashboard(config: foundationDashboard));
+    return CTPage(child: CTSuiteDashboard(config: foundationDashboard));
   }
 }

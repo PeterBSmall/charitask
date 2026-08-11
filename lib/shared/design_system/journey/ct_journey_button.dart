@@ -26,18 +26,22 @@ class CTJourneyButton extends StatelessWidget {
           ),
           foregroundColor: Colors.white,
           disabledForegroundColor: Colors.white70,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(CTJourneySizes.buttonRadius),
           ),
           textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(text),
-            const SizedBox(width: 10),
-            const Icon(Icons.arrow_forward_rounded, size: 20),
-          ],
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(text),
+              const SizedBox(width: 10),
+              const Icon(Icons.arrow_forward_rounded, size: 20),
+            ],
+          ),
         ),
       ),
     );

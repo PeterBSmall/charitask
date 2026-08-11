@@ -10,7 +10,7 @@ import 'package:charitask/shared/models/ct_suite_dashboard_config.dart';
 import 'package:charitask/shared/widgets/workspace/ct_workspace_modules.dart';
 import 'package:charitask/shared/widgets/workspace/ct_workspace_tasks.dart';
 
-const foundationDashboard = CTSuiteDashboardConfig(
+final foundationDashboard = CTSuiteDashboardConfig(
   hero: FoundationHero(),
   metrics: CTWorkspaceMetrics(metrics: foundationMetrics),
 

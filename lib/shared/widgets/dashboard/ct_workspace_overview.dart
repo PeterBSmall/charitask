@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:charitask/shared/models/ct_workspace_overview_config.dart';
 import 'package:charitask/shared/widgets/buttons/ct_button.dart';
+import 'package:charitask/shared/models/ct_workspace_overview_config.dart';
 
 class CTWorkspaceOverview extends StatelessWidget {
   final CTWorkspaceOverviewConfig config;
@@ -105,51 +105,116 @@ class CTWorkspaceOverview extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 28),
 
-                    const SizedBox(height: 32),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: LinearProgressIndicator(
-                        value: config.progress,
-                        minHeight: 10,
-                        backgroundColor: Colors.white24,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
+                    // ─────────────────────────────────────────
+                    // NEXT STEP PANEL
+                    // ─────────────────────────────────────────
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(28, 22, 28, 24),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.09),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(.14),
+                          width: 1,
                         ),
                       ),
-                    ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Next step + percentage
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  config.nextStep,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
 
-                    const SizedBox(height: 14),
+                              Text(
+                                '${(config.progress * 100).round()}%',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
 
-                    Text(
-                      'Next Step: ${config.nextStep}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                          const SizedBox(height: 14),
+
+                          // Progress bar
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: LinearProgressIndicator(
+                              value: config.progress,
+                              minHeight: 10,
+                              backgroundColor: Colors.white24,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Actions
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CTButton(
+                                    label: config.primaryButtonLabel,
+                                    onPressed: config.onPrimaryPressed,
+                                  ),
+
+                                  const SizedBox(width: 16),
+
+                                  CTButton(
+                                    label: config.secondaryButtonLabel,
+                                    onPressed: config.onSecondaryPressed,
+                                    isPrimary: false,
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              Center(
+                                child: TextButton(
+                                  onPressed: () {
+                                    // Save progress and finish later.
+                                    // Persistence will be connected later.
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.white70,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Save and finish later',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-
-                    const SizedBox(height: 36),
-                    const SizedBox(height: 40),
-
-                    Row(
-                      children: [
-                        CTButton(
-                          label: config.primaryButtonLabel,
-                          onPressed: config.onPrimaryPressed,
-                        ),
-
-                        const SizedBox(width: 16),
-
-                        CTButton(
-                          label: config.secondaryButtonLabel,
-                          onPressed: config.onSecondaryPressed,
-                          isPrimary: false,
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -157,6 +222,7 @@ class CTWorkspaceOverview extends StatelessWidget {
 
               const SizedBox(width: 56),
 
+              // Workspace identity
               Column(
                 children: [
                   CircleAvatar(

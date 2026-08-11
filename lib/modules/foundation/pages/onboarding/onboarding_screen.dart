@@ -9,8 +9,7 @@ import 'package:charitask/modules/organization/pages/widgets/ct_organization_siz
 import 'package:charitask/modules/organization/pages/widgets/ct_organization_mission_step.dart';
 
 import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_creation_step.dart';
-import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_claim_workspace_step.dart';
-import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_enter_workspace_step.dart';
+import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_ready_step.dart';
 
 import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspace.dart';
 
@@ -33,8 +32,6 @@ class OnboardingScreen extends StatelessWidget {
         CTJourneyChapter(hero: CTJourneyHeroes.organizationSetup),
 
         CTJourneyChapter(hero: CTJourneyHeroes.organizationType),
-
-        CTJourneyChapter(hero: CTJourneyHeroes.organizationLocation),
 
         CTJourneyChapter(hero: CTJourneyHeroes.organizationLocation),
 
@@ -93,17 +90,9 @@ class OnboardingScreen extends StatelessWidget {
           onContinue: next,
         ),
 
-        // Step 8 - Claim Workspace
-        (controller, next, back) => CTClaimWorkspaceStep(
-          controller: controller,
-          onContinue: next,
-          onBack: back,
-        ),
-
-        // Step 9 - Enter Workspace
-        (controller, next, back) => CTEnterWorkspaceStep(
-          organizationName: controller.organization.identity.name,
-          onEnterWorkspace: () {
+        // Final Step - Workspace Ready
+        (controller, next, back) => CTWorkspaceReadyStep(
+          onContinue: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const FoundationWorkspace()),
             );

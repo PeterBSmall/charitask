@@ -1,5 +1,3 @@
-import 'package:charitask/shared/models/ct_place.dart';
-
 class CTPlace {
   final String primary;
   final String secondary;

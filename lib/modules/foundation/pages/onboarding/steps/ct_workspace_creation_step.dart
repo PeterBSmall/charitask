@@ -68,7 +68,7 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const CTJourneyProgress(currentStep: 7, totalSteps: 9),
+        const CTJourneyProgress(currentStep: 7, totalSteps: 7),
 
         const SizedBox(height: CTJourneySpacing.progressToHeader),
 
@@ -160,10 +160,7 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
               onPressed: widget.onContinue,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 18),
-                child: Text(
-                  'Claim My Workspace',
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: Text('Continue', style: TextStyle(fontSize: 18)),
               ),
             ),
           ),

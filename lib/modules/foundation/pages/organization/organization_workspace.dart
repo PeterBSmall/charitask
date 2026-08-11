@@ -12,8 +12,8 @@ class OrganizationWorkspace extends StatelessWidget {
     return CTPage(
       title: 'Organization',
       subtitle: 'Define your organization’s identity, mission, and brand.',
-
-      child: ListView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           CTModuleCard(
             icon: Icons.flag,
