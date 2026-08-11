@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/design_system/design_system.dart';
 
-import 'package:charitask/modules/foundation/pages/onboarding/onboarding_screen.dart';
+import 'package:charitask/modules/onboarding/pages/onboarding_entry_page.dart';
 
 class ChariTaskApp extends StatelessWidget {
   const ChariTaskApp({super.key});
@@ -15,7 +15,7 @@ class ChariTaskApp extends StatelessWidget {
 
       theme: AppTheme.light,
 
-      home: const OnboardingScreen(),
+      home: const OnboardingEntryPage(),
     );
   }
 }
