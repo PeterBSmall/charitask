@@ -17,7 +17,9 @@ class AccountWelcomePanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Brand
+          // ---------------------------------------------------------------
+          // BRAND
+          // ---------------------------------------------------------------
           Row(
             children: [
               Container(
@@ -52,6 +54,9 @@ class AccountWelcomePanel extends StatelessWidget {
 
           const SizedBox(height: 70),
 
+          // ---------------------------------------------------------------
+          // WELCOME
+          // ---------------------------------------------------------------
           const Text(
             'Welcome to\nChariTask',
             style: TextStyle(
@@ -68,7 +73,7 @@ class AccountWelcomePanel extends StatelessWidget {
             width: 62,
             height: 5,
             decoration: BoxDecoration(
-              color: Color(0xFF7652FF),
+              color: const Color(0xFF7652FF),
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -88,6 +93,9 @@ class AccountWelcomePanel extends StatelessWidget {
 
           const SizedBox(height: 48),
 
+          // ---------------------------------------------------------------
+          // BENEFITS
+          // ---------------------------------------------------------------
           const _Benefit(
             icon: Icons.people_alt_outlined,
             title: 'Bring your team together',
@@ -111,8 +119,11 @@ class AccountWelcomePanel extends StatelessWidget {
                 'Gain insights, streamline operations, and focus on your mission.',
           ),
 
-          const Spacer(),
+          const SizedBox(height: 48),
 
+          // ---------------------------------------------------------------
+          // FOOTER
+          // ---------------------------------------------------------------
           Container(height: 1, color: Colors.white.withValues(alpha: 0.25)),
 
           const SizedBox(height: 24),

@@ -26,7 +26,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
   late final TextEditingController _passwordController;
+
   final _accountFormKey = GlobalKey<AccountFormState>();
+
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _scrollController.dispose();
 
     super.dispose();
   }
@@ -55,52 +59,75 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1320, maxHeight: 900),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Material(
-                  elevation: 8,
-                  shadowColor: Colors.black.withValues(alpha: 0.12),
-                  child: Row(
-                    children: [
-                      Expanded(flex: 42, child: AccountWelcomePanel()),
-                      Expanded(
-                        flex: 58,
-                        child: AccountFormPanel(
-                          firstNameController: _firstNameController,
-                          lastNameController: _lastNameController,
-                          emailController: _emailController,
-                          phoneController: _phoneController,
-                          passwordController: _passwordController,
-                          accountFormKey: _accountFormKey,
-                          onContinue: () {
-                            if (!_accountFormKey.currentState!.validate()) {
-                              return;
-                            }
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Scrollbar(
+              controller: _scrollController,
+              thumbVisibility: false,
+              interactive: true,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(20),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: 1320,
+                      minHeight: (constraints.maxHeight - 40).clamp(
+                        0.0,
+                        double.infinity,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Material(
+                        elevation: 8,
+                        shadowColor: Colors.black.withValues(alpha: 0.12),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(flex: 42, child: AccountWelcomePanel()),
 
-                            widget.controller.createPersonDraft(
-                              firstName: _firstNameController.text.trim(),
-                              lastName: _lastNameController.text.trim(),
-                              email: _emailController.text.trim(),
-                              phone: _phoneController.text.trim().isEmpty
-                                  ? null
-                                  : _phoneController.text.trim(),
-                            );
+                              Expanded(
+                                flex: 58,
+                                child: AccountFormPanel(
+                                  firstNameController: _firstNameController,
+                                  lastNameController: _lastNameController,
+                                  emailController: _emailController,
+                                  phoneController: _phoneController,
+                                  passwordController: _passwordController,
+                                  accountFormKey: _accountFormKey,
+                                  onContinue: () {
+                                    if (!_accountFormKey.currentState!
+                                        .validate()) {
+                                      return;
+                                    }
 
-                            widget.onContinue();
-                          },
+                                    widget.controller.createPersonDraft(
+                                      firstName: _firstNameController.text
+                                          .trim(),
+                                      lastName: _lastNameController.text.trim(),
+                                      email: _emailController.text.trim(),
+                                      phone:
+                                          _phoneController.text.trim().isEmpty
+                                          ? null
+                                          : _phoneController.text.trim(),
+                                    );
+
+                                    widget.onContinue();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
