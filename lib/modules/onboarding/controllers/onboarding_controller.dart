@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:charitask/modules/foundation/domain/models/person.dart';
+import 'package:charitask/domain/identity/organization_role.dart';
 
 /// Controls the first-time ChariTask account onboarding journey.
 ///
@@ -12,6 +13,7 @@ class OnboardingController extends ChangeNotifier {
   Person? person;
 
   bool emailVerified = false;
+  OrganizationRole? organizationRole;
 
   /// Updates the person's basic identity information.
   void updatePerson({
@@ -67,10 +69,17 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Stores the person's organizational role selected during onboarding.
+  void setOrganizationRole(OrganizationRole role) {
+    organizationRole = role;
+    notifyListeners();
+  }
+
   /// Clears the onboarding state.
   void reset() {
     person = null;
     emailVerified = false;
+    organizationRole = null;
     notifyListeners();
   }
 }

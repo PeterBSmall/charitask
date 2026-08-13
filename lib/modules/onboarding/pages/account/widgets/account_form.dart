@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'password_requirements.dart';
+import 'package:charitask/shared/widgets/forms/ct_phone_field.dart';
 
 class AccountForm extends StatefulWidget {
   final TextEditingController firstNameController;
@@ -118,13 +119,11 @@ class AccountFormState extends State<AccountForm> {
 
           const SizedBox(height: 20),
 
-          TextFormField(
+          CTPhoneField(
             controller: widget.phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'Phone number',
-              hintText: 'Enter your phone number',
-            ),
+            labelText: 'Phone number',
+            hintText: 'Enter your phone number',
+            required: true,
           ),
 
           const SizedBox(height: 20),

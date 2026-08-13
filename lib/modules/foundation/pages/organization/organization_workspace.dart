@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/design_system/foundations/app_spacing.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/widgets/cards/ct_module_card.dart';
 import 'package:charitask/shared/widgets/layout/ct_page.dart';
 
 class OrganizationWorkspace extends StatelessWidget {
-  const OrganizationWorkspace({super.key});
+  final CTJourneyController journeyController;
+
+  const OrganizationWorkspace({super.key, required this.journeyController});
 
   @override
   Widget build(BuildContext context) {
+    final organizationName = journeyController.organization.identity.name
+        .trim();
+
     return CTPage(
-      title: 'Organization',
+      title: organizationName.isEmpty ? 'Organization' : organizationName,
       subtitle: 'Define your organization’s identity, mission, and brand.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

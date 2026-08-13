@@ -55,7 +55,7 @@ class _CTOrganizationLocationStepState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const CTJourneyProgress(currentStep: 4, totalSteps: 7),
+        const CTJourneyProgress(currentStep: 6, totalSteps: 7),
 
         const SizedBox(height: CTJourneySpacing.progressToHeader),
 
@@ -92,6 +92,9 @@ class _CTOrganizationLocationStepState
             Expanded(
               child: OutlinedButton(
                 onPressed: widget.onBack,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 52),
+                ),
                 child: const Text('Back'),
               ),
             ),

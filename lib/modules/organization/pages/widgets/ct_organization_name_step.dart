@@ -61,14 +61,14 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
               children: [
                 const CTJourneyProgress(
                   journeyTitle: 'Organization Setup',
-                  currentStep: 2,
+                  currentStep: 4,
                   totalSteps: 7,
                 ),
 
                 const SizedBox(height: 18),
 
                 CTJourneyHeader(
-                  title: 'Hello ${widget.journeyController.firstName}',
+                  title: 'Hello ${widget.journeyController.firstName}.',
                   question: "What's the name of your organization?",
                   subtitle:
                       'This will become the home for your people, teams, locations, volunteers, and mission.',

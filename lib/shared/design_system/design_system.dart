@@ -23,6 +23,7 @@ export 'foundations/app_typography.dart';
 
 export 'components/app_button_theme.dart';
 export 'components/app_checkbox_theme.dart';
+export 'components/app_scrollbar.dart';
 export 'components/app_scrollbar_theme.dart';
 export 'components/app_slider_theme.dart';
 export 'components/app_switch_theme.dart';

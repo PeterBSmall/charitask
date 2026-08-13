@@ -1,31 +1,57 @@
+import 'package:flutter/material.dart';
+
 import 'package:charitask/modules/foundation/pages/workspaces/foundation_modules.dart';
 import 'package:charitask/modules/foundation/pages/workspaces/foundation_tasks.dart';
+import 'package:charitask/modules/foundation/pages/workspaces/foundation_metrics_data.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_activity.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_hero.dart';
-import 'package:charitask/modules/foundation/pages/workspaces/foundation_metrics_data.dart';
 
+import 'package:charitask/shared/widgets/layout/ct_page.dart';
 import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
-
-import 'package:charitask/shared/models/ct_suite_dashboard_config.dart';
 import 'package:charitask/shared/widgets/workspace/ct_workspace_modules.dart';
 import 'package:charitask/shared/widgets/workspace/ct_workspace_tasks.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
+import 'package:charitask/shared/design_system/design_system.dart';
 
-final foundationDashboard = CTSuiteDashboardConfig(
-  hero: FoundationHero(),
-  metrics: CTWorkspaceMetrics(metrics: foundationMetrics),
+class FoundationWorkspacePage extends StatelessWidget {
+  final CTJourneyController journeyController;
 
-  primaryContent: CTWorkspaceTasks(tasks: foundationTasks),
+  const FoundationWorkspacePage({super.key, required this.journeyController});
 
-  secondaryContent: CTWorkspaceModules(
-    title: 'Foundation Modules',
-    modules: foundationModules,
-  ),
+  @override
+  Widget build(BuildContext context) {
+    return CTPage(
+      title: 'Foundation',
+      subtitle: 'Build the structure that supports your organization.',
+      child: AppScrollbar(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FoundationHero(journeyController: journeyController),
 
-  activity: FoundationActivity(),
+              const SizedBox(height: AppSpacing.lg),
 
-  primaryTitle: 'Active Tasks',
-  primarySubtitle: 'Continue building your organization.',
+              CTWorkspaceMetrics(metrics: foundationMetrics),
 
-  secondaryTitle: 'Foundation Modules',
-  secondarySubtitle: 'Configure your organization and core settings.',
-);
+              const SizedBox(height: AppSpacing.lg),
+
+              CTWorkspaceTasks(tasks: foundationTasks),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              CTWorkspaceModules(
+                title: 'Foundation Modules',
+                modules: foundationModules,
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              FoundationActivity(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

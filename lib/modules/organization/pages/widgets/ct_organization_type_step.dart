@@ -34,12 +34,12 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const CTJourneyProgress(currentStep: 3, totalSteps: 7),
+        const CTJourneyProgress(currentStep: 5, totalSteps: 7),
 
         const SizedBox(height: CTJourneySpacing.progressToHeader),
 
         CTJourneyHeader(
-          title: 'Hello Peter.',
+          title: 'Hello ${widget.journeyController.firstName}.',
           question: 'How do you serve your community?',
           subtitle:
               'Select the organization that best represents your mission. We\'ll personalize ChariTask to match the way you work.',

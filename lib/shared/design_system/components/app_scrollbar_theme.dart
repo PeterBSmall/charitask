@@ -16,11 +16,13 @@ class AppScrollbarTheme {
 
       thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
         return states.contains(WidgetState.hovered)
-            ? AppColors.missionPurple
-            : AppColors.missionPurple.withValues(alpha: 0.75);
+            ? AppColors.missionPurple.withValues(alpha: 0.75)
+            : AppColors.missionPurple.withValues(alpha: 0.50);
       }),
 
-      trackColor: WidgetStateProperty.all(Colors.grey.withValues(alpha: 0.08)),
+      trackColor: WidgetStateProperty.all(
+        AppColors.missionPurple.withValues(alpha: 0.06),
+      ),
 
       interactive: true,
     );

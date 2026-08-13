@@ -9,21 +9,35 @@ import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 
-class OrganizationSetupScreen extends StatelessWidget {
-  final VoidCallback? onComplete;
+import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_creation_step.dart';
 
-  const OrganizationSetupScreen({super.key, this.onComplete});
+class OrganizationSetupScreen extends StatelessWidget {
+  final void Function(CTJourneyController controller)? onComplete;
+  final String firstName;
+
+  const OrganizationSetupScreen({
+    super.key,
+    this.onComplete,
+    required this.firstName,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return CTJourneyEngine(
-      controller: CTJourneyController(),
+    final journeyController = CTJourneyController();
 
-      onComplete: onComplete,
+    journeyController.updateFirstName(firstName);
+
+    return CTJourneyEngine(
+      controller: journeyController,
+
+      onComplete: () {
+        onComplete?.call(journeyController);
+      },
 
       chapters: const [
         CTJourneyChapter(hero: CTJourneyHeroes.organizationSetup),
         CTJourneyChapter(hero: CTJourneyHeroes.organizationSetup),
+        CTJourneyChapter(hero: CTJourneyHeroes.organizationType),
         CTJourneyChapter(hero: CTJourneyHeroes.organizationType),
       ],
 
@@ -44,6 +58,11 @@ class OrganizationSetupScreen extends StatelessWidget {
           journeyController: journeyController,
           onContinue: next,
           onBack: back,
+        ),
+
+        (journeyController, next, back) => CTWorkspaceCreationStep(
+          profile: journeyController.missionProfile,
+          onContinue: next,
         ),
       ],
     );
