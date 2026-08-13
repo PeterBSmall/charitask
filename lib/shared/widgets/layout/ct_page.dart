@@ -9,6 +9,7 @@ class CTPage extends StatelessWidget {
   final String? subtitle;
   final Widget child;
   final Widget? trailing;
+  final bool scrollable;
 
   const CTPage({
     super.key,
@@ -16,6 +17,7 @@ class CTPage extends StatelessWidget {
     this.subtitle,
     required this.child,
     this.trailing,
+    this.scrollable = true,
   });
 
   @override
@@ -42,7 +44,11 @@ class CTPage extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xl),
                   ],
 
-                  Expanded(child: SingleChildScrollView(child: child)),
+                  Expanded(
+                    child: scrollable
+                        ? SingleChildScrollView(child: child)
+                        : child,
+                  ),
                 ],
               ),
             ),

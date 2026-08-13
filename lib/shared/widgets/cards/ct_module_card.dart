@@ -10,12 +10,19 @@ class CTModuleCard extends StatelessWidget {
   final String description;
   final VoidCallback? onTap;
 
+  // Optional icon styling.
+  // Existing cards remain unchanged when these aren't provided.
+  final Color? iconColor;
+  final Color? iconBackground;
+
   const CTModuleCard({
     super.key,
     required this.icon,
     required this.title,
     required this.description,
     this.onTap,
+    this.iconColor,
+    this.iconBackground,
   });
 
   @override
@@ -24,7 +31,15 @@ class CTModuleCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Icon(icon, size: 40),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: iconBackground,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 26, color: iconColor),
+          ),
 
           const SizedBox(width: AppSpacing.lg),
 

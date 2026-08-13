@@ -257,9 +257,9 @@ class _YourRolePageState extends State<YourRolePage> {
                   Expanded(
                     child: RoleOptionCard(
                       role: OrganizationRole.boardMember,
-                      title: 'Board Member',
-                      description: 'I serve on the organization’s board.',
-                      icon: Icons.groups_rounded,
+                      title: 'IT',
+                      description: 'I manage technology and systems.',
+                      icon: Icons.devices_outlined,
                       accentColor: const Color(0xFF5B7FEA),
                       selected: _selectedRole == OrganizationRole.boardMember,
                       onTap: () => _selectRole(OrganizationRole.boardMember),
