@@ -15,6 +15,7 @@ class Person {
   final String firstName;
   final String lastName;
   final String? preferredName;
+  final String? pronouns;
 
   /// Contact information.
   final String? email;
@@ -28,6 +29,7 @@ class Person {
     required this.firstName,
     required this.lastName,
     this.preferredName,
+    this.pronouns,
     this.email,
     this.phone,
     this.photoPath,
@@ -50,6 +52,7 @@ class Person {
     String? firstName,
     String? lastName,
     String? preferredName,
+    String? pronouns,
     String? email,
     String? phone,
     String? photoPath,
@@ -59,6 +62,7 @@ class Person {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       preferredName: preferredName ?? this.preferredName,
+      pronouns: pronouns ?? this.pronouns,
       email: email ?? this.email,
       phone: phone ?? this.phone,
       photoPath: photoPath ?? this.photoPath,

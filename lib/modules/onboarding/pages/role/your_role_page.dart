@@ -219,8 +219,7 @@ class _YourRolePageState extends State<YourRolePage> {
                     child: RoleOptionCard(
                       role: OrganizationRole.executiveDirector,
                       title: 'Executive Director',
-                      description:
-                          'I lead the organization’s day-to-day operations.',
+                      description: 'I manage daily operations.',
                       icon: Icons.groups_rounded,
                       accentColor: const Color(0xFFE77A2F),
                       selected:

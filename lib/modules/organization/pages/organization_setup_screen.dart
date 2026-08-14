@@ -13,11 +13,13 @@ import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace
 
 class OrganizationSetupScreen extends StatelessWidget {
   final void Function(CTJourneyController controller)? onComplete;
+  final void Function(CTJourneyController controller)? onCompleteProfile;
   final String firstName;
 
   const OrganizationSetupScreen({
     super.key,
     this.onComplete,
+    this.onCompleteProfile,
     required this.firstName,
   });
 
@@ -63,6 +65,9 @@ class OrganizationSetupScreen extends StatelessWidget {
         (journeyController, next, back) => CTWorkspaceCreationStep(
           profile: journeyController.missionProfile,
           onContinue: next,
+          onCompleteProfile: () {
+            onCompleteProfile?.call(journeyController);
+          },
         ),
       ],
     );
