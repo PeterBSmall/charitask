@@ -10,9 +10,12 @@ import 'package:charitask/modules/organization/pages/organization_setup_screen.d
 import 'package:charitask/modules/foundation/pages/identity/complete_personal_profile_page.dart';
 import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspace_page.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OnboardingEntryPage extends StatefulWidget {
-  const OnboardingEntryPage({super.key});
+  final bool launchedFromAuthCallback;
+
+  const OnboardingEntryPage({super.key, this.launchedFromAuthCallback = false});
 
   @override
   State<OnboardingEntryPage> createState() => _OnboardingEntryPageState();
@@ -33,6 +36,40 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
     super.dispose();
   }
 
+  Future<void> _sendOnboardingEmail() async {
+    final person = _controller.person;
+
+    if (person?.email == null || person!.email!.trim().isEmpty) {
+      debugPrint('No email address available for onboarding email.');
+      return;
+    }
+
+    final email = person.email!.trim();
+    final firstName = person.firstName.trim();
+
+    try {
+      final response = await Supabase.instance.client.functions.invoke(
+        'send-onboarding-email',
+        body: {
+          'to': email,
+          'subject': 'Welcome to ChariTask, $firstName!',
+          'html':
+              '''
+          <h1>Welcome to ChariTask, $firstName! 🎉</h1>
+          <p>Your ChariTask account is ready.</p>
+          <p>You have successfully completed your initial setup and are ready to begin using your workspace.</p>
+          <p>We're excited to have you here!</p>
+          <p><strong>— The ChariTask Team</strong></p>
+        ''',
+        },
+      );
+
+      debugPrint('Onboarding email sent: ${response.data}');
+    } catch (e) {
+      debugPrint('Failed to send onboarding email: $e');
+    }
+  }
+
   void _openPersonalProfile(CTJourneyController journeyController) {
     final person = _controller.person;
 
@@ -48,12 +85,14 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
             _finishOnboarding(journeyController);
           },
           onComplete:
-              ({String? preferredName, String? pronouns, String? phone}) {
+              ({String? preferredName, String? pronouns, String? phone}) async {
                 _controller.updatePerson(
                   preferredName: preferredName,
                   pronouns: pronouns,
                   phone: phone,
                 );
+
+                await _sendOnboardingEmail();
 
                 _finishOnboarding(journeyController);
               },

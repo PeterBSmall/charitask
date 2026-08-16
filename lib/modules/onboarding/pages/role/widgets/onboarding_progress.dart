@@ -20,62 +20,118 @@ class OnboardingProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(_steps.length * 2 - 1, (index) {
-        if (index.isOdd) {
-          return Expanded(
-            child: Container(
-              height: 2,
-              color: index ~/ 2 < currentStep ? _purple : _line,
-            ),
-          );
-        }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
 
-        final stepIndex = index ~/ 2;
-        final step = _steps[stepIndex];
+        // Scale the progress indicator down as the window gets smaller.
+        final compact = width < 700;
+        final veryCompact = width < 520;
 
-        final completed = stepIndex < currentStep;
-        final active = stepIndex == currentStep;
+        final circleSize = veryCompact
+            ? 38.0
+            : compact
+            ? 42.0
+            : 48.0;
 
-        return SizedBox(
-          width: 112,
-          child: Column(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: active
-                      ? Colors.white
-                      : completed
-                      ? const Color(0xFFF5F1FF)
-                      : Colors.white,
-                  border: Border.all(
-                    color: active || completed ? _purple : _line,
-                    width: active ? 2 : 1.5,
+        final iconSize = veryCompact
+            ? 19.0
+            : compact
+            ? 21.0
+            : 23.0;
+
+        final labelSize = veryCompact
+            ? 10.0
+            : compact
+            ? 11.0
+            : 12.0;
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(_steps.length * 2 - 1, (index) {
+            // ------------------------------------------------------------
+            // CONNECTING LINE
+            // ------------------------------------------------------------
+            if (index.isOdd) {
+              return Expanded(
+                child: Padding(
+                  // Give the line a little breathing room on compact sizes.
+                  padding: EdgeInsets.only(
+                    top: circleSize / 2,
+                    left: compact ? 4 : 8,
+                    right: compact ? 4 : 8,
+                  ),
+                  child: Container(
+                    height: 2,
+                    color: index ~/ 2 < currentStep ? _purple : _line,
                   ),
                 ),
-                child: Icon(
-                  completed ? Icons.check_rounded : step.$1,
-                  color: active || completed ? _purple : _mutedText,
-                  size: 23,
-                ),
+              );
+            }
+
+            // ------------------------------------------------------------
+            // STEP
+            // ------------------------------------------------------------
+            final stepIndex = index ~/ 2;
+            final step = _steps[stepIndex];
+
+            final completed = stepIndex < currentStep;
+            final active = stepIndex == currentStep;
+
+            return Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: circleSize,
+                    height: circleSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: active
+                          ? Colors.white
+                          : completed
+                          ? const Color(0xFFF5F1FF)
+                          : Colors.white,
+                      border: Border.all(
+                        color: active || completed ? _purple : _line,
+                        width: active ? 2 : 1.5,
+                      ),
+                    ),
+                    child: Icon(
+                      completed ? Icons.check_rounded : step.$1,
+                      color: active || completed ? _purple : _mutedText,
+                      size: iconSize,
+                    ),
+                  ),
+
+                  SizedBox(height: compact ? 5 : 7),
+
+                  // FittedBox prevents long labels from overflowing
+                  // when the window becomes narrow.
+                  SizedBox(
+                    height: veryCompact ? 28 : 32,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        step.$2,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        style: TextStyle(
+                          color: active || completed ? _purple : _mutedText,
+                          fontSize: labelSize,
+                          fontWeight: active
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 7),
-              Text(
-                step.$2,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: active || completed ? _purple : _mutedText,
-                  fontSize: 12,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }

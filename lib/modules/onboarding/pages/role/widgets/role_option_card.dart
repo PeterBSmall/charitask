@@ -74,6 +74,7 @@ class RoleOptionCard extends StatelessWidget {
             // ----------------------------------------------------------
             Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -85,14 +86,14 @@ class RoleOptionCard extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 7),
+                  const SizedBox(height: 2),
 
                   Text(
                     description,
                     style: const TextStyle(
                       color: Color(0xFF596579),
                       fontSize: 12,
-                      height: 1.35,
+                      height: 1.30,
                     ),
                   ),
                 ],

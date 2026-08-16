@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/onboarding/controllers/onboarding_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EmailVerificationPage extends StatelessWidget {
   final OnboardingController controller;
@@ -140,7 +141,37 @@ class EmailVerificationPage extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   TextButton(
-                    onPressed: null,
+                    onPressed: () async {
+                      try {
+                        await controller.resendVerificationEmail();
+
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Verification email sent. Please check your inbox.',
+                            ),
+                          ),
+                        );
+                      } on AuthException catch (error) {
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(error.message)));
+                      } catch (_) {
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'We could not resend the verification email. Please try again.',
+                            ),
+                          ),
+                        );
+                      }
+                    },
                     child: const Text(
                       'Resend verification email',
                       style: TextStyle(

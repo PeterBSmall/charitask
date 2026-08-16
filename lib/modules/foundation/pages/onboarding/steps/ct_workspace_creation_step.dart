@@ -26,6 +26,7 @@ class CTWorkspaceCreationStep extends StatefulWidget {
 
 class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
   int _completedItems = 0;
+  bool _showCompletionScreen = false;
 
   final List<String> _checklist = const [
     'Organization profile',
@@ -64,7 +65,9 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildPreparationScreen();
+    return _showCompletionScreen
+        ? _buildCompletionScreen()
+        : _buildPreparationScreen();
   }
 
   // ===========================================================================
@@ -252,7 +255,11 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
                       width: double.infinity,
                       height: 52,
                       child: FilledButton(
-                        onPressed: widget.onContinue,
+                        onPressed: () {
+                          setState(() {
+                            _showCompletionScreen = true;
+                          });
+                        },
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

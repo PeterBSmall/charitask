@@ -13,6 +13,9 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   http: ^1.5.0
+  supabase_flutter: ^2.17.2
+  app_links: 6.4.1
+  win32_registry: 3.0.2
 
 dev_dependencies:
   flutter_test:

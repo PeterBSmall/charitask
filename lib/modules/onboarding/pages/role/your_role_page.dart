@@ -80,7 +80,11 @@ class _YourRolePageState extends State<YourRolePage> {
 
                             const SizedBox(height: 28),
 
-                            Expanded(child: _buildContent()),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: _buildContent(),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -159,150 +163,135 @@ class _YourRolePageState extends State<YourRolePage> {
 
         // --------------------------------------------------------------
         // ROLE OPTIONS
+        // Responsive grid:
+        //   Wide window   = 4 columns
+        //   Medium window = 2 columns
+        //   Narrow window = 1 column
         // --------------------------------------------------------------
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --------------------------------------------------------------
-              // ROW 1
-              // --------------------------------------------------------------
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.founder,
-                      title: 'Founder',
-                      description:
-                          'I started or established this organization.',
-                      icon: Icons.spa_outlined,
-                      accentColor: const Color(0xFF67B96B),
-                      selected: _selectedRole == OrganizationRole.founder,
-                      onTap: () => _selectRole(OrganizationRole.founder),
-                    ),
-                  ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
 
-                  const SizedBox(width: 14),
+            final int columns;
+            if (width >= 1000) {
+              columns = 4;
+            } else if (width >= 600) {
+              columns = 2;
+            } else {
+              columns = 1;
+            }
 
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.president,
-                      title: 'President',
-                      description:
-                          'I serve as the president of the organization.',
-                      icon: Icons.person_outline_rounded,
-                      accentColor: const Color(0xFFD9B43B),
-                      selected: _selectedRole == OrganizationRole.president,
-                      onTap: () => _selectRole(OrganizationRole.president),
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.ceo,
-                      title: 'CEO',
-                      description:
-                          'I am the chief executive officer of the organization.',
-                      icon: Icons.business_center_outlined,
-                      accentColor: const Color(0xFF8E2F4F),
-                      selected: _selectedRole == OrganizationRole.ceo,
-                      onTap: () => _selectRole(OrganizationRole.ceo),
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.executiveDirector,
-                      title: 'Executive Director',
-                      description: 'I manage daily operations.',
-                      icon: Icons.groups_rounded,
-                      accentColor: const Color(0xFFE77A2F),
-                      selected:
-                          _selectedRole == OrganizationRole.executiveDirector,
-                      onTap: () =>
-                          _selectRole(OrganizationRole.executiveDirector),
-                    ),
-                  ),
-                ],
+            final roles = <RoleOptionCard>[
+              RoleOptionCard(
+                role: OrganizationRole.founder,
+                title: 'Founder',
+                description: 'I started or established this organization.',
+                icon: Icons.spa_outlined,
+                accentColor: const Color(0xFF67B96B),
+                selected: _selectedRole == OrganizationRole.founder,
+                onTap: () => _selectRole(OrganizationRole.founder),
               ),
 
-              const SizedBox(height: 14),
-
-              // --------------------------------------------------------------
-              // ROW 2
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.administrator,
-                      title: 'Administrator',
-                      description:
-                          'I manage or oversee the organization’s operations.',
-                      icon: Icons.shield_outlined,
-                      accentColor: const Color(0xFF4D9C98),
-                      selected: _selectedRole == OrganizationRole.administrator,
-                      onTap: () => _selectRole(OrganizationRole.administrator),
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.boardMember,
-                      title: 'IT',
-                      description: 'I manage technology and systems.',
-                      icon: Icons.devices_outlined,
-                      accentColor: const Color(0xFF5B7FEA),
-                      selected: _selectedRole == OrganizationRole.boardMember,
-                      onTap: () => _selectRole(OrganizationRole.boardMember),
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.officeManager,
-                      title: 'Office Manager',
-                      description: 'I manage day-to-day office operations.',
-                      icon: Icons.business_center_outlined,
-                      accentColor: const Color(0xFF67AFA8),
-                      selected: _selectedRole == OrganizationRole.officeManager,
-                      onTap: () => _selectRole(OrganizationRole.officeManager),
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  Expanded(
-                    child: RoleOptionCard(
-                      role: OrganizationRole.other,
-                      title: 'Other',
-                      description: 'My role is not listed here.',
-                      icon: Icons.more_horiz_rounded,
-                      accentColor: const Color(0xFF7C5CE5),
-                      selected: _selectedRole == OrganizationRole.other,
-                      onTap: () => _selectRole(OrganizationRole.other),
-                    ),
-                  ),
-                ],
+              RoleOptionCard(
+                role: OrganizationRole.president,
+                title: 'President',
+                description: 'I serve as the president of the organization.',
+                icon: Icons.person_outline_rounded,
+                accentColor: const Color(0xFFD9B43B),
+                selected: _selectedRole == OrganizationRole.president,
+                onTap: () => _selectRole(OrganizationRole.president),
               ),
 
-              const SizedBox(height: 18),
+              RoleOptionCard(
+                role: OrganizationRole.ceo,
+                title: 'CEO',
+                description:
+                    'I am the chief executive officer of the organization.',
+                icon: Icons.business_center_outlined,
+                accentColor: const Color(0xFF8E2F4F),
+                selected: _selectedRole == OrganizationRole.ceo,
+                onTap: () => _selectRole(OrganizationRole.ceo),
+              ),
 
-              // --------------------------------------------------------------
-              // ADMINISTRATOR NOTICE
-              // --------------------------------------------------------------
-              const AdministratorNotice(),
-            ],
-          ),
+              RoleOptionCard(
+                role: OrganizationRole.executiveDirector,
+                title: 'Executive Director',
+                description: 'I manage daily operations.',
+                icon: Icons.groups_rounded,
+                accentColor: const Color(0xFFE77A2F),
+                selected: _selectedRole == OrganizationRole.executiveDirector,
+                onTap: () => _selectRole(OrganizationRole.executiveDirector),
+              ),
+
+              RoleOptionCard(
+                role: OrganizationRole.administrator,
+                title: 'Administrator',
+                description:
+                    'I manage or oversee the organization’s operations.',
+                icon: Icons.shield_outlined,
+                accentColor: const Color(0xFF4D9C98),
+                selected: _selectedRole == OrganizationRole.administrator,
+                onTap: () => _selectRole(OrganizationRole.administrator),
+              ),
+
+              RoleOptionCard(
+                role: OrganizationRole.boardMember,
+                title: 'IT',
+                description: 'I manage technology and systems.',
+                icon: Icons.devices_outlined,
+                accentColor: const Color(0xFF5B7FEA),
+                selected: _selectedRole == OrganizationRole.boardMember,
+                onTap: () => _selectRole(OrganizationRole.boardMember),
+              ),
+
+              RoleOptionCard(
+                role: OrganizationRole.officeManager,
+                title: 'Office Manager',
+                description: 'I manage day-to-day office operations.',
+                icon: Icons.business_center_outlined,
+                accentColor: const Color(0xFF67AFA8),
+                selected: _selectedRole == OrganizationRole.officeManager,
+                onTap: () => _selectRole(OrganizationRole.officeManager),
+              ),
+
+              RoleOptionCard(
+                role: OrganizationRole.other,
+                title: 'Other',
+                description: 'My role is not listed here.',
+                icon: Icons.more_horiz_rounded,
+                accentColor: const Color(0xFF7C5CE5),
+                selected: _selectedRole == OrganizationRole.other,
+                onTap: () => _selectRole(OrganizationRole.other),
+              ),
+            ];
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: roles.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                    mainAxisExtent: 126,
+                  ),
+                  itemBuilder: (context, index) {
+                    return roles[index];
+                  },
+                ),
+
+                const SizedBox(height: 18),
+
+                // ----------------------------------------------------------
+                // ADMINISTRATOR NOTICE
+                // ----------------------------------------------------------
+                const AdministratorNotice(),
+              ],
+            );
+          },
         ),
 
         const SizedBox(height: 20),

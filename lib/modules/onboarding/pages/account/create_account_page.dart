@@ -5,6 +5,7 @@ import 'package:charitask/modules/onboarding/controllers/onboarding_controller.d
 import 'widgets/account_form.dart';
 import 'widgets/account_form_panel.dart';
 import 'widgets/account_welcome_panel.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreateAccountPage extends StatefulWidget {
   final OnboardingController controller;
@@ -54,6 +55,79 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     super.dispose();
   }
 
+  Future<void> _createAccount() async {
+    if (!_accountFormKey.currentState!.validate()) {
+      return;
+    }
+
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text;
+
+    try {
+      final response = await Supabase.instance.client.auth.signUp(
+        email: email,
+        password: password,
+        emailRedirectTo: 'chari-task://auth-callback',
+        data: {
+          'first_name': firstName,
+          'last_name': lastName,
+          if (phone.isNotEmpty) 'phone': phone,
+        },
+      );
+
+      if (!mounted) return;
+
+      final user = response.user;
+
+      if (user == null) {
+        throw const AuthException(
+          'We could not create your account. Please try again.',
+        );
+      }
+
+      // Keep the existing ChariTask onboarding draft.
+      widget.controller.createPersonDraft(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone.isEmpty ? null : phone,
+      );
+
+      // With email confirmation enabled, Supabase normally
+      // returns a user but no session.
+      if (response.session == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Account created. Please check your email to verify your account.',
+            ),
+          ),
+        );
+      }
+
+      widget.onContinue();
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Something went wrong creating your account. Please try again.',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,25 +171,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                   phoneController: _phoneController,
                                   passwordController: _passwordController,
                                   accountFormKey: _accountFormKey,
-                                  onContinue: () {
-                                    if (!_accountFormKey.currentState!
-                                        .validate()) {
-                                      return;
-                                    }
-
-                                    widget.controller.createPersonDraft(
-                                      firstName: _firstNameController.text
-                                          .trim(),
-                                      lastName: _lastNameController.text.trim(),
-                                      email: _emailController.text.trim(),
-                                      phone:
-                                          _phoneController.text.trim().isEmpty
-                                          ? null
-                                          : _phoneController.text.trim(),
-                                    );
-
-                                    widget.onContinue();
-                                  },
+                                  onContinue: _createAccount,
                                 ),
                               ),
                             ],

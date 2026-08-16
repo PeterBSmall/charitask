@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:charitask/modules/foundation/domain/models/person.dart';
 import 'package:charitask/domain/identity/organization_role.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Controls the first-time ChariTask account onboarding journey.
 ///
@@ -63,6 +64,22 @@ class OnboardingController extends ChangeNotifier {
     );
 
     notifyListeners();
+  }
+
+  /// Resends the email verification message for the current person.
+  Future<void> resendVerificationEmail() async {
+    final email = person?.email?.trim();
+
+    if (email == null || email.isEmpty) {
+      throw const AuthException(
+        'We could not find an email address for this account.',
+      );
+    }
+
+    await Supabase.instance.client.auth.resend(
+      type: OtpType.signup,
+      email: email,
+    );
   }
 
   /// Marks the person's email as verified.
