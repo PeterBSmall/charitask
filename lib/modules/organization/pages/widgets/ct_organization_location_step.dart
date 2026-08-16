@@ -76,16 +76,27 @@ class _CTOrganizationLocationStepState
           },
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 18),
 
-        const CTJourneyInfoCard(
-          icon: Icons.info_outline_rounded,
-          title: 'Your organization can grow with you.',
-          message:
-              'Start with your primary location today. Additional offices, campuses, stores, or service areas can be added anytime.',
+        // ------------------------------------------------------------
+        // SCROLLABLE CONTENT
+        // ------------------------------------------------------------
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: const CTJourneyInfoCard(
+              icon: Icons.info_outline_rounded,
+              title: 'Your organization can grow with you.',
+              message:
+                  'Start with your primary location today. Additional offices, campuses, stores, or service areas can be added anytime.',
+            ),
+          ),
         ),
 
-        const Spacer(),
+        // ------------------------------------------------------------
+        // ACTIONS — ALWAYS VISIBLE
+        // ------------------------------------------------------------
+        const SizedBox(height: 16),
 
         Row(
           children: [

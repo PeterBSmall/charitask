@@ -361,34 +361,42 @@ class _CompletePersonalProfilePageState
   Widget _buildFooter() {
     return Row(
       children: [
-        TextButton(
-          onPressed: widget.onSkip,
-          child: const Text(
-            "I'll do this later",
-            style: TextStyle(
-              color: Color(0xFF6246E5),
-              fontWeight: FontWeight.w700,
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: widget.onSkip,
+              child: const Text(
+                "I'll do this later",
+                style: TextStyle(
+                  color: Color(0xFF6246E5),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
         ),
 
-        const Spacer(),
+        const SizedBox(width: 16),
 
-        SizedBox(
-          height: 52,
-          child: FilledButton(
-            onPressed: _nextStep,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+        Expanded(
+          child: SizedBox(
+            height: 52,
+            child: FilledButton(
+              onPressed: _nextStep,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    _currentStep == 3 ? 'Save & Complete Profile' : 'Continue',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  Flexible(
+                    child: Text(
+                      _currentStep == 3
+                          ? 'Save & Complete Profile'
+                          : 'Continue',
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
-
                   const SizedBox(width: 10),
-
                   const Icon(Icons.arrow_forward_rounded),
                 ],
               ),

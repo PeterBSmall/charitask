@@ -86,199 +86,203 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
         const SizedBox(height: CTJourneySpacing.progressToHeader),
 
         Expanded(
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F5FF),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFE5D9FF)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // --------------------------------------------------------------
-                // HEADER
-                // --------------------------------------------------------------
-                Row(
-                  children: [
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 350),
-                      child: isComplete
-                          ? Container(
-                              key: const ValueKey('complete'),
-                              width: 48,
-                              height: 48,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFECE7FF),
-                                shape: BoxShape.circle,
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F5FF),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: const Color(0xFFE5D9FF)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ----------------------------------------------------------
+                  // HEADER
+                  // ----------------------------------------------------------
+                  Row(
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 350),
+                        child: isComplete
+                            ? Container(
+                                key: const ValueKey('complete'),
+                                width: 48,
+                                height: 48,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFECE7FF),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check_rounded,
+                                  color: Color(0xFF6246E5),
+                                  size: 28,
+                                ),
+                              )
+                            : const SizedBox(
+                                key: ValueKey('loading'),
+                                width: 48,
+                                height: 48,
+                                child: Center(child: CTLoadingIndicator()),
                               ),
-                              child: const Icon(
-                                Icons.check_rounded,
-                                color: Color(0xFF6246E5),
-                                size: 28,
+                      ),
+
+                      const SizedBox(width: 16),
+
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Building your organization workspace',
+                              style: TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF1F2937),
                               ),
-                            )
-                          : const SizedBox(
-                              key: ValueKey('loading'),
-                              width: 48,
-                              height: 48,
-                              child: Center(child: CTLoadingIndicator()),
                             ),
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Building your organization workspace',
-                            style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1F2937),
+                            SizedBox(height: 4),
+                            Text(
+                              'Setting everything up so you can get started.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF667085),
+                              ),
                             ),
+                          ],
+                        ),
+                      ),
+
+                      Text(
+                        '${(progress * 100).round()}%',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF6246E5),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ----------------------------------------------------------
+                  // PROGRESS BAR
+                  // ----------------------------------------------------------
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0, end: progress),
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOut,
+                      builder: (context, value, child) {
+                        return LinearProgressIndicator(
+                          value: value,
+                          minHeight: 8,
+                          backgroundColor: const Color(0xFFE5DFFF),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFF6246E5),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Setting everything up so you can get started.',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF667085),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ----------------------------------------------------------
+                  // CHECKLIST
+                  // ----------------------------------------------------------
+                  Column(
+                    children: List.generate(
+                      _checklist.length,
+                      (index) => _buildChecklistItem(
+                        label: _checklist[index],
+                        index: index,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ----------------------------------------------------------
+                  // READY MESSAGE
+                  // ----------------------------------------------------------
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 400),
+                    opacity: isComplete ? 1 : 0,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFE5D9FF)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.auto_awesome_rounded,
+                            color: Color(0xFF6246E5),
+                            size: 20,
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Your workspace is ready.',
+                              style: TextStyle(
+                                color: Color(0xFF344054),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-
-                    Text(
-                      '${(progress * 100).round()}%',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF6246E5),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 28),
-
-                // --------------------------------------------------------------
-                // PROGRESS BAR
-                // --------------------------------------------------------------
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: 0, end: progress),
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeOut,
-                    builder: (context, value, child) {
-                      return LinearProgressIndicator(
-                        value: value,
-                        minHeight: 8,
-                        backgroundColor: const Color(0xFFE5DFFF),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF6246E5),
-                        ),
-                      );
-                    },
                   ),
-                ),
 
-                const SizedBox(height: 28),
+                  const SizedBox(height: 16),
 
-                // --------------------------------------------------------------
-                // CHECKLIST
-                // --------------------------------------------------------------
-                Column(
-                  children: List.generate(_checklist.length, (index) {
-                    return _buildChecklistItem(
-                      label: _checklist[index],
-                      index: index,
-                    );
-                  }),
-                ),
-
-                const SizedBox(height: 20),
-
-                // --------------------------------------------------------------
-                // READY MESSAGE
-                // --------------------------------------------------------------
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 400),
-                  opacity: isComplete ? 1 : 0,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFE5D9FF)),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(
-                          Icons.auto_awesome_rounded,
-                          color: Color(0xFF6246E5),
-                          size: 20,
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Your workspace is ready.',
-                            style: TextStyle(
-                              color: Color(0xFF344054),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                  // ----------------------------------------------------------
+                  // CONTINUE BUTTON
+                  // ----------------------------------------------------------
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 400),
+                    opacity: isComplete ? 1 : 0,
+                    child: IgnorePointer(
+                      ignoring: !isComplete,
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: FilledButton(
+                          onPressed: () {
+                            setState(() {
+                              _showCompletionScreen = true;
+                            });
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Continue',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Icon(Icons.arrow_forward_rounded, size: 20),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // --------------------------------------------------------------
-                // CONTINUE BUTTON
-                // --------------------------------------------------------------
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 400),
-                  opacity: isComplete ? 1 : 0,
-                  child: IgnorePointer(
-                    ignoring: !isComplete,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton(
-                        onPressed: () {
-                          setState(() {
-                            _showCompletionScreen = true;
-                          });
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Continue',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Icon(Icons.arrow_forward_rounded, size: 20),
-                          ],
-                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -384,26 +388,30 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
   // ===========================================================================
 
   Widget _buildCompletionScreen() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const CTJourneyProgress(currentStep: 7, totalSteps: 7),
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CTJourneyProgress(currentStep: 7, totalSteps: 7),
 
-        const SizedBox(height: CTJourneySpacing.progressToHeader),
+          const SizedBox(height: 28),
 
-        const Text(
-          'Your mission has a home.',
-          style: TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1F2937),
+          const Text(
+            'Your mission has a home.',
+            style: TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1F2937),
+            ),
           ),
-        ),
 
-        const SizedBox(height: 28),
+          const SizedBox(height: 28),
 
-        Expanded(
-          child: Container(
+          // --------------------------------------------------------------
+          // ORGANIZATION WORKSPACE READY
+          // --------------------------------------------------------------
+          Container(
             width: double.infinity,
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
@@ -418,8 +426,8 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 42,
-                      height: 42,
+                      width: 48,
+                      height: 48,
                       decoration: const BoxDecoration(
                         color: Color(0xFFECE7FF),
                         shape: BoxShape.circle,
@@ -427,11 +435,11 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
                       child: const Icon(
                         Icons.check_rounded,
                         color: Color(0xFF6C4CF1),
-                        size: 27,
+                        size: 28,
                       ),
                     ),
 
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 16),
 
                     const Expanded(
                       child: Column(
@@ -440,16 +448,16 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
                           Text(
                             'Organization Workspace Ready',
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 21,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF1F2937),
                             ),
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: 6),
                           Text(
                             'Your organization is set up and ready to use.',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 15,
                               color: Color(0xFF667085),
                               height: 1.4,
                             ),
@@ -460,83 +468,68 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
                   ],
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'What’s next?',
-                        style: TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1F2937),
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      const Text(
-                        'Choose something to do now, or go straight to your workspace.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF667085),
-                          height: 1.4,
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: _NextActionCard(
-                                icon: Icons.person_outline_rounded,
-                                title: 'Complete Your Personal Profile',
-                                description:
-                                    'Add the personal details that represent you in your organization.',
-                                onTap: widget.onCompleteProfile,
-                              ),
-                            ),
-
-                            const SizedBox(width: 16),
-
-                            Expanded(
-                              child: _NextActionCard(
-                                icon: Icons.people_outline_rounded,
-                                title: 'Invite Your Team Members',
-                                description:
-                                    'Start building your organization’s team.',
-                                onTap: () {
-                                  // Team invitation
-                                  // flow will be
-                                  // connected here.
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      const _MoreActionsButton(),
-                    ],
+                const Text(
+                  'What’s next?',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1F2937),
                   ),
                 ),
+
+                const SizedBox(height: 8),
+
+                const Text(
+                  'Choose something to do now, or go straight to your workspace.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF667085),
+                    height: 1.4,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _NextActionCard(
+                        icon: Icons.person_outline_rounded,
+                        title: 'Complete Your Personal Profile',
+                        description:
+                            'Add the personal details that represent you in your organization.',
+                        onTap: widget.onCompleteProfile,
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    Expanded(
+                      child: _NextActionCard(
+                        icon: Icons.people_outline_rounded,
+                        title: 'Invite Your Team Members',
+                        description: 'Start building your organization’s team.',
+                        onTap: () {
+                          // Connect team invitation flow later.
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                const _MoreActionsButton(),
               ],
             ),
           ),
-        ),
 
-        const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
-        CTJourneyReveal(
-          visible: true,
-          child: SizedBox(
+          SizedBox(
             width: double.infinity,
             child: FilledButton(
               onPressed: widget.onContinue,
@@ -549,8 +542,10 @@ class _CTWorkspaceCreationStepState extends State<CTWorkspaceCreationStep> {
               ),
             ),
           ),
-        ),
-      ],
+
+          const SizedBox(height: 12),
+        ],
+      ),
     );
   }
 }
@@ -613,14 +608,12 @@ class _NextActionCard extends StatelessWidget {
 
               const SizedBox(height: 6),
 
-              Expanded(
-                child: Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    color: Color(0xFF667085),
-                    height: 1.4,
-                  ),
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  color: Color(0xFF667085),
+                  height: 1.4,
                 ),
               ),
             ],

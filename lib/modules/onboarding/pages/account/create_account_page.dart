@@ -151,33 +151,65 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         double.infinity,
                       ),
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: Material(
-                        elevation: 8,
-                        shadowColor: Colors.black.withValues(alpha: 0.12),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(flex: 42, child: AccountWelcomePanel()),
+                    child: LayoutBuilder(
+                      builder: (context, panelConstraints) {
+                        final isCompact = panelConstraints.maxWidth < 900;
 
-                              Expanded(
-                                flex: 58,
-                                child: AccountFormPanel(
-                                  firstNameController: _firstNameController,
-                                  lastNameController: _lastNameController,
-                                  emailController: _emailController,
-                                  phoneController: _phoneController,
-                                  passwordController: _passwordController,
-                                  accountFormKey: _accountFormKey,
-                                  onContinue: _createAccount,
-                                ),
-                              ),
-                            ],
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Material(
+                            elevation: 8,
+                            shadowColor: Colors.black.withValues(alpha: 0.12),
+                            child: isCompact
+                                ? Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      AccountWelcomePanel(),
+
+                                      AccountFormPanel(
+                                        firstNameController:
+                                            _firstNameController,
+                                        lastNameController: _lastNameController,
+                                        emailController: _emailController,
+                                        phoneController: _phoneController,
+                                        passwordController: _passwordController,
+                                        accountFormKey: _accountFormKey,
+                                        onContinue: _createAccount,
+                                      ),
+                                    ],
+                                  )
+                                : IntrinsicHeight(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(
+                                          flex: 42,
+                                          child: AccountWelcomePanel(),
+                                        ),
+
+                                        Expanded(
+                                          flex: 58,
+                                          child: AccountFormPanel(
+                                            firstNameController:
+                                                _firstNameController,
+                                            lastNameController:
+                                                _lastNameController,
+                                            emailController: _emailController,
+                                            phoneController: _phoneController,
+                                            passwordController:
+                                                _passwordController,
+                                            accountFormKey: _accountFormKey,
+                                            onContinue: _createAccount,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ),
