@@ -88,6 +88,9 @@ class OnboardingScreen extends StatelessWidget {
         (controller, next, back) => CTWorkspaceCreationStep(
           profile: controller.missionProfile,
           onContinue: next,
+          onCompleteProfile: () {
+            // Profile completion will be connected here.
+          },
         ),
 
         // Final Step - Workspace Ready

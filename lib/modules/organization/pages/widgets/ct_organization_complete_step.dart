@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_creation_step.dart';
+import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 class CTOrganizationCompleteStep extends StatelessWidget {
   final VoidCallback onEnterWorkspace;
@@ -20,6 +20,9 @@ class CTOrganizationCompleteStep extends StatelessWidget {
     return CTWorkspaceCreationStep(
       profile: controller.missionProfile,
       onContinue: onEnterWorkspace,
+      onCompleteProfile: () {
+        // Profile completion will be connected here.
+      },
     );
   }
 }
