@@ -1,5 +1,4 @@
 # Miscellaneous
-
 *.class
 *.log
 *.pyc
@@ -14,18 +13,15 @@
 migrate_working_dir/
 
 # IntelliJ related
-
 *.iml
 *.ipr
 *.iws
 .idea/
 
 # VS Code
-
 .vscode/
 
 # Flutter/Dart/Pub related
-
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -36,15 +32,19 @@ migrate_working_dir/
 /coverage/
 
 # Symbolication related
-
 app.*.symbols
 
 # Obfuscation related
-
 app.*.map.json
 
 # Android Studio will place build artifacts here
-
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Node dependencies
+node_modules/
+
+# Supabase local development files
+supabase/.temp/
+supabase/.branches/
