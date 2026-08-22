@@ -55,11 +55,11 @@ Future<void> main(List<String> args) async {
   }
 
   // ---------------------------------------------------------------
-  // SUPABASE
+  // SUPABASE - LOCAL DEVELOPMENT
   // ---------------------------------------------------------------
   await Supabase.initialize(
-    url: 'https://yymsahuoevgbkobhzigi.supabase.co',
-    publishableKey: 'sb_publishable_j5vzG9KtG0NNcaG1y4_aDA_5GL9bLYZ',
+    url: 'http://127.0.0.1:54321',
+    publishableKey: 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH',
   );
 
   final supabase = Supabase.instance.client;
@@ -93,7 +93,6 @@ Future<void> main(List<String> args) async {
       final response = await supabase.auth.getSessionFromUrl(startupUri);
 
       debugPrint('>>> AUTH CALLBACK PROCESSED');
-
       debugPrint('>>> CALLBACK USER: ${response.session?.user.email}');
     } catch (error, stackTrace) {
       debugPrint('>>> AUTH CALLBACK ERROR: $error');
