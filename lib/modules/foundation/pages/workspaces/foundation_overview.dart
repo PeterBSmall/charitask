@@ -33,19 +33,21 @@ CTWorkspaceOverviewConfig foundationOverview(
     // Greeting
     greeting: _foundationGreeting(firstName.isEmpty ? 'there' : firstName),
 
-    // Mission Hero
-    mission: 'Your foundation is ready. Now let’s build what comes next.',
+    // Hero content
     welcomeMessage:
         'Build the structure that supports every mission, every person, and every opportunity to serve.',
+
     organizationName: organizationName.isEmpty
         ? 'Your Organization'
         : organizationName,
 
+    mission: 'Your foundation is ready. Now let’s build what comes next.',
+
     // Progress
-    progress: .75,
+    progress: 0.75,
     nextStep: 'Finalize Your Organization Setup',
 
-    // Actions
+    // Primary action
     primaryButtonLabel: 'Continue Setup',
     onPrimaryPressed: () {
       Navigator.of(context).push(
@@ -56,6 +58,7 @@ CTWorkspaceOverviewConfig foundationOverview(
       );
     },
 
+    // Secondary action
     secondaryButtonLabel: 'View Organization',
     onSecondaryPressed: () {
       Navigator.of(context).push(

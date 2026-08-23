@@ -4,49 +4,32 @@ import 'package:charitask/shared/models/ct_metric.dart';
 
 const foundationMetrics = [
   CTMetric(
-    icon: Icons.people,
-    value: '148',
-    label: 'People',
-    trend: '+12 this month',
-    trendColor: Colors.green,
+    icon: Icons.account_balance_outlined,
+    value: 'Profile',
+    label: 'Org',
   ),
 
-  CTMetric(
-    icon: Icons.group_work,
-    value: '12',
-    label: 'Groups',
-    trend: '2 new',
-    trendColor: Colors.green,
-  ),
+  CTMetric(icon: Icons.people_outline, value: '148 Members', label: 'People'),
+
+  CTMetric(icon: Icons.groups_outlined, value: '12 Teams', label: 'Groups'),
 
   CTMetric(
-    icon: Icons.location_on,
-    value: '4',
+    icon: Icons.location_on_outlined,
+    value: '4 Active',
     label: 'Locations',
-    trend: 'No change',
   ),
 
   CTMetric(
-    icon: Icons.dashboard_customize,
-    value: '7',
+    icon: Icons.dashboard_customize_outlined,
+    value: '7 Modules',
     label: 'Suites',
-    trend: 'All Active',
-    trendColor: Colors.green,
   ),
 
-  CTMetric(
-    icon: Icons.task_alt,
-    value: '18',
-    label: 'Tasks',
-    trend: '4 Recommended',
-    trendColor: Colors.orange,
-  ),
+  CTMetric(icon: Icons.task_alt_outlined, value: '18 Pending', label: 'Tasks'),
 
   CTMetric(
-    icon: Icons.notifications,
-    value: '3',
+    icon: Icons.notifications_none_outlined,
+    value: '3 Critical',
     label: 'Alerts',
-    trend: 'Needs Review',
-    trendColor: Colors.red,
   ),
 ];

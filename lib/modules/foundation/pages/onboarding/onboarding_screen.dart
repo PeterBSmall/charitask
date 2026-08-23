@@ -97,7 +97,10 @@ class OnboardingScreen extends StatelessWidget {
         (controller, next, back) => CTWorkspaceReadyStep(
           onContinue: () {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const FoundationWorkspace()),
+              MaterialPageRoute(
+                builder: (_) =>
+                    FoundationWorkspace(journeyController: controller),
+              ),
             );
           },
           onBack: back,

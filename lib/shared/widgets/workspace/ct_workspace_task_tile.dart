@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../design_system/foundations/app_colors.dart';
 import '../../design_system/foundations/app_spacing.dart';
 import '../../design_system/foundations/app_typography.dart';
 
@@ -25,13 +24,22 @@ class CTWorkspaceTaskTile extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
+          ),
+        ),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: color.withOpacity(.12),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
               child: Icon(icon, color: color, size: 20),
             ),
 
@@ -41,16 +49,24 @@ class CTWorkspaceTaskTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTypography.body),
+                  Text(
+                    title,
+                    style: AppTypography.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
 
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
 
                   Text(category, style: AppTypography.caption),
                 ],
               ),
             ),
 
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.black.withValues(alpha: 0.35),
+            ),
           ],
         ),
       ),

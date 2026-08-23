@@ -4,10 +4,12 @@ import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspa
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 class FoundationWorkspace extends StatelessWidget {
-  const FoundationWorkspace({super.key});
+  final CTJourneyController journeyController;
+
+  const FoundationWorkspace({super.key, required this.journeyController});
 
   @override
   Widget build(BuildContext context) {
-    return FoundationWorkspacePage(journeyController: CTJourneyController());
+    return FoundationWorkspacePage(journeyController: journeyController);
   }
 }

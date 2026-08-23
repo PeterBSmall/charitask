@@ -3,32 +3,57 @@ import 'package:flutter/material.dart';
 import 'package:charitask/shared/models/ct_metric.dart';
 import 'package:charitask/shared/widgets/workspace/ct_metric_card.dart';
 
-class CTWorkspaceMetrics extends StatelessWidget {
+class CTWorkspaceMetrics extends StatefulWidget {
   final List<CTMetric> metrics;
 
   const CTWorkspaceMetrics({super.key, required this.metrics});
 
   @override
+  State<CTWorkspaceMetrics> createState() => _CTWorkspaceMetricsState();
+}
+
+class _CTWorkspaceMetricsState extends State<CTWorkspaceMetrics> {
+  int _selectedIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
+    const spacing = 12.0;
+    const minCardWidth = 150.0;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 16.0;
+        final totalSpacing = spacing * (widget.metrics.length - 1);
 
-        final cardWidth =
-            (constraints.maxWidth - (spacing * (metrics.length - 1))) /
-            metrics.length;
+        final availableWidth = constraints.maxWidth - totalSpacing;
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (int i = 0; i < metrics.length; i++) ...[
-              SizedBox(
-                width: cardWidth,
-                child: CTMetricCard(metric: metrics[i]),
-              ),
-              if (i != metrics.length - 1) const SizedBox(width: spacing),
+        final calculatedWidth = availableWidth / widget.metrics.length;
+
+        final cardWidth = calculatedWidth < minCardWidth
+            ? minCardWidth
+            : calculatedWidth;
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (int i = 0; i < widget.metrics.length; i++) ...[
+                SizedBox(
+                  width: cardWidth,
+                  child: CTMetricCard(
+                    metric: widget.metrics[i],
+                    isSelected: i == _selectedIndex,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = i;
+                      });
+                    },
+                  ),
+                ),
+                if (i != widget.metrics.length - 1)
+                  const SizedBox(width: spacing),
+              ],
             ],
-          ],
+          ),
         );
       },
     );

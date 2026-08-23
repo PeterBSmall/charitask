@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/foundation/pages/organization/organization_workspace.dart';
+import 'package:charitask/modules/people/pages/people_page.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 class AppRouter {
@@ -16,5 +17,11 @@ class AppRouter {
             OrganizationWorkspace(journeyController: journeyController),
       ),
     );
+  }
+
+  static Future<void> goToPeople(BuildContext context) {
+    return Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const PeoplePage()));
   }
 }

@@ -8,8 +8,10 @@ import 'package:charitask/modules/onboarding/pages/role/your_role_page.dart';
 import 'package:charitask/modules/organization/pages/organization_setup_screen.dart';
 
 import 'package:charitask/modules/foundation/pages/identity/complete_personal_profile_page.dart';
-import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspace_page.dart';
+import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspace.dart';
+
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OnboardingEntryPage extends StatefulWidget {
@@ -105,7 +107,7 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) =>
-            FoundationWorkspacePage(journeyController: journeyController),
+            FoundationWorkspace(journeyController: journeyController),
       ),
     );
   }

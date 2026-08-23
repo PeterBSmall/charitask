@@ -12,9 +12,9 @@ class CTWorkspaceOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -30,225 +30,172 @@ class CTWorkspaceOverview extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background Watermark
+          // Background watermark
           Positioned(
-            right: -40,
-            top: -30,
+            right: -20,
+            bottom: -35,
             child: Icon(
               config.icon,
-              size: 240,
+              size: 180,
               color: Colors.white.withOpacity(.06),
             ),
           ),
 
-          // Soft Glow
-          Positioned(
-            left: -80,
-            bottom: -80,
-            child: Container(
-              width: 240,
-              height: 240,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(.08),
-              ),
-            ),
-          ),
-
-          // Main Content
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // LEFT
               Expanded(
+                flex: 6,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       config.greeting,
                       style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.white70,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: Colors.white70,
                       ),
                     ),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 10),
 
                     Text(
                       config.welcomeMessage,
                       style: const TextStyle(
-                        fontSize: 38,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 26,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
-                        height: 1.15,
                       ),
                     ),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 12),
 
                     Text(
                       config.organizationName,
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 17,
                         color: Colors.white70,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
 
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 14),
 
                     Text(
                       config.mission,
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 15,
+                        height: 1.4,
                         color: Colors.white70,
-                        height: 1.6,
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // ─────────────────────────────────────────
-                    // NEXT STEP PANEL
-                    // ─────────────────────────────────────────
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(28, 22, 28, 24),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(.09),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(.14),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Next step + percentage
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  config.nextStep,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-
-                              Text(
-                                '${(config.progress * 100).round()}%',
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 14),
-
-                          // Progress bar
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: LinearProgressIndicator(
-                              value: config.progress,
-                              minHeight: 10,
-                              backgroundColor: Colors.white24,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Actions
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  CTButton(
-                                    label: config.primaryButtonLabel,
-                                    onPressed: config.onPrimaryPressed,
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  CTButton(
-                                    label: config.secondaryButtonLabel,
-                                    onPressed: config.onSecondaryPressed,
-                                    isPrimary: false,
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              Center(
-                                child: TextButton(
-                                  onPressed: () {
-                                    // Save progress and finish later.
-                                    // Persistence will be connected later.
-                                  },
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.white70,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Save and finish later',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(width: 56),
+              const SizedBox(width: 32),
 
-              // Workspace identity
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 46,
-                    backgroundColor: Colors.white24,
-                    child: Icon(config.icon, color: Colors.white, size: 46),
+              // RIGHT PROGRESS CARD
+              Expanded(
+                flex: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(.09),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white.withOpacity(.14)),
                   ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white70,
+                            size: 18,
+                          ),
 
-                  const SizedBox(height: 20),
+                          const SizedBox(width: 8),
 
-                  Text(
-                    config.suiteName.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          const Text(
+                            'SETUP PROGRESS',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.3,
+                            ),
+                          ),
+
+                          const Spacer(),
+
+                          Text(
+                            '${(config.progress * 100).round()}%',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Text(
+                        config.nextStep,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: LinearProgressIndicator(
+                          value: config.progress,
+                          minHeight: 8,
+                          backgroundColor: Colors.white24,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CTButton(
+                              label: config.primaryButtonLabel,
+                              onPressed: config.onPrimaryPressed,
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: CTButton(
+                              label: config.secondaryButtonLabel,
+                              onPressed: config.onSecondaryPressed,
+                              isPrimary: false,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-
-                  const SizedBox(height: 12),
-
-                  const Text(
-                    'Workspace',
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
-                  ),
-                ],
+                ),
               ),
             ],
           ),

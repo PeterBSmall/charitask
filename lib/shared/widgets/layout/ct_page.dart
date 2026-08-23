@@ -31,7 +31,12 @@ class CTPage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.lg,
+                AppSpacing.xl,
+                AppSpacing.xl,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -41,7 +46,8 @@ class CTPage extends StatelessWidget {
                       subtitle: subtitle ?? '',
                       trailing: trailing,
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+
+                    const SizedBox(height: AppSpacing.lg),
                   ],
 
                   Expanded(
