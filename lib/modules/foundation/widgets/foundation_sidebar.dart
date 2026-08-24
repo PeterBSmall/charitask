@@ -17,7 +17,9 @@ class FoundationSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CTSidebar(
       header: _buildHeader(),
-      child: Column(
+
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           const SizedBox(height: 12),
 
@@ -84,6 +86,7 @@ class FoundationSidebar extends StatelessWidget {
           ),
         ],
       ),
+
       footer: Column(
         children: [
           const Divider(height: 1),

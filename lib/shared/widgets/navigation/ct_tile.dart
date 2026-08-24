@@ -21,7 +21,7 @@ class CTTile extends StatelessWidget {
     const accentColor = Color(0xFF5B4BC4);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(14),
@@ -30,7 +30,7 @@ class CTTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            height: 56,
+            height: 52,
             padding: const EdgeInsets.symmetric(horizontal: 18),
             decoration: BoxDecoration(
               color: selected ? accentColor : Colors.transparent,

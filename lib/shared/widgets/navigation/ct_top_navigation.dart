@@ -27,13 +27,16 @@ class CTTopNavigation extends StatelessWidget {
         children: [
           // LEFT NAVIGATION
           Expanded(
-            child: Row(
-              children: List.generate(
-                _items.length,
-                (index) => _buildNavItem(
-                  label: _items[index],
-                  selected: selectedIndex == index,
-                  onTap: () => onSelected(index),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(
+                  _items.length,
+                  (index) => _buildNavItem(
+                    label: _items[index],
+                    selected: selectedIndex == index,
+                    onTap: () => onSelected(index),
+                  ),
                 ),
               ),
             ),
@@ -107,7 +110,7 @@ class CTTopNavigation extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 88,
-        padding: const EdgeInsets.symmetric(horizontal: 22),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
         alignment: Alignment.center,
         child: Stack(
           alignment: Alignment.center,

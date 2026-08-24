@@ -11,6 +11,7 @@ import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_active_tasks.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_recent_activity.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_pinned_notes.dart';
+import 'package:charitask/modules/people/pages/people_page.dart';
 
 class FoundationWorkspacePage extends StatelessWidget {
   final CTJourneyController journeyController;
@@ -20,15 +21,14 @@ class FoundationWorkspacePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FoundationWorkspaceShell(
-      dashboard: FoundationDashboard(journeyController: journeyController),
+      dashboardBuilder: (onNavigate) => FoundationDashboard(
+        journeyController: journeyController,
+        onNavigate: onNavigate,
+      ),
 
       organization: OrganizationWorkspace(journeyController: journeyController),
 
-      people: const _FoundationPlaceholderPage(
-        title: 'People',
-        subtitle: 'Manage the people connected to your organization.',
-        icon: Icons.people_outline,
-      ),
+      people: const PeoplePage(),
 
       groups: const _FoundationPlaceholderPage(
         title: 'Groups',
@@ -59,8 +59,13 @@ class FoundationWorkspacePage extends StatelessWidget {
 
 class FoundationDashboard extends StatefulWidget {
   final CTJourneyController journeyController;
+  final ValueChanged<int> onNavigate;
 
-  const FoundationDashboard({super.key, required this.journeyController});
+  const FoundationDashboard({
+    super.key,
+    required this.journeyController,
+    required this.onNavigate,
+  });
 
   @override
   State<FoundationDashboard> createState() => _FoundationDashboardState();
@@ -116,7 +121,14 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
 
             const SizedBox(height: 16),
 
-            CTWorkspaceMetrics(metrics: foundationMetrics),
+            CTWorkspaceMetrics(
+              metrics: foundationMetrics,
+              onMetricSelected: (index) {
+                if (index == 1) {
+                  widget.onNavigate(2);
+                }
+              },
+            ),
 
             const SizedBox(height: 24),
 

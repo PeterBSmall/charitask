@@ -4,7 +4,7 @@ import 'foundation_sidebar.dart';
 import 'package:charitask/shared/widgets/navigation/ct_top_navigation.dart';
 
 class FoundationWorkspaceShell extends StatefulWidget {
-  final Widget dashboard;
+  final Widget Function(ValueChanged<int> onNavigate) dashboardBuilder;
   final Widget organization;
   final Widget people;
   final Widget groups;
@@ -14,7 +14,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
 
   const FoundationWorkspaceShell({
     super.key,
-    required this.dashboard,
+    required this.dashboardBuilder,
     required this.organization,
     required this.people,
     required this.groups,
@@ -31,13 +31,18 @@ class FoundationWorkspaceShell extends StatefulWidget {
 class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
   int _selectedIndex = 0;
 
-  // Top navigation selection
   int _topNavIndex = 0;
+
+  void _navigateTo(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   Widget get _currentPage {
     switch (_selectedIndex) {
       case 0:
-        return widget.dashboard;
+        return widget.dashboardBuilder(_navigateTo);
 
       case 1:
         return widget.organization;
@@ -58,7 +63,7 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
         return widget.notes;
 
       default:
-        return widget.dashboard;
+        return widget.dashboardBuilder(_navigateTo);
     }
   }
 
@@ -69,11 +74,7 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
         children: [
           FoundationSidebar(
             selectedIndex: _selectedIndex,
-            onSelected: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+            onSelected: _navigateTo,
           ),
 
           Expanded(
