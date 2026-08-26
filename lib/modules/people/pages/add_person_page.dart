@@ -9,7 +9,9 @@ import 'package:charitask/modules/people/widgets/add_person/basic_information_st
 import 'package:charitask/modules/people/widgets/add_person/connection_step.dart';
 import 'package:charitask/modules/people/widgets/add_person/membership_step.dart';
 import 'package:charitask/modules/people/widgets/add_person/review_create_step.dart';
-import '../widgets/add_person/add_person_navigation.dart';
+import 'package:charitask/modules/people/widgets/add_person/add_person_navigation.dart';
+
+import 'package:charitask/shared/widgets/workspace_canvas.dart';
 
 class AddPersonPage extends StatefulWidget {
   const AddPersonPage({super.key});
@@ -22,7 +24,6 @@ class _AddPersonPageState extends State<AddPersonPage> {
   int _currentStep = 0;
 
   bool _hasSystemAccess = false;
-
   String? _connectionType;
 
   final _firstNameController = TextEditingController();
@@ -34,12 +35,13 @@ class _AddPersonPageState extends State<AddPersonPage> {
 
   String _membershipStatus = 'Active';
   String _roleCategory = 'Staff';
+  String _donorType = 'Individual Donor';
   String? _preferredContactMethod;
 
   static const List<String> _steps = [
     'Connection',
     'Basic Information',
-    'Details',
+    'Primary Relationship',
     'Assignments',
     'Access',
     'Review & Create',
@@ -114,9 +116,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
   }
 
   void _nextStep() {
-    if (!_validateCurrentStep()) {
-      return;
-    }
+    if (!_validateCurrentStep()) return;
 
     if (_currentStep < _steps.length - 1) {
       setState(() {
@@ -136,29 +136,48 @@ class _AddPersonPageState extends State<AddPersonPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FC),
+      backgroundColor: const Color(0xFF3D2466),
       body: SafeArea(
-        child: Column(
-          children: [
-            AddPersonHeader(
-              onCancel: () {
-                Navigator.of(context).maybePop();
-              },
-              onSaveDraft: () {
-                // Save draft functionality will be added later.
-              },
+        child: WorkspaceCanvas(
+          padding: const EdgeInsets.all(24),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFC),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x22000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
+              ],
             ),
+            child: Column(
+              children: [
+                AddPersonHeader(
+                  onCancel: () {
+                    Navigator.of(context).maybePop();
+                  },
+                  onSaveDraft: () {
+                    // Save draft functionality will be added later.
+                  },
+                ),
 
-            const Divider(height: 1),
+                const Divider(height: 1),
 
-            AddPersonStepper(currentStep: _currentStep, steps: _steps),
+                AddPersonStepper(currentStep: _currentStep, steps: _steps),
 
-            Expanded(child: _buildStepContent()),
+                Expanded(child: _buildStepContent()),
 
-            const Divider(height: 1),
+                const Divider(height: 1),
 
-            _buildNavigation(),
-          ],
+                _buildNavigation(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -183,6 +202,16 @@ class _AddPersonPageState extends State<AddPersonPage> {
           preferredNameController: _preferredNameController,
           emailController: _emailController,
           phoneController: _phoneController,
+
+          connectionType: _connectionType ?? 'internal',
+          membershipStatus: _membershipStatus,
+          joinDateController: _joinDateController,
+          onMembershipStatusChanged: (value) {
+            setState(() {
+              _membershipStatus = value;
+            });
+          },
+
           preferredContactMethod: _preferredContactMethod,
           onPreferredContactMethodChanged: (value) {
             setState(() {
@@ -190,10 +219,13 @@ class _AddPersonPageState extends State<AddPersonPage> {
             });
           },
         );
+
       case 2:
         return MembershipStep(
+          connectionType: _connectionType ?? 'internal',
           membershipStatus: _membershipStatus,
           roleCategory: _roleCategory,
+          donorType: _donorType,
           joinDateController: _joinDateController,
           onMembershipStatusChanged: (value) {
             setState(() {
@@ -203,6 +235,11 @@ class _AddPersonPageState extends State<AddPersonPage> {
           onRoleCategoryChanged: (value) {
             setState(() {
               _roleCategory = value;
+            });
+          },
+          onDonorTypeChanged: (value) {
+            setState(() {
+              _donorType = value;
             });
           },
         );

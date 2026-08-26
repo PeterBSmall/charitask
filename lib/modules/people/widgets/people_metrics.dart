@@ -5,56 +5,83 @@ class PeopleMetrics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(
-          child: _PeopleMetricCard(
-            icon: Icons.people_outline,
-            value: '128',
-            label: 'People',
-            subtitle: 'Total',
-            iconColor: Color(0xFF5B4BC4),
-          ),
-        ),
+    const cards = [
+      _PeopleMetricData(
+        icon: Icons.people_outline,
+        value: '128',
+        label: 'People',
+        subtitle: 'Total',
+        iconColor: Color(0xFF5B4BC4),
+      ),
+      _PeopleMetricData(
+        icon: Icons.check_circle_outline,
+        value: '24',
+        label: 'Active Today',
+        subtitle: 'People clocked in',
+        iconColor: Color(0xFF6B8E62),
+      ),
+      _PeopleMetricData(
+        icon: Icons.mail_outline,
+        value: '12',
+        label: 'Invited',
+        subtitle: 'Pending invitation',
+        iconColor: Color(0xFF5B4BC4),
+      ),
+      _PeopleMetricData(
+        icon: Icons.person_off_outlined,
+        value: '8',
+        label: 'Inactive',
+        subtitle: 'Not currently active',
+        iconColor: Color(0xFF6B7280),
+      ),
+    ];
 
-        SizedBox(width: 16),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 900;
+        final columns = isNarrow ? 2 : 4;
+        const spacing = 16.0;
 
-        Expanded(
-          child: _PeopleMetricCard(
-            icon: Icons.check_circle_outline,
-            value: '24',
-            label: 'Active Today',
-            subtitle: 'People clocked in',
-            iconColor: Color(0xFF6B8E62),
-          ),
-        ),
+        final cardWidth =
+            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
-        SizedBox(width: 16),
-
-        Expanded(
-          child: _PeopleMetricCard(
-            icon: Icons.mail_outline,
-            value: '12',
-            label: 'Invited',
-            subtitle: 'Pending invitation',
-            iconColor: Color(0xFF5B4BC4),
-          ),
-        ),
-
-        SizedBox(width: 16),
-
-        Expanded(
-          child: _PeopleMetricCard(
-            icon: Icons.person_off_outlined,
-            value: '8',
-            label: 'Inactive',
-            subtitle: 'Not currently active',
-            iconColor: Color(0xFF6B7280),
-          ),
-        ),
-      ],
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: cards
+              .map(
+                (card) => SizedBox(
+                  width: cardWidth,
+                  child: _PeopleMetricCard(
+                    icon: card.icon,
+                    value: card.value,
+                    label: card.label,
+                    subtitle: card.subtitle,
+                    iconColor: card.iconColor,
+                  ),
+                ),
+              )
+              .toList(),
+        );
+      },
     );
   }
+}
+
+class _PeopleMetricData {
+  final IconData icon;
+  final String value;
+  final String label;
+  final String subtitle;
+  final Color iconColor;
+
+  const _PeopleMetricData({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.subtitle,
+    required this.iconColor,
+  });
 }
 
 class _PeopleMetricCard extends StatelessWidget {
@@ -107,7 +134,7 @@ class _PeopleMetricCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 26,
-                    height: 1.0,
+                    height: 1,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF2F3A4A),
                   ),

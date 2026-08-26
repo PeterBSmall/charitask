@@ -13,31 +13,36 @@ class PeoplePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFFF7F8FC),
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          PeopleHeader(
-            onAddPerson: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const AddPersonPage()),
-              );
-            },
-          ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PeopleHeader(
+              onAddPerson: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AddPersonPage(),
+                  ),
+                );
+              },
+            ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          const PeopleToolbar(),
+            const PeopleToolbar(),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          const PeopleMetrics(),
+            const PeopleMetrics(),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // Table takes the remaining available space
-          const Expanded(child: PeopleTable()),
-        ],
+            const PeopleTable(),
+
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }
