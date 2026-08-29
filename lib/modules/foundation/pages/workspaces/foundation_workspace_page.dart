@@ -94,7 +94,7 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
         controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
-          24,
+          12,
           AppSpacing.lg,
           AppSpacing.lg,
         ),
@@ -117,6 +117,8 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
               style: TextStyle(fontSize: 16, color: Color(0xFF6B7280)),
             ),
 
+            const SizedBox(height: 4),
+
             FoundationHero(journeyController: widget.journeyController),
 
             const SizedBox(height: 16),
@@ -132,21 +134,75 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
 
             const SizedBox(height: 24),
 
-            const Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: FoundationActiveTasks()),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
 
-                SizedBox(width: 24),
+                // Large desktop:
+                // Three equal cards matching the reference design.
+                if (width >= 1100) {
+                  return const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: FoundationActiveTasks()),
 
-                Expanded(child: FoundationRecentActivity()),
+                      SizedBox(width: 24),
 
-                SizedBox(width: 24),
+                      Expanded(child: FoundationRecentActivity()),
 
-                Expanded(child: FoundationPinnedNotes()),
-              ],
+                      SizedBox(width: 24),
+
+                      Expanded(child: FoundationPinnedNotes()),
+                    ],
+                  );
+                }
+
+                // Medium width:
+                // Two columns, with the actual available width calculated
+                // instead of using a fixed card width.
+                if (width >= 700) {
+                  final cardWidth = (width - 24) / 2;
+
+                  return Wrap(
+                    spacing: 24,
+                    runSpacing: 24,
+                    children: [
+                      SizedBox(
+                        width: cardWidth,
+                        child: const FoundationActiveTasks(),
+                      ),
+
+                      SizedBox(
+                        width: cardWidth,
+                        child: const FoundationRecentActivity(),
+                      ),
+
+                      SizedBox(
+                        width: cardWidth,
+                        child: const FoundationPinnedNotes(),
+                      ),
+                    ],
+                  );
+                }
+
+                // Narrow:
+                // One full-width card at a time.
+                return const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FoundationActiveTasks(),
+
+                    SizedBox(height: 24),
+
+                    FoundationRecentActivity(),
+
+                    SizedBox(height: 24),
+
+                    FoundationPinnedNotes(),
+                  ],
+                );
+              },
             ),
-
             const SizedBox(height: AppSpacing.lg),
           ],
         ),

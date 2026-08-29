@@ -11,6 +11,7 @@ class FoundationRecentActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 260),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -67,19 +68,51 @@ class FoundationRecentActivity extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Recent Activity',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF2F3A4A),
-          ),
-        ),
-        TextButton(onPressed: () {}, child: const Text('View All')),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 280;
+
+        if (isNarrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Recent Activity',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2F3A4A),
+                ),
+              ),
+              const SizedBox(height: 4),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('View All'),
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Recent Activity',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF2F3A4A),
+              ),
+            ),
+            TextButton(onPressed: () {}, child: const Text('View All')),
+          ],
+        );
+      },
     );
   }
 
@@ -91,6 +124,38 @@ class FoundationRecentActivity extends StatelessWidget {
   }
 
   Widget _buildActivityItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+    required String time,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 360;
+
+        if (isNarrow) {
+          return _buildNarrowActivityItem(
+            icon: icon,
+            iconColor: iconColor,
+            title: title,
+            description: description,
+            time: time,
+          );
+        }
+
+        return _buildWideActivityItem(
+          icon: icon,
+          iconColor: iconColor,
+          title: title,
+          description: description,
+          time: time,
+        );
+      },
+    );
+  }
+
+  Widget _buildWideActivityItem({
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -135,6 +200,8 @@ class FoundationRecentActivity extends StatelessWidget {
             children: [
               Text(
                 title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -146,6 +213,8 @@ class FoundationRecentActivity extends StatelessWidget {
 
               Text(
                 description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 13, color: Color(0xFF7B8494)),
               ),
             ],
@@ -157,6 +226,95 @@ class FoundationRecentActivity extends StatelessWidget {
         Text(
           time,
           style: const TextStyle(fontSize: 12, color: Color(0xFF7B8494)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNarrowActivityItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+    required String time,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 48,
+          child: Column(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                margin: const EdgeInsets.only(top: 8),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF8B95A7),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2F3A4A),
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF7B8494),
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF7B8494),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

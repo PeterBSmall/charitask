@@ -312,6 +312,9 @@ class _YourRolePageState extends State<YourRolePage> {
         // --------------------------------------------------------------
         // ACTIONS
         // --------------------------------------------------------------
+        // --------------------------------------------------------------
+        // ACTIONS
+        // --------------------------------------------------------------
         Row(
           children: [
             OutlinedButton.icon(
@@ -319,7 +322,7 @@ class _YourRolePageState extends State<YourRolePage> {
               icon: const Icon(Icons.arrow_back_rounded),
               label: const Text('Back'),
               style: OutlinedButton.styleFrom(
-                minimumSize: const Size(130, 52),
+                minimumSize: const Size(105, 52),
                 side: const BorderSide(color: Color(0xFFD9D1FF)),
                 foregroundColor: const Color(0xFF6546E8),
                 shape: RoundedRectangleBorder(
@@ -344,7 +347,7 @@ class _YourRolePageState extends State<YourRolePage> {
               icon: const Icon(Icons.arrow_forward_rounded),
               label: const Text('Continue'),
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(160, 52),
+                minimumSize: const Size(130, 52),
                 backgroundColor: const Color(0xFF6C4CF1),
                 foregroundColor: Colors.white,
                 disabledBackgroundColor: const Color(0xFFE3E0EF),

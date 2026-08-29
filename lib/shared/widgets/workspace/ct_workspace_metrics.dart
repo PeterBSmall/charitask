@@ -22,47 +22,82 @@ class _CTWorkspaceMetricsState extends State<CTWorkspaceMetrics> {
 
   @override
   Widget build(BuildContext context) {
-    const spacing = 12.0;
-    const minCardWidth = 150.0;
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalSpacing = spacing * (widget.metrics.length - 1);
+        final width = constraints.maxWidth;
 
-        final availableWidth = constraints.maxWidth - totalSpacing;
+        // Wide desktop:
+        // Keep the reference design of seven cards in one row.
+        if (width >= 1200) {
+          return _buildGrid(crossAxisCount: 7);
+        }
 
-        final calculatedWidth = availableWidth / widget.metrics.length;
+        // Medium desktop:
+        // Four cards per row.
+        if (width >= 900) {
+          return _buildGrid(crossAxisCount: 4);
+        }
 
-        final cardWidth = calculatedWidth < minCardWidth
-            ? minCardWidth
-            : calculatedWidth;
+        // Tablet / smaller desktop:
+        // Three cards per row.
+        if (width >= 650) {
+          return _buildGrid(crossAxisCount: 3);
+        }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (int i = 0; i < widget.metrics.length; i++) ...[
-                SizedBox(
-                  width: cardWidth,
-                  child: CTMetricCard(
-                    metric: widget.metrics[i],
-                    isSelected: i == _selectedIndex,
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = i;
-                      });
+        // Narrow:
+        // Two cards per row.
+        if (width >= 400) {
+          return _buildGrid(crossAxisCount: 2);
+        }
 
-                      widget.onMetricSelected?.call(i);
-                    },
-                  ),
-                ),
-                if (i != widget.metrics.length - 1)
-                  const SizedBox(width: spacing),
-              ],
-            ],
-          ),
+        // Very narrow:
+        // One card per row.
+        return _buildGrid(crossAxisCount: 1);
+      },
+    );
+  }
+
+  Widget _buildGrid({required int crossAxisCount}) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: widget.metrics.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: _getAspectRatio(crossAxisCount),
+      ),
+      itemBuilder: (context, index) {
+        final metric = widget.metrics[index];
+
+        return CTMetricCard(
+          metric: metric,
+          isSelected: index == _selectedIndex,
+          onTap: () {
+            setState(() {
+              _selectedIndex = index;
+            });
+
+            widget.onMetricSelected?.call(index);
+          },
         );
       },
     );
+  }
+
+  double _getAspectRatio(int crossAxisCount) {
+    switch (crossAxisCount) {
+      case 7:
+        return 1.05;
+      case 4:
+        return 1.45;
+      case 3:
+        return 1.45;
+      case 2:
+        return 1.55;
+      default:
+        return 3.0;
+    }
   }
 }

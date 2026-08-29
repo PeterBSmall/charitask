@@ -29,6 +29,7 @@ class CTWorkspaceOverview extends StatelessWidget {
         ],
       ),
       child: Stack(
+        fit: StackFit.passthrough,
         children: [
           // Background watermark
           Positioned(
@@ -41,163 +42,332 @@ class CTWorkspaceOverview extends StatelessWidget {
             ),
           ),
 
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // LEFT
-              Expanded(
-                flex: 6,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 1100;
+
+              if (isNarrow) {
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      config.greeting,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white70,
-                      ),
+                    // LEFT
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          config.greeting,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white70,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Text(
+                          config.welcomeMessage,
+                          style: const TextStyle(
+                            fontSize: 26,
+                            height: 1.2,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Text(
+                          config.organizationName,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        Text(
+                          config.mission,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            height: 1.4,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 24),
 
-                    Text(
-                      config.welcomeMessage,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                    // RIGHT PROGRESS CARD
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.09),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(.14),
+                        ),
                       ),
-                    ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.check_circle_outline,
+                                color: Colors.white70,
+                                size: 18,
+                              ),
 
-                    const SizedBox(height: 12),
+                              const SizedBox(width: 8),
 
-                    Text(
-                      config.organizationName,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                              const Expanded(
+                                child: Text(
+                                  'SETUP PROGRESS',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.3,
+                                  ),
+                                ),
+                              ),
 
-                    const SizedBox(height: 14),
+                              const SizedBox(width: 8),
 
-                    Text(
-                      config.mission,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        height: 1.4,
-                        color: Colors.white70,
+                              Text(
+                                '${(config.progress * 100).round()}%',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          Text(
+                            config.nextStep,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: LinearProgressIndicator(
+                              value: config.progress,
+                              minHeight: 8,
+                              backgroundColor: Colors.white24,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              CTButton(
+                                label: config.primaryButtonLabel,
+                                onPressed: config.onPrimaryPressed,
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              CTButton(
+                                label: config.secondaryButtonLabel,
+                                onPressed: config.onSecondaryPressed,
+                                isPrimary: false,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ),
-              ),
+                );
+              }
 
-              const SizedBox(width: 32),
-
-              // RIGHT PROGRESS CARD
-              Expanded(
-                flex: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.09),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Colors.white.withOpacity(.14)),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle_outline,
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // LEFT
+                  Expanded(
+                    flex: 6,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          config.greeting,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white70,
-                            size: 18,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Text(
+                          config.welcomeMessage,
+                          style: const TextStyle(
+                            fontSize: 26,
+                            height: 1.2,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Text(
+                          config.organizationName,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        Text(
+                          config.mission,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            height: 1.4,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 32),
+
+                  // RIGHT PROGRESS CARD
+                  Expanded(
+                    flex: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.09),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(.14),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.check_circle_outline,
+                                color: Colors.white70,
+                                size: 18,
+                              ),
+
+                              const SizedBox(width: 8),
+
+                              const Expanded(
+                                child: Text(
+                                  'SETUP PROGRESS',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.3,
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(width: 8),
+
+                              Text(
+                                '${(config.progress * 100).round()}%',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
 
-                          const SizedBox(width: 8),
-
-                          const Text(
-                            'SETUP PROGRESS',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.3,
-                            ),
-                          ),
-
-                          const Spacer(),
+                          const SizedBox(height: 16),
 
                           Text(
-                            '${(config.progress * 100).round()}%',
+                            config.nextStep,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
                             ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: LinearProgressIndicator(
+                              value: config.progress,
+                              minHeight: 8,
+                              backgroundColor: Colors.white24,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CTButton(
+                                  label: config.primaryButtonLabel,
+                                  onPressed: config.onPrimaryPressed,
+                                ),
+                              ),
+
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: CTButton(
+                                  label: config.secondaryButtonLabel,
+                                  onPressed: config.onSecondaryPressed,
+                                  isPrimary: false,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 16),
-
-                      Text(
-                        config.nextStep,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: LinearProgressIndicator(
-                          value: config.progress,
-                          minHeight: 8,
-                          backgroundColor: Colors.white24,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: CTButton(
-                              label: config.primaryButtonLabel,
-                              onPressed: config.onPrimaryPressed,
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: CTButton(
-                              label: config.secondaryButtonLabel,
-                              onPressed: config.onSecondaryPressed,
-                              isPrimary: false,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ],
       ),

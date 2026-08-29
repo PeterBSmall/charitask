@@ -67,7 +67,7 @@ class OrganizationSetupScreen extends StatelessWidget {
           journeyController: journeyController,
           onContinue: next,
           onCompleteProfile: () {
-            // Profile completion will be connected here.
+            onCompleteProfile?.call(journeyController);
           },
         ),
       ],

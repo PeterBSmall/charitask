@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+
 class FoundationActiveTasks extends StatelessWidget {
   const FoundationActiveTasks({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 260),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,

@@ -125,7 +125,7 @@ class _CompletePersonalProfilePageState
 
   Widget _buildContent() {
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -137,11 +137,20 @@ class _CompletePersonalProfilePageState
 
           const SizedBox(height: 20),
 
-          _buildIntro(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildIntro(),
 
-          const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-          Expanded(child: _buildCurrentStep()),
+                  _buildCurrentStep(),
+                ],
+              ),
+            ),
+          ),
 
           const SizedBox(height: 16),
 
@@ -251,16 +260,19 @@ class _CompletePersonalProfilePageState
 
         const SizedBox(width: 4),
 
-        const Text(
-          'Complete Your Personal Profile',
-          style: TextStyle(
-            color: Color(0xFF263248),
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
+        const Expanded(
+          child: Text(
+            'Complete Your Personal Profile',
+            style: TextStyle(
+              color: Color(0xFF263248),
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
 
-        const Spacer(),
+        const SizedBox(width: 8),
 
         Text(
           'Step $_currentStep of 3',

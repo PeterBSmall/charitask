@@ -310,10 +310,13 @@ class _ProfileContactInfoState extends State<ProfileContactInfo> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Icon(icon, color: const Color(0xFF6246E5), size: 18),
-            const SizedBox(width: 8),
+
             Text(
               label,
               style: const TextStyle(
@@ -322,8 +325,8 @@ class _ProfileContactInfoState extends State<ProfileContactInfo> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            if (optional) ...[
-              const SizedBox(width: 5),
+
+            if (optional)
               const Text(
                 '(optional)',
                 style: TextStyle(
@@ -332,7 +335,6 @@ class _ProfileContactInfoState extends State<ProfileContactInfo> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-            ],
           ],
         ),
 

@@ -18,6 +18,8 @@ import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 
+import 'package:charitask/modules/foundation/pages/identity/complete_personal_profile_page.dart';
+
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
