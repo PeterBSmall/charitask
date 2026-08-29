@@ -24,10 +24,14 @@ class CTHero extends StatelessWidget {
             left: 48,
             right: 48,
             bottom: 28,
-            child: _JourneyHeroContent(
-              title: hero.title,
-              subtitle: hero.subtitle,
-              missionTag: hero.missionTag,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.bottomLeft,
+              child: _JourneyHeroContent(
+                title: hero.title,
+                subtitle: hero.subtitle,
+                missionTag: hero.missionTag,
+              ),
             ),
           ),
         ],
@@ -82,6 +86,7 @@ class _JourneyHeroContent extends StatelessWidget {
             shadows: shadow,
           ),
         ),
+
         const SizedBox(height: 36),
 
         Row(

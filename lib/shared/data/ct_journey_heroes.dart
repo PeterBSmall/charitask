@@ -19,7 +19,7 @@ class CTJourneyHeroes {
   );
 
   static const organizationType = CTJourneyHeroData(
-    imageAsset: 'assets/images/onboarding/organization_type.png',
+    imageAsset: 'assets/images/onboarding/celebrate_photo.jpg',
     title: 'Every mission is unique.',
     subtitle:
         'The way your organization serves its community helps ChariTask personalize your workspace from day one.',
@@ -39,5 +39,13 @@ class CTJourneyHeroes {
     subtitle:
         'Coordinate ministries, volunteers, events, and outreach—so you can spend more time serving people.',
     missionTag: 'Built for Faith Communities',
+  );
+
+  static const completion = CTJourneyHeroData(
+    imageAsset: 'assets/images/onboarding/celebrate_photo.jpg',
+    title: 'Your organization is ready!',
+    subtitle:
+        'You’ve set up your organization and created your personal profile.',
+    missionTag: 'Built for Mission-Driven Organizations',
   );
 }

@@ -10,10 +10,12 @@ class NotesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: 48),
+        const Divider(),
+
+        const SizedBox(height: 28),
 
         const Text(
-          'Notes (optional)',
+          'Notes',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -21,39 +23,42 @@ class NotesSection extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
 
         const Text(
-          'Add any additional context about this person that may be helpful for your team.',
+          'Add any additional information you would like to keep about this person.',
           style: TextStyle(fontSize: 14, height: 1.5, color: Color(0xFF6B7280)),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
         TextField(
           controller: controller,
+          minLines: 4,
           maxLines: 6,
-          maxLength: 1000,
+          textAlignVertical: TextAlignVertical.top,
           decoration: InputDecoration(
-            hintText: 'Add notes about this person...',
+            hintText: 'Add notes...',
             hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-            alignLabelWithHint: true,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: const Color(0xFFFBFBFC),
+            contentPadding: const EdgeInsets.all(16),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFF5B3FC4), width: 2),
             ),
           ),
         ),
+
+        const SizedBox(height: 40),
       ],
     );
   }

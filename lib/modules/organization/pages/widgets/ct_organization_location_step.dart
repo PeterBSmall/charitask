@@ -22,6 +22,7 @@ class CTOrganizationLocationStep extends StatefulWidget {
     required this.onContinue,
     required this.onBack,
   });
+
   @override
   State<CTOrganizationLocationStep> createState() =>
       _CTOrganizationLocationStepState();
@@ -39,13 +40,16 @@ class _CTOrganizationLocationStepState
       text: widget.journeyController.organizationLocation,
     );
 
-    _locationController.addListener(() {
-      setState(() {});
-    });
+    _locationController.addListener(_onLocationChanged);
+  }
+
+  void _onLocationChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _locationController.removeListener(_onLocationChanged);
     _locationController.dispose();
     super.dispose();
   }
@@ -54,6 +58,7 @@ class _CTOrganizationLocationStepState
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const CTJourneyProgress(currentStep: 6, totalSteps: 7),
 
@@ -78,25 +83,14 @@ class _CTOrganizationLocationStepState
 
         const SizedBox(height: 18),
 
-        // ------------------------------------------------------------
-        // SCROLLABLE CONTENT
-        // ------------------------------------------------------------
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: const CTJourneyInfoCard(
-              icon: Icons.info_outline_rounded,
-              title: 'Your organization can grow with you.',
-              message:
-                  'Start with your primary location today. Additional offices, campuses, stores, or service areas can be added anytime.',
-            ),
-          ),
+        const CTJourneyInfoCard(
+          icon: Icons.info_outline_rounded,
+          title: 'Your organization can grow with you.',
+          message:
+              'Start with your primary location today. Additional offices, campuses, stores, or service areas can be added anytime.',
         ),
 
-        // ------------------------------------------------------------
-        // ACTIONS — ALWAYS VISIBLE
-        // ------------------------------------------------------------
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
         Row(
           children: [
@@ -104,13 +98,14 @@ class _CTOrganizationLocationStepState
               child: OutlinedButton(
                 onPressed: widget.onBack,
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 52),
+                  minimumSize: const Size(double.infinity, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 child: const Text('Back'),
               ),
             ),
 
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
 
             Expanded(
               child: CTJourneyButton(
@@ -119,7 +114,8 @@ class _CTOrganizationLocationStepState
                     ? null
                     : () {
                         debugPrint(
-                          'CTOrganizationLocationStep: Continue pressed with location: '
+                          'CTOrganizationLocationStep: Continue pressed '
+                          'with location: '
                           '${_locationController.text.trim()}',
                         );
 
@@ -128,7 +124,8 @@ class _CTOrganizationLocationStepState
                         );
 
                         debugPrint(
-                          'CTOrganizationLocationStep: calling onContinue.',
+                          'CTOrganizationLocationStep: '
+                          'calling onContinue.',
                         );
 
                         widget.onContinue();
@@ -137,6 +134,8 @@ class _CTOrganizationLocationStepState
             ),
           ],
         ),
+
+        const SizedBox(height: 8),
       ],
     );
   }

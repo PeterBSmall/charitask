@@ -15,6 +15,7 @@ class FoundationQuickActions extends StatelessWidget {
           icon: Icons.person_add,
           title: 'Add Person',
           subtitle: 'Create an employee or volunteer',
+          isPrimary: true,
           onTap: () {},
         ),
 

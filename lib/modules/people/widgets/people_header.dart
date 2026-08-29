@@ -37,25 +37,36 @@ class PeopleHeader extends StatelessWidget {
           ),
         ),
 
-        OutlinedButton.icon(
+        // PRIMARY ACTION
+        ElevatedButton.icon(
           onPressed: onAddPerson,
           icon: const Icon(Icons.add),
           label: const Text('Add Person'),
-          style: OutlinedButton.styleFrom(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF5B4BC4),
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         ),
 
         const SizedBox(width: 12),
 
-        ElevatedButton.icon(
+        // SECONDARY ACTION
+        OutlinedButton.icon(
           onPressed: onImportPeople,
           icon: const Icon(Icons.upload_outlined),
           label: const Text('Import People'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF5B4BC4),
-            foregroundColor: Colors.white,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF6B7280),
+            side: const BorderSide(color: Color(0xFFE2E5EC)),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         ),
       ],

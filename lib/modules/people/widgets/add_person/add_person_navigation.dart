@@ -21,6 +21,8 @@ class AddPersonNavigation extends StatelessWidget {
     final isFirstStep = currentStep == 0;
     final isLastStep = currentStep == totalSteps - 1;
 
+    final canProceed = !isLastStep && isCurrentStepValid;
+
     return Container(
       height: 96,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -37,9 +39,32 @@ class AddPersonNavigation extends StatelessWidget {
           ),
 
           ElevatedButton.icon(
-            onPressed: isLastStep ? null : (isCurrentStepValid ? onNext : null),
-            icon: Icon(isLastStep ? Icons.check : Icons.arrow_forward),
-            label: Text(isLastStep ? 'Create' : 'Next'),
+            onPressed: canProceed ? onNext : null,
+
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5B4BC4),
+              foregroundColor: Colors.white,
+
+              disabledBackgroundColor: const Color(0xFFE5E7EB),
+              disabledForegroundColor: const Color(0xFF9CA3AF),
+
+              minimumSize: const Size(145, 48),
+
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+
+              elevation: 0,
+            ),
+
+            icon: const Icon(Icons.arrow_forward),
+
+            label: const Text(
+              'Next',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

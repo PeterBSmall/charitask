@@ -51,52 +51,43 @@ class _CTOrganizationNameStepState extends State<CTOrganizationNameStep> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CTJourneyProgress(
-                  journeyTitle: 'Organization Setup',
-                  currentStep: 4,
-                  totalSteps: 7,
-                ),
-
-                const SizedBox(height: 18),
-
-                CTJourneyHeader(
-                  title: 'Hello ${widget.journeyController.firstName}.',
-                  question: "What's the name of your organization?",
-                  subtitle:
-                      'This will become the home for your people, teams, locations, volunteers, and mission.',
-                  icon: Icons.business_outlined,
-                ),
-
-                const SizedBox(height: 18),
-
-                CTJourneyTextField(
-                  controller: _organizationController,
-                  hintText: 'Enter organization name',
-                  prefixIcon: Icons.business_outlined,
-                ),
-
-                const SizedBox(height: 18),
-
-                const CTJourneyInfoCard(
-                  icon: Icons.info_outline_rounded,
-                  title: 'Your organization can always evolve.',
-                  message:
-                      'Choose the name people know you by today. You can always update it later in Organization Settings.',
-                ),
-              ],
-            ),
-          ),
+        const CTJourneyProgress(
+          journeyTitle: 'Organization Setup',
+          currentStep: 4,
+          totalSteps: 7,
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
+
+        CTJourneyHeader(
+          title: 'Hello ${widget.journeyController.firstName}.',
+          question: "What's the name of your organization?",
+          subtitle:
+              'This will become the home for your people, teams, locations, volunteers, and mission.',
+          icon: Icons.business_outlined,
+        ),
+
+        const SizedBox(height: 18),
+
+        CTJourneyTextField(
+          controller: _organizationController,
+          hintText: 'Enter organization name',
+          prefixIcon: Icons.business_outlined,
+        ),
+
+        const SizedBox(height: 18),
+
+        const CTJourneyInfoCard(
+          icon: Icons.info_outline_rounded,
+          title: 'Your organization can always evolve.',
+          message:
+              'Choose the name people know you by today. You can always update it later in Organization Settings.',
+        ),
+
+        const SizedBox(height: 24),
 
         Row(
           children: [

@@ -129,30 +129,43 @@ class _YourRolePageState extends State<YourRolePage> {
         // PERSONALIZATION MESSAGE
         // --------------------------------------------------------------
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: const Color(0xFFF3F0FF),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
+              const Icon(
                 Icons.verified_user_rounded,
                 color: Color(0xFF5633D8),
                 size: 18,
               ),
-              SizedBox(width: 8),
-              Text(
-                'This helps ChariTask ',
-                style: TextStyle(color: Color(0xFF596579), fontSize: 13),
-              ),
-              Text(
-                'tailor your workspace, permissions, and guidance.',
-                style: TextStyle(
-                  color: Color(0xFF5633D8),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+
+              const SizedBox(width: 8),
+
+              Expanded(
+                child: RichText(
+                  text: const TextSpan(
+                    style: TextStyle(
+                      color: Color(0xFF596579),
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                    children: [
+                      TextSpan(text: 'This helps ChariTask '),
+                      TextSpan(
+                        text:
+                            'tailor your workspace, permissions, and guidance.',
+                        style: TextStyle(
+                          color: Color(0xFF5633D8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

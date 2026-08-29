@@ -13,7 +13,6 @@ import 'package:charitask/shared/data/organization/organization_types.dart';
 class CTOrganizationTypeStep extends StatefulWidget {
   final VoidCallback onContinue;
   final VoidCallback onBack;
-
   final CTJourneyController journeyController;
 
   const CTOrganizationTypeStep({
@@ -22,6 +21,7 @@ class CTOrganizationTypeStep extends StatefulWidget {
     required this.onContinue,
     required this.onBack,
   });
+
   @override
   State<CTOrganizationTypeStep> createState() => _CTOrganizationTypeStepState();
 }
@@ -42,37 +42,48 @@ class _CTOrganizationTypeStepState extends State<CTOrganizationTypeStep> {
           title: 'Hello ${widget.journeyController.firstName}.',
           question: 'How do you serve your community?',
           subtitle:
-              'Select the organization that best represents your mission. We\'ll personalize ChariTask to match the way you work.',
+              'Select the organization that best represents your mission. '
+              'We\'ll personalize ChariTask to match the way you work.',
           icon: Icons.favorite_outline,
         ),
 
         const SizedBox(height: 28),
 
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.only(right: 8),
-            itemCount: organizationTypes.length,
-            itemBuilder: (context, index) {
-              final option = organizationTypes[index];
+        // ---------------------------------------------------------------
+        // ORGANIZATION TYPES
+        //
+        // This step is already inside the journey's SingleChildScrollView,
+        // so the list must shrink-wrap instead of using Expanded.
+        // ---------------------------------------------------------------
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(right: 8),
+          itemCount: organizationTypes.length,
+          itemBuilder: (context, index) {
+            final option = organizationTypes[index];
 
-              return CTJourneySelectionCard(
-                icon: option.icon,
-                title: option.title,
-                subtitle: option.subtitle,
-                selected: _selectedType == option.type,
-                onTap: () {
-                  setState(() {
-                    _selectedType = option.type;
-                  });
+            return CTJourneySelectionCard(
+              icon: option.icon,
+              title: option.title,
+              subtitle: option.subtitle,
+              selected: _selectedType == option.type,
+              onTap: () {
+                setState(() {
+                  _selectedType = option.type;
+                });
 
-                  widget.journeyController.updateOrganizationType(option.type);
-                },
-              );
-            },
-          ),
+                widget.journeyController.updateOrganizationType(option.type);
+              },
+            );
+          },
         ),
+
         const SizedBox(height: 20),
 
+        // ---------------------------------------------------------------
+        // NAVIGATION
+        // ---------------------------------------------------------------
         Row(
           children: [
             SizedBox(

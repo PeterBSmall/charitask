@@ -5,6 +5,7 @@ import 'package:charitask/shared/design_system/journey/ct_journey_chapter.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/design_system/hero/ct_hero.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_shell.dart';
+import 'package:charitask/shared/data/ct_journey_heroes.dart';
 
 typedef CTJourneyStepBuilder =
     Widget Function(
@@ -84,9 +85,16 @@ class _CTJourneyEngineState extends State<CTJourneyEngine> {
   }
 
   void _updateChapterHero() {
-    widget.controller.setChapterHero(
-      widget.chapters[widget.controller.currentStep].hero,
-    );
+    final isCompletionStep =
+        widget.controller.currentStep == widget.chapters.length;
+
+    if (isCompletionStep) {
+      widget.controller.setChapterHero(CTJourneyHeroes.completion);
+    } else {
+      widget.controller.setChapterHero(
+        widget.chapters[widget.controller.currentStep].hero,
+      );
+    }
 
     widget.controller.setContextHero(null);
   }

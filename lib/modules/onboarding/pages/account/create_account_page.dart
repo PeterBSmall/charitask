@@ -88,7 +88,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         );
       }
 
-      // Keep the existing ChariTask onboarding draft.
       widget.controller.createPersonDraft(
         firstName: firstName,
         lastName: lastName,
@@ -96,8 +95,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         phone: phone.isEmpty ? null : phone,
       );
 
-      // With email confirmation enabled, Supabase normally
-      // returns a user but no session.
       if (response.session == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -135,6 +132,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final availableHeight = constraints.maxHeight;
+            final availableWidth = constraints.maxWidth;
+
             return Scrollbar(
               controller: _scrollController,
               thumbVisibility: false,
@@ -143,73 +143,73 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 controller: _scrollController,
                 padding: const EdgeInsets.all(20),
                 child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: 1320,
-                      minHeight: (constraints.maxHeight - 40).clamp(
-                        0.0,
-                        double.infinity,
-                      ),
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, panelConstraints) {
-                        final isCompact = panelConstraints.maxWidth < 900;
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1320),
+                      child: LayoutBuilder(
+                        builder: (context, panelConstraints) {
+                          final isCompact = panelConstraints.maxWidth < 900;
 
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Material(
-                            elevation: 8,
-                            shadowColor: Colors.black.withValues(alpha: 0.12),
-                            child: isCompact
-                                ? Column(
+                          final content = isCompact
+                              ? Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    const AccountWelcomePanel(),
+
+                                    AccountFormPanel(
+                                      firstNameController: _firstNameController,
+                                      lastNameController: _lastNameController,
+                                      emailController: _emailController,
+                                      phoneController: _phoneController,
+                                      passwordController: _passwordController,
+                                      accountFormKey: _accountFormKey,
+                                      onContinue: _createAccount,
+                                    ),
+                                  ],
+                                )
+                              : SizedBox(
+                                  height: (constraints.maxHeight - 40).clamp(
+                                    400.0,
+                                    double.infinity,
+                                  ),
+                                  child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: [
-                                      AccountWelcomePanel(),
-
-                                      AccountFormPanel(
-                                        firstNameController:
-                                            _firstNameController,
-                                        lastNameController: _lastNameController,
-                                        emailController: _emailController,
-                                        phoneController: _phoneController,
-                                        passwordController: _passwordController,
-                                        accountFormKey: _accountFormKey,
-                                        onContinue: _createAccount,
+                                      const Expanded(
+                                        flex: 42,
+                                        child: AccountWelcomePanel(),
+                                      ),
+                                      Expanded(
+                                        flex: 58,
+                                        child: AccountFormPanel(
+                                          firstNameController:
+                                              _firstNameController,
+                                          lastNameController:
+                                              _lastNameController,
+                                          emailController: _emailController,
+                                          phoneController: _phoneController,
+                                          passwordController:
+                                              _passwordController,
+                                          accountFormKey: _accountFormKey,
+                                          onContinue: _createAccount,
+                                        ),
                                       ),
                                     ],
-                                  )
-                                : IntrinsicHeight(
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        Expanded(
-                                          flex: 42,
-                                          child: AccountWelcomePanel(),
-                                        ),
-
-                                        Expanded(
-                                          flex: 58,
-                                          child: AccountFormPanel(
-                                            firstNameController:
-                                                _firstNameController,
-                                            lastNameController:
-                                                _lastNameController,
-                                            emailController: _emailController,
-                                            phoneController: _phoneController,
-                                            passwordController:
-                                                _passwordController,
-                                            accountFormKey: _accountFormKey,
-                                            onContinue: _createAccount,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
-                          ),
-                        );
-                      },
+                                );
+
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Material(
+                              elevation: 8,
+                              shadowColor: Colors.black.withValues(alpha: 0.12),
+                              child: content,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

@@ -64,9 +64,10 @@ class OrganizationSetupScreen extends StatelessWidget {
 
         (journeyController, next, back) => CTWorkspaceCreationStep(
           profile: journeyController.missionProfile,
+          journeyController: journeyController,
           onContinue: next,
           onCompleteProfile: () {
-            onCompleteProfile?.call(journeyController);
+            // Profile completion will be connected here.
           },
         ),
       ],

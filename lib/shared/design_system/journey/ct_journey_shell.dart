@@ -41,6 +41,15 @@ class CTJourneyShell extends StatelessWidget {
                 ? 28.0
                 : 18.0;
 
+            // ------------------------------------------------------------
+            // RESPONSIVE LAYOUT
+            //
+            // On a normal desktop window we keep the two-panel layout.
+            // On a narrow window we stack the panels vertically so neither
+            // side gets squeezed into an unusably narrow width.
+            // ------------------------------------------------------------
+            final useTwoPanels = width >= 1000;
+
             return Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1500),
@@ -49,22 +58,47 @@ class CTJourneyShell extends StatelessWidget {
                     horizontal: horizontalPadding,
                     vertical: verticalPadding,
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // --------------------------------------------------
-                      // LEFT HERO
-                      // --------------------------------------------------
-                      Expanded(flex: 1, child: leftPanel),
+                  child: useTwoPanels
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // ------------------------------------------------
+                            // LEFT HERO
+                            // ------------------------------------------------
+                            Expanded(flex: 9, child: leftPanel),
 
-                      SizedBox(width: panelGap),
+                            SizedBox(width: panelGap),
 
-                      // --------------------------------------------------
-                      // RIGHT JOURNEY CARD
-                      // --------------------------------------------------
-                      Expanded(flex: 1, child: rightPanel),
-                    ],
-                  ),
+                            // ------------------------------------------------
+                            // RIGHT JOURNEY CARD
+                            //
+                            // Give the journey side slightly more width
+                            // because its content needs more horizontal room.
+                            // ------------------------------------------------
+                            Expanded(
+                              flex: 11,
+                              child: SingleChildScrollView(child: rightPanel),
+                            ),
+                          ],
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // ----------------------------------------------
+                              // LEFT HERO
+                              // ----------------------------------------------
+                              SizedBox(height: 520, child: leftPanel),
+
+                              SizedBox(height: panelGap),
+
+                              // ----------------------------------------------
+                              // RIGHT JOURNEY CARD
+                              // ----------------------------------------------
+                              rightPanel,
+                            ],
+                          ),
+                        ),
                 ),
               ),
             );

@@ -13,32 +13,27 @@ class ExternalRelationshipSelector extends StatelessWidget {
   static const List<_RelationshipOption> _options = [
     _RelationshipOption(
       value: 'Donor',
-      description: 'Provides financial or material support',
+      description: 'Provides financial, in-kind, or other charitable support',
       icon: Icons.favorite_border_rounded,
     ),
     _RelationshipOption(
-      value: 'Customer',
-      description: 'Purchases products, services, or participates in programs',
-      icon: Icons.shopping_bag_outlined,
-    ),
-    _RelationshipOption(
-      value: 'Vendor',
-      description: 'Provides goods or professional services',
-      icon: Icons.storefront_outlined,
-    ),
-    _RelationshipOption(
       value: 'Partner',
-      description: 'Collaborates with your organization',
+      description: 'Collaborates with your organization toward shared goals',
       icon: Icons.handshake_outlined,
     ),
     _RelationshipOption(
-      value: 'Contact',
-      description: 'A general external person or connection',
-      icon: Icons.person_outline_rounded,
+      value: 'Vendor',
+      description: 'Provides products, services, or professional support',
+      icon: Icons.storefront_outlined,
+    ),
+    _RelationshipOption(
+      value: 'Community Member',
+      description: 'Connected to your organization or community',
+      icon: Icons.groups_outlined,
     ),
     _RelationshipOption(
       value: 'Other',
-      description: 'A custom or unique relationship',
+      description: 'A custom or unique external relationship',
       icon: Icons.more_horiz_rounded,
     ),
   ];
@@ -77,7 +72,7 @@ class ExternalRelationshipSelector extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(selectedOption.icon, color: const Color(0xFF167C80)),
+                Icon(selectedOption.icon, color: const Color(0xFF5B3FC4)),
 
                 const SizedBox(width: 12),
 
@@ -114,19 +109,12 @@ class ExternalRelationshipSelector extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.all(24),
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.85,
+              maxHeight: MediaQuery.of(context).size.height * 0.80,
             ),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
-                ),
-              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -199,7 +187,7 @@ class _RelationshipOptionTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 3),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFE6F5F5) : Colors.transparent,
+          color: selected ? const Color(0xFFF1EEFF) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -209,13 +197,13 @@ class _RelationshipOptionTile extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 color: selected
-                    ? const Color(0xFFCDEAEA)
+                    ? const Color(0xFFDDD5FF)
                     : const Color(0xFFF4F4F5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 option.icon,
-                color: const Color(0xFF167C80),
+                color: const Color(0xFF5B3FC4),
                 size: 21,
               ),
             ),
@@ -250,7 +238,7 @@ class _RelationshipOptionTile extends StatelessWidget {
             ),
 
             if (selected)
-              const Icon(Icons.check_circle_rounded, color: Color(0xFF167C80)),
+              const Icon(Icons.check_circle_rounded, color: Color(0xFF5B3FC4)),
           ],
         ),
       ),

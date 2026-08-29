@@ -12,6 +12,7 @@ import 'package:charitask/modules/people/widgets/add_person/review_create_step.d
 import 'package:charitask/modules/people/widgets/add_person/add_person_navigation.dart';
 
 import 'package:charitask/shared/widgets/workspace_canvas.dart';
+import 'package:charitask/shared/custom_types/custom_type.dart';
 
 class AddPersonPage extends StatefulWidget {
   const AddPersonPage({super.key});
@@ -31,11 +32,15 @@ class _AddPersonPageState extends State<AddPersonPage> {
   final _preferredNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  final _dateOfBirthController = TextEditingController();
   final _joinDateController = TextEditingController();
+  final _notesController = TextEditingController();
+  final List<CustomType> _customDonorTypes = [];
 
   String _membershipStatus = 'Active';
-  String _roleCategory = 'Staff';
-  String _donorType = 'Individual Donor';
+  String _roleCategory = '';
+  String? _donorType;
   String? _preferredContactMethod;
 
   static const List<String> _steps = [
@@ -74,6 +79,19 @@ class _AddPersonPageState extends State<AddPersonPage> {
           email: _emailController.text,
           phone: _phoneController.text,
         );
+
+      case 2:
+        // A primary relationship must be selected.
+        if (_roleCategory.isEmpty) {
+          return false;
+        }
+
+        // If Donor is selected, a donor type is also required.
+        if (_roleCategory == 'Donor' && _donorType == null) {
+          return false;
+        }
+
+        return true;
 
       default:
         return true;
@@ -202,15 +220,9 @@ class _AddPersonPageState extends State<AddPersonPage> {
           preferredNameController: _preferredNameController,
           emailController: _emailController,
           phoneController: _phoneController,
-
-          connectionType: _connectionType ?? 'internal',
-          membershipStatus: _membershipStatus,
-          joinDateController: _joinDateController,
-          onMembershipStatusChanged: (value) {
-            setState(() {
-              _membershipStatus = value;
-            });
-          },
+          dateOfBirthController: _dateOfBirthController,
+          notesController: _notesController,
+          connectionType: _connectionType ?? '',
 
           preferredContactMethod: _preferredContactMethod,
           onPreferredContactMethodChanged: (value) {
@@ -227,19 +239,31 @@ class _AddPersonPageState extends State<AddPersonPage> {
           roleCategory: _roleCategory,
           donorType: _donorType,
           joinDateController: _joinDateController,
+
           onMembershipStatusChanged: (value) {
             setState(() {
               _membershipStatus = value;
             });
           },
+
           onRoleCategoryChanged: (value) {
             setState(() {
               _roleCategory = value;
             });
           },
+
           onDonorTypeChanged: (value) {
             setState(() {
               _donorType = value;
+            });
+          },
+
+          customTypes: _customDonorTypes,
+
+          onCustomTypeAdded: (customType) {
+            setState(() {
+              _customDonorTypes.add(customType);
+              _donorType = customType.id;
             });
           },
         );
@@ -290,7 +314,10 @@ class _AddPersonPageState extends State<AddPersonPage> {
     _preferredNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
+
+    _dateOfBirthController.dispose();
     _joinDateController.dispose();
+    _notesController.dispose();
 
     super.dispose();
   }
