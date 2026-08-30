@@ -10,6 +10,7 @@ import 'package:charitask/shared/design_system/journey/ct_journey_controller.dar
 import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 
 import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_creation_step.dart';
+import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspace.dart';
 
 class OrganizationSetupScreen extends StatelessWidget {
   final void Function(CTJourneyController controller)? onComplete;
@@ -65,7 +66,18 @@ class OrganizationSetupScreen extends StatelessWidget {
         (journeyController, next, back) => CTWorkspaceCreationStep(
           profile: journeyController.missionProfile,
           journeyController: journeyController,
-          onContinue: next,
+
+          // Go directly to the Foundation Workspace.
+          onContinue: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) =>
+                    FoundationWorkspace(journeyController: journeyController),
+              ),
+            );
+          },
+
+          // Complete Personal Profile remains a separate path.
           onCompleteProfile: () {
             onCompleteProfile?.call(journeyController);
           },

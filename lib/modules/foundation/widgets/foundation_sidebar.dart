@@ -139,7 +139,7 @@ class FoundationSidebar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Foundation',
+                  'Organization Workspace',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

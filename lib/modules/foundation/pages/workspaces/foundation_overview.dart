@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:charitask/modules/foundation/pages/organization/organization_workspace.dart';
 import 'package:charitask/shared/models/ct_workspace_overview_config.dart';
 import 'package:charitask/shared/design_system/foundations/app_colors.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
@@ -9,11 +8,11 @@ String _foundationGreeting(String firstName) {
   final hour = DateTime.now().hour;
 
   if (hour < 12) {
-    return 'Good Morning, $firstName.';
+    return 'Welcome back, $firstName! 🎉';
   } else if (hour < 17) {
-    return 'Good Afternoon, $firstName.';
+    return 'Welcome back, $firstName! 🎉';
   } else {
-    return 'Good Evening, $firstName.';
+    return 'Welcome back, $firstName! 🎉';
   }
 }
 
@@ -21,8 +20,6 @@ CTWorkspaceOverviewConfig foundationOverview(
   BuildContext context,
   CTJourneyController journeyController,
 ) {
-  final organizationName = journeyController.organization.identity.name.trim();
-
   final firstName = journeyController.firstName.trim();
 
   return CTWorkspaceOverviewConfig(
@@ -33,44 +30,31 @@ CTWorkspaceOverviewConfig foundationOverview(
     // Greeting
     greeting: _foundationGreeting(firstName.isEmpty ? 'there' : firstName),
 
-    // Hero content
-    welcomeMessage:
-        'Build the structure that supports every mission, every person, and every opportunity to serve.',
+    // Completed workspace hero
+    welcomeMessage: 'Your organization is active and running smoothly.',
 
-    organizationName: organizationName.isEmpty
-        ? 'Your Organization'
-        : organizationName,
+    organizationName:
+        'You’ve built a strong foundation. Now you can manage people, '
+        'locations, and teams—all in one place.',
 
-    mission: 'Your foundation is ready. Now let’s build what comes next.',
+    mission: '',
 
-    // Progress
-    progress: 0.75,
-    nextStep: 'Finalize Your Organization Setup',
+    // Setup is complete.
+    progress: null,
+    nextStep: null,
 
-    // Primary action
-    primaryButtonLabel: 'Continue Setup',
+    // Completed workspace action
+    primaryButtonLabel: 'View Reports',
     onPrimaryPressed: () {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) =>
-              OrganizationWorkspace(journeyController: journeyController),
-        ),
-      );
+      // Reports will be connected when Analytics is ready.
     },
 
-    // Secondary action
-    secondaryButtonLabel: 'View Organization',
-    onSecondaryPressed: () {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) =>
-              OrganizationWorkspace(journeyController: journeyController),
-        ),
-      );
-    },
+    // No secondary action.
+    secondaryButtonLabel: null,
+    onSecondaryPressed: null,
 
     // Theme
     accentColor: AppColors.missionPurple,
-    backgroundGradient: const [Color(0xFF6C4CF1), Color(0xFF7B5CFA)],
+    backgroundGradient: const [Color(0xFF4338B8), Color(0xFF5B4BC4)],
   );
 }

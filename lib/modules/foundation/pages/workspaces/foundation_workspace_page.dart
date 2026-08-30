@@ -187,8 +187,8 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
 
                 // Narrow:
                 // One full-width card at a time.
-                return const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                return const Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     FoundationActiveTasks(),
 

@@ -86,16 +86,47 @@ class OnboardingScreen extends StatelessWidget {
           onBack: back,
         ),
 
-        // Step 7 - Create Workspace / Organization Ready
+        // Step 7 - Organization Ready
         (controller, next, back) => CTWorkspaceCreationStep(
           profile: controller.missionProfile,
           journeyController: controller,
-          onContinue: next,
+
+          // Go directly to the organizational workspace.
+          onContinue: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) =>
+                    FoundationWorkspace(journeyController: controller),
+              ),
+            );
+          },
+
+          // Complete personal profile.
           onCompleteProfile: () {
-            // Profile completion will be connected here.
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => CompletePersonalProfilePage(
+                  firstName: controller.firstName,
+                  lastName: '',
+                  email: '',
+                  phone: null,
+                  organizationalRole: '',
+                  onSkip: () {
+                    Navigator.of(context).pop();
+                  },
+                  onComplete:
+                      ({
+                        String? preferredName,
+                        String? pronouns,
+                        String? phone,
+                      }) {
+                        Navigator.of(context).pop();
+                      },
+                ),
+              ),
+            );
           },
         ),
-
         // Step 8 - Workspace Ready
         (controller, next, back) => CTWorkspaceReadyStep(
           onContinue: () {

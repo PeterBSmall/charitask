@@ -132,6 +132,18 @@ class FoundationRecentActivity extends StatelessWidget {
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // During live window resizing Flutter can temporarily provide
+        // unbounded width. Never use Expanded in that situation.
+        if (!constraints.hasBoundedWidth) {
+          return _buildUnboundedActivityItem(
+            icon: icon,
+            iconColor: iconColor,
+            title: title,
+            description: description,
+            time: time,
+          );
+        }
+
         final isNarrow = constraints.maxWidth < 360;
 
         if (isNarrow) {
@@ -167,18 +179,14 @@ class FoundationRecentActivity extends StatelessWidget {
       children: [
         SizedBox(
           width: 48,
-          child: Column(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                margin: const EdgeInsets.only(top: 8),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF8B95A7),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
+          child: Container(
+            width: 12,
+            height: 12,
+            margin: const EdgeInsets.only(top: 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFF8B95A7),
+              shape: BoxShape.circle,
+            ),
           ),
         ),
 
@@ -208,9 +216,7 @@ class FoundationRecentActivity extends StatelessWidget {
                   color: Color(0xFF2F3A4A),
                 ),
               ),
-
               const SizedBox(height: 4),
-
               Text(
                 description,
                 maxLines: 2,
@@ -243,75 +249,54 @@ class FoundationRecentActivity extends StatelessWidget {
       children: [
         SizedBox(
           width: 48,
-          child: Column(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                margin: const EdgeInsets.only(top: 8),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF8B95A7),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
+          child: Container(
+            width: 12,
+            height: 12,
+            margin: const EdgeInsets.only(top: 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFF8B95A7),
+              shape: BoxShape.circle,
+            ),
           ),
         ),
 
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.10),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+
+        const SizedBox(width: 12),
+
         Expanded(
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.10),
-                  shape: BoxShape.circle,
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2F3A4A),
                 ),
-                child: Icon(icon, color: iconColor, size: 24),
               ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2F3A4A),
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      description,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF7B8494),
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      time,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF7B8494),
-                      ),
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF7B8494)),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                time,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF7B8494)),
               ),
             ],
           ),
@@ -319,4 +304,156 @@ class FoundationRecentActivity extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildUnboundedActivityItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+    required String time,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 48,
+          child: Container(
+            width: 12,
+            height: 12,
+            margin: const EdgeInsets.only(top: 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFF8B95A7),
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.10),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+
+        const SizedBox(width: 12),
+
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2F3A4A),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              description,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF7B8494)),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              time,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF7B8494)),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+Widget _buildNarrowActivityItem({
+  required IconData icon,
+  required Color iconColor,
+  required String title,
+  required String description,
+  required String time,
+}) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 48,
+        child: Column(
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              margin: const EdgeInsets.only(top: 8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF8B95A7),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      Expanded(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2F3A4A),
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF7B8494),
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    time,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF7B8494),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }

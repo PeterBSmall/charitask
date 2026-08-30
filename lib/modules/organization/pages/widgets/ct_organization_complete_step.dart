@@ -19,6 +19,7 @@ class CTOrganizationCompleteStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return CTWorkspaceCreationStep(
       profile: controller.missionProfile,
+      journeyController: controller,
       onContinue: onEnterWorkspace,
       onCompleteProfile: () {
         // Profile completion will be connected here.

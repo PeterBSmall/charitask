@@ -14,16 +14,16 @@ class CTWorkspaceOverviewConfig {
   final String welcomeMessage;
 
   /// Progress
-  final String nextStep;
-
-  /// Progress
-  final double progress;
+  ///
+  /// Null means the workspace is in its completed state.
+  final String? nextStep;
+  final double? progress;
 
   /// Actions
   final String primaryButtonLabel;
   final VoidCallback? onPrimaryPressed;
 
-  final String secondaryButtonLabel;
+  final String? secondaryButtonLabel;
   final VoidCallback? onSecondaryPressed;
 
   /// Theme
@@ -37,16 +37,12 @@ class CTWorkspaceOverviewConfig {
     required this.organizationName,
     required this.mission,
     required this.progress,
-
     required this.primaryButtonLabel,
     required this.onPrimaryPressed,
-
     required this.secondaryButtonLabel,
     required this.onSecondaryPressed,
-
     required this.accentColor,
     required this.backgroundGradient,
-
     required this.welcomeMessage,
     required this.nextStep,
   });

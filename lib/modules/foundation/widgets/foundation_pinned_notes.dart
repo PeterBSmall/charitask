@@ -101,7 +101,8 @@ class FoundationPinnedNotes extends StatelessWidget {
 
           const SizedBox(width: 12),
 
-          Expanded(
+          Flexible(
+            fit: FlexFit.loose,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
