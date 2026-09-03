@@ -7,7 +7,30 @@ class PeopleRepositoryImpl implements PeopleRepository {
   final PeopleService _service;
 
   @override
-  Future<List<Map<String, dynamic>>> getPeople() {
-    return _service.getPeople();
+  Future<List<Map<String, dynamic>>> getPeople({
+    required String organizationId,
+  }) {
+    return _service.getPeople(organizationId: organizationId);
+  }
+
+  @override
+  Future<Map<String, dynamic>> createPerson({
+    required String organizationId,
+    required String firstName,
+    required String lastName,
+    String? preferredName,
+    String? email,
+    String? phone,
+    String? employmentType,
+  }) {
+    return _service.createPerson(
+      organizationId: organizationId,
+      firstName: firstName,
+      lastName: lastName,
+      preferredName: preferredName,
+      email: email,
+      phone: phone,
+      employmentType: employmentType,
+    );
   }
 }

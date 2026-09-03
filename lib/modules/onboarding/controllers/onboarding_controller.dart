@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:charitask/modules/foundation/domain/models/person.dart';
+import 'package:charitask/platform/people/person.dart';
 import 'package:charitask/domain/identity/organization_role.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -61,6 +61,34 @@ class OnboardingController extends ChangeNotifier {
       lastName: lastName,
       email: email,
       phone: phone,
+    );
+
+    notifyListeners();
+  }
+
+  /// Restores the in-memory person from the authenticated Supabase user.
+  ///
+  /// Used when an existing Auth account signs in before the ChariTask
+  /// Person has been provisioned.
+  void loadAuthenticatedPerson() {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user == null) {
+      return;
+    }
+
+    final metadata = user.userMetadata ?? {};
+
+    final firstName = (metadata['first_name'] as String?)?.trim() ?? '';
+    final lastName = (metadata['last_name'] as String?)?.trim() ?? '';
+    final phone = (metadata['phone'] as String?)?.trim();
+
+    person = Person(
+      id: '',
+      firstName: firstName,
+      lastName: lastName,
+      email: user.email?.trim(),
+      phone: phone?.isEmpty == true ? null : phone,
     );
 
     notifyListeners();

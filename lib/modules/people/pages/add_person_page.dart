@@ -304,6 +304,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
       isCurrentStepValid: _isCurrentStepValid,
       onBack: _previousStep,
       onNext: _nextStep,
+      onCreate: _createPerson,
     );
   }
 
@@ -320,5 +321,9 @@ class _AddPersonPageState extends State<AddPersonPage> {
     _notesController.dispose();
 
     super.dispose();
+  }
+
+  void _createPerson() {
+    // Person creation will be wired here next.
   }
 }

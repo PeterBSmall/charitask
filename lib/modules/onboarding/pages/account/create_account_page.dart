@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:charitask/modules/onboarding/controllers/onboarding_controller.dart';
 
 import 'widgets/account_form.dart';
 import 'widgets/account_form_panel.dart';
 import 'widgets/account_welcome_panel.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'sign_in_page.dart';
 
 class CreateAccountPage extends StatefulWidget {
   final OnboardingController controller;
   final VoidCallback onContinue;
+  final VoidCallback onSignedIn;
 
   const CreateAccountPage({
     super.key,
     required this.controller,
     required this.onContinue,
+    required this.onSignedIn,
   });
 
   @override
@@ -103,8 +106,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             ),
           ),
         );
+
+        return;
       }
 
+      widget.onContinue();
       widget.onContinue();
     } on AuthException catch (error) {
       if (!mounted) return;
@@ -125,6 +131,25 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     }
   }
 
+  Future<void> _handleSignIn() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SignInPage(
+          onBack: () {
+            Navigator.of(context).pop();
+          },
+          onSignedIn: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    widget.onSignedIn();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,7 +158,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final availableHeight = constraints.maxHeight;
-            final availableWidth = constraints.maxWidth;
 
             return Scrollbar(
               controller: _scrollController,
@@ -143,73 +167,73 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 controller: _scrollController,
                 padding: const EdgeInsets.all(20),
                 child: Center(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1320),
-                      child: LayoutBuilder(
-                        builder: (context, panelConstraints) {
-                          final isCompact = panelConstraints.maxWidth < 900;
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1320),
+                    child: LayoutBuilder(
+                      builder: (context, panelConstraints) {
+                        final isCompact = panelConstraints.maxWidth < 900;
 
-                          final content = isCompact
-                              ? Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    const AccountWelcomePanel(),
+                        final Widget content;
 
-                                    AccountFormPanel(
-                                      firstNameController: _firstNameController,
-                                      lastNameController: _lastNameController,
-                                      emailController: _emailController,
-                                      phoneController: _phoneController,
-                                      passwordController: _passwordController,
-                                      accountFormKey: _accountFormKey,
-                                      onContinue: _createAccount,
-                                    ),
-                                  ],
-                                )
-                              : SizedBox(
-                                  height: (constraints.maxHeight - 40).clamp(
-                                    400.0,
-                                    double.infinity,
+                        if (isCompact) {
+                          content = Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const AccountWelcomePanel(),
+
+                              AccountFormPanel(
+                                firstNameController: _firstNameController,
+                                lastNameController: _lastNameController,
+                                emailController: _emailController,
+                                phoneController: _phoneController,
+                                passwordController: _passwordController,
+                                accountFormKey: _accountFormKey,
+                                onContinue: _createAccount,
+                                onSignIn: _handleSignIn,
+                              ),
+                            ],
+                          );
+                        } else {
+                          content = SizedBox(
+                            height: (availableHeight - 40).clamp(
+                              400.0,
+                              double.infinity,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Expanded(
+                                  flex: 42,
+                                  child: AccountWelcomePanel(),
+                                ),
+
+                                Expanded(
+                                  flex: 58,
+                                  child: AccountFormPanel(
+                                    firstNameController: _firstNameController,
+                                    lastNameController: _lastNameController,
+                                    emailController: _emailController,
+                                    phoneController: _phoneController,
+                                    passwordController: _passwordController,
+                                    accountFormKey: _accountFormKey,
+                                    onContinue: _createAccount,
+                                    onSignIn: _handleSignIn,
                                   ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      const Expanded(
-                                        flex: 42,
-                                        child: AccountWelcomePanel(),
-                                      ),
-                                      Expanded(
-                                        flex: 58,
-                                        child: AccountFormPanel(
-                                          firstNameController:
-                                              _firstNameController,
-                                          lastNameController:
-                                              _lastNameController,
-                                          emailController: _emailController,
-                                          phoneController: _phoneController,
-                                          passwordController:
-                                              _passwordController,
-                                          accountFormKey: _accountFormKey,
-                                          onContinue: _createAccount,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Material(
-                              elevation: 8,
-                              shadowColor: Colors.black.withValues(alpha: 0.12),
-                              child: content,
+                                ),
+                              ],
                             ),
                           );
-                        },
-                      ),
+                        }
+
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Material(
+                            elevation: 8,
+                            shadowColor: Colors.black.withValues(alpha: 0.12),
+                            child: content,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

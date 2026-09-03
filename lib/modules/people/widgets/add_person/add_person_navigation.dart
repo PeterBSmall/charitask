@@ -8,6 +8,7 @@ class AddPersonNavigation extends StatelessWidget {
     required this.isCurrentStepValid,
     required this.onBack,
     required this.onNext,
+    required this.onCreate,
   });
 
   final int currentStep;
@@ -15,13 +16,14 @@ class AddPersonNavigation extends StatelessWidget {
   final bool isCurrentStepValid;
   final VoidCallback onBack;
   final VoidCallback onNext;
+  final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
     final isFirstStep = currentStep == 0;
     final isLastStep = currentStep == totalSteps - 1;
 
-    final canProceed = !isLastStep && isCurrentStepValid;
+    final canProceed = isCurrentStepValid;
 
     return Container(
       height: 96,
@@ -39,7 +41,7 @@ class AddPersonNavigation extends StatelessWidget {
           ),
 
           ElevatedButton.icon(
-            onPressed: canProceed ? onNext : null,
+            onPressed: canProceed ? (isLastStep ? onCreate : onNext) : null,
 
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF5B4BC4),
@@ -48,7 +50,7 @@ class AddPersonNavigation extends StatelessWidget {
               disabledBackgroundColor: const Color(0xFFE5E7EB),
               disabledForegroundColor: const Color(0xFF9CA3AF),
 
-              minimumSize: const Size(145, 48),
+              minimumSize: const Size(160, 48),
 
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
 
@@ -59,11 +61,11 @@ class AddPersonNavigation extends StatelessWidget {
               elevation: 0,
             ),
 
-            icon: const Icon(Icons.arrow_forward),
+            icon: Icon(isLastStep ? Icons.check_rounded : Icons.arrow_forward),
 
-            label: const Text(
-              'Next',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            label: Text(
+              isLastStep ? 'Create Person' : 'Next',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ],

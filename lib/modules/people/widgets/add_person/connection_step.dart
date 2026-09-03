@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'add_person_step_template.dart';
 import 'add_person_story_panel.dart';
 import 'connection_step_graphic.dart';
-import 'add_person_story_panel.dart';
 
 class ConnectionStep extends StatelessWidget {
   final String? selectedType;
@@ -101,7 +100,7 @@ class _ConnectionCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
         decoration: BoxDecoration(
           color: selected
               ? backgroundColor
@@ -119,37 +118,39 @@ class _ConnectionCard extends StatelessWidget {
               : null,
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: iconColor),
+            Icon(icon, size: 48, color: iconColor),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             Text(
               title,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF2F3A4A),
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             Text(
               description,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 15,
-                height: 1.5,
+                fontSize: 14,
+                height: 1.35,
                 color: Color(0xFF6B7280),
               ),
             ),
 
             if (selected) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
               Icon(
                 Icons.check_circle,
+                size: 22,
                 color: isInternal
                     ? const Color(0xFF5B4BC4)
                     : const Color(0xFF2F8F9D),

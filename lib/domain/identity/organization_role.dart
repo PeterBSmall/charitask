@@ -9,6 +9,7 @@ enum OrganizationRole {
   ceo,
   executiveDirector,
   administrator,
+  it,
   boardMember,
   officeManager,
   other,

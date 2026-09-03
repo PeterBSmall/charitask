@@ -26,6 +26,8 @@ class AccountForm extends StatefulWidget {
 class AccountFormState extends State<AccountForm> {
   final _formKey = GlobalKey<FormState>();
 
+  bool _obscurePassword = true;
+
   @override
   void initState() {
     super.initState();
@@ -130,10 +132,23 @@ class AccountFormState extends State<AccountForm> {
 
           TextFormField(
             controller: widget.passwordController,
-            obscureText: true,
-            decoration: const InputDecoration(
+            obscureText: _obscurePassword,
+            decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Create a password',
+              suffixIcon: IconButton(
+                tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+              ),
             ),
             validator: (value) {
               final password = value ?? '';

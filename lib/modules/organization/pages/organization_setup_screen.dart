@@ -11,17 +11,20 @@ import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 
 import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_creation_step.dart';
 import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspace.dart';
+import 'package:charitask/modules/onboarding/controllers/onboarding_controller.dart';
 
 class OrganizationSetupScreen extends StatelessWidget {
   final void Function(CTJourneyController controller)? onComplete;
   final void Function(CTJourneyController controller)? onCompleteProfile;
   final String firstName;
+  final OnboardingController onboardingController;
 
   const OrganizationSetupScreen({
     super.key,
     this.onComplete,
     this.onCompleteProfile,
     required this.firstName,
+    required this.onboardingController,
   });
 
   @override
@@ -66,6 +69,7 @@ class OrganizationSetupScreen extends StatelessWidget {
         (journeyController, next, back) => CTWorkspaceCreationStep(
           profile: journeyController.missionProfile,
           journeyController: journeyController,
+          onboardingController: onboardingController,
 
           // Go directly to the Foundation Workspace.
           onContinue: () {

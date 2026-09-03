@@ -248,13 +248,13 @@ class _YourRolePageState extends State<YourRolePage> {
               ),
 
               RoleOptionCard(
-                role: OrganizationRole.boardMember,
+                role: OrganizationRole.it,
                 title: 'IT',
                 description: 'I manage technology and systems.',
                 icon: Icons.devices_outlined,
                 accentColor: const Color(0xFF5B7FEA),
-                selected: _selectedRole == OrganizationRole.boardMember,
-                onTap: () => _selectRole(OrganizationRole.boardMember),
+                selected: _selectedRole == OrganizationRole.it,
+                onTap: () => _selectRole(OrganizationRole.it),
               ),
 
               RoleOptionCard(

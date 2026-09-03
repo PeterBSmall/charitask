@@ -62,21 +62,20 @@ class CTWorkspaceCompletionScreen extends StatelessWidget {
                     Expanded(
                       child: _ActionCard(
                         icon: Icons.person_outline_rounded,
-                        title: 'Complete Your Personal Profile',
+                        title: 'Create Your Personal Workspace',
                         description:
-                            'Add the personal details that represent you in your organization.',
+                            'Set up your personal workspace to organize your work, tasks, and collaborations in one place.',
                         highlights: const [
-                          'Photo & contact information',
-                          'Assignments & roles',
-                          'Access & permissions',
-                          'Preferences',
+                          'Personal workspace setup',
+                          'Manage your tasks',
+                          'Organize your projects',
+                          'Customize your workspace',
                         ],
-                        buttonLabel: 'Complete Profile',
+                        buttonLabel: 'Create Workspace',
                         isPrimary: true,
                         onPressed: onCompleteProfile,
                       ),
                     ),
-
                     SizedBox(width: narrow ? 12 : 18),
 
                     Expanded(

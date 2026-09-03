@@ -10,6 +10,7 @@ class AccountFormPanel extends StatelessWidget {
   final TextEditingController passwordController;
   final GlobalKey<AccountFormState> accountFormKey;
   final VoidCallback onContinue;
+  final VoidCallback onSignIn;
 
   const AccountFormPanel({
     super.key,
@@ -20,6 +21,7 @@ class AccountFormPanel extends StatelessWidget {
     required this.passwordController,
     required this.accountFormKey,
     required this.onContinue,
+    required this.onSignIn,
   });
 
   @override
@@ -36,19 +38,22 @@ class AccountFormPanel extends StatelessWidget {
             // -------------------------------------------------------------
             Align(
               alignment: Alignment.topRight,
-              child: RichText(
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  children: const [
-                    TextSpan(text: 'Already have an account? '),
-                    TextSpan(
-                      text: 'Sign in',
-                      style: TextStyle(
-                        color: Color(0xFF5633D8),
-                        fontWeight: FontWeight.w700,
+              child: GestureDetector(
+                onTap: onSignIn,
+                child: RichText(
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    children: const [
+                      TextSpan(text: 'Already have an account? '),
+                      TextSpan(
+                        text: 'Sign in',
+                        style: TextStyle(
+                          color: Color(0xFF5633D8),
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

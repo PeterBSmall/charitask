@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:charitask/shared/widgets/navigation/ct_sidebar.dart';
 import 'package:charitask/shared/widgets/navigation/ct_tile.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class FoundationSidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -104,9 +106,20 @@ class FoundationSidebar extends StatelessWidget {
             icon: Icons.logout_rounded,
             label: 'Log Out',
             selected: false,
-            onTap: () {},
-          ),
+            onTap: () async {
+              try {
+                await Supabase.instance.client.auth.signOut();
 
+                if (!context.mounted) return;
+
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              } catch (error) {
+                debugPrint('>>> LOGOUT ERROR: $error');
+              }
+            },
+          ),
           const SizedBox(height: 20),
         ],
       ),

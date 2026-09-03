@@ -43,7 +43,21 @@ Future<void> main(List<String> args) async {
 
     if (startupUri != null) {
       debugPrint('>>> STARTUP DEEP LINK: $startupUri');
+      try {
+        final desktopPath =
+            Platform.environment['USERPROFILE'] ?? Platform.environment['TEMP'];
 
+        if (desktopPath != null) {
+          final debugFile = File(
+            '$desktopPath\\Desktop\\charitask_startup_debug.txt',
+          );
+
+          await debugFile.writeAsString(
+            'STARTUP DEEP LINK: $startupUri\n',
+            mode: FileMode.append,
+          );
+        }
+      } catch (_) {}
       launchedFromAuthCallback =
           startupUri.scheme == 'chari-task' &&
           startupUri.host == 'auth-callback';
@@ -65,6 +79,33 @@ Future<void> main(List<String> args) async {
   final supabase = Supabase.instance.client;
 
   // ---------------------------------------------------------------
+  // PROCESS WINDOWS AUTH CALLBACK
+  // ---------------------------------------------------------------
+  if (launchedFromAuthCallback && startupUri != null) {
+    final code = startupUri.queryParameters['code'];
+
+    if (code != null && code.isNotEmpty) {
+      debugPrint('>>> AUTH CALLBACK CODE FOUND');
+      debugPrint('>>> EXCHANGING AUTH CODE FOR SESSION');
+
+      try {
+        final response = await supabase.auth.exchangeCodeForSession(code);
+
+        debugPrint(
+          '>>> AUTH CODE EXCHANGE COMPLETE | '
+          'USER: ${response.session?.user.email}',
+        );
+      } catch (error, stackTrace) {
+        debugPrint('>>> AUTH CODE EXCHANGE FAILED: $error');
+        debugPrint('$stackTrace');
+      }
+    } else {
+      debugPrint('>>> AUTH CALLBACK DID NOT CONTAIN A CODE');
+      debugPrint('>>> CALLBACK URI: $startupUri');
+    }
+  }
+
+  // ---------------------------------------------------------------
   // AUTH EVENTS
   // ---------------------------------------------------------------
   supabase.auth.onAuthStateChange.listen(
@@ -82,23 +123,6 @@ Future<void> main(List<String> args) async {
       debugPrint('>>> AUTH ERROR: $error');
     },
   );
-
-  // ---------------------------------------------------------------
-  // PROCESS WINDOWS AUTH CALLBACK
-  // ---------------------------------------------------------------
-  if (launchedFromAuthCallback && startupUri != null) {
-    debugPrint('>>> PROCESSING CHARITASK AUTH CALLBACK');
-
-    try {
-      final response = await supabase.auth.getSessionFromUrl(startupUri);
-
-      debugPrint('>>> AUTH CALLBACK PROCESSED');
-      debugPrint('>>> CALLBACK USER: ${response.session?.user.email}');
-    } catch (error, stackTrace) {
-      debugPrint('>>> AUTH CALLBACK ERROR: $error');
-      debugPrint('$stackTrace');
-    }
-  }
 
   // ---------------------------------------------------------------
   // WINDOWS PROTOCOL REGISTRATION

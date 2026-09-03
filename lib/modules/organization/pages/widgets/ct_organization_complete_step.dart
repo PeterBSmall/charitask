@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_creation_step.dart';
+
+import 'package:charitask/modules/onboarding/controllers/onboarding_controller.dart';
+
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 class CTOrganizationCompleteStep extends StatelessWidget {
   final VoidCallback onEnterWorkspace;
   final VoidCallback onBack;
+
   final CTJourneyController controller;
+  final OnboardingController onboardingController;
 
   const CTOrganizationCompleteStep({
     super.key,
     required this.controller,
+    required this.onboardingController,
     required this.onEnterWorkspace,
     required this.onBack,
   });
@@ -20,9 +26,10 @@ class CTOrganizationCompleteStep extends StatelessWidget {
     return CTWorkspaceCreationStep(
       profile: controller.missionProfile,
       journeyController: controller,
+      onboardingController: onboardingController,
       onContinue: onEnterWorkspace,
       onCompleteProfile: () {
-        // Profile completion will be connected here.
+        // Personal workspace flow will be connected here.
       },
     );
   }
