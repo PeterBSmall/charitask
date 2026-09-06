@@ -32,14 +32,10 @@ class PersonalDetailsStep extends StatelessWidget {
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 900;
 
-        return SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: EdgeInsets.all(isCompact ? 20 : 32),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1180),
-              child: _buildContent(context, isCompact: isCompact),
-            ),
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1250),
+            child: _buildContent(context, isCompact: isCompact),
           ),
         );
       },
@@ -47,51 +43,21 @@ class PersonalDetailsStep extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, {required bool isCompact}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildStepIndicator(),
-
-        const SizedBox(height: 24),
-
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x12000000),
-                blurRadius: 24,
-                offset: Offset(0, 8),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 24,
+            offset: Offset(0, 8),
           ),
-          child: isCompact ? _buildCompactLayout() : _buildWideLayout(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStepIndicator() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF6246E5),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: const Text(
-          'STEP 1 OF 2',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .7,
-          ),
-        ),
+        ],
       ),
+      child: isCompact ? _buildCompactLayout() : _buildWideLayout(),
     );
   }
 

@@ -93,7 +93,7 @@ Future<void> main(List<String> args) async {
 
         debugPrint(
           '>>> AUTH CODE EXCHANGE COMPLETE | '
-          'USER: ${response.session?.user.email}',
+          'USER: ${response.session.user.email}',
         );
       } catch (error, stackTrace) {
         debugPrint('>>> AUTH CODE EXCHANGE FAILED: $error');
@@ -104,7 +104,18 @@ Future<void> main(List<String> args) async {
       debugPrint('>>> CALLBACK URI: $startupUri');
     }
   }
-
+  // ---------------------------------------------------------------
+  // DEVELOPMENT AUTH RESET
+  // ---------------------------------------------------------------
+  // During development, start normal app launches logged out so
+  // onboarding can be tested from the beginning.
+  //
+  // Auth callback launches are excluded so email confirmation/login
+  // can still establish the session normally.
+  if (!launchedFromAuthCallback) {
+    await supabase.auth.signOut();
+    debugPrint('>>> DEVELOPMENT AUTH RESET: SIGNED OUT');
+  }
   // ---------------------------------------------------------------
   // AUTH EVENTS
   // ---------------------------------------------------------------
