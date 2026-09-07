@@ -10,21 +10,18 @@ class CTTopNavigation extends StatelessWidget {
     required this.onSelected,
   });
 
-  static const _items = ['Modules', 'Tasks', 'Activity', 'Notes', 'Settings'];
+  static const _items = ['Overview', 'Tasks', 'Activity', 'Notes', 'Reports'];
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-
-        // At this width there is not enough room for the full
-        // navigation + search + actions on one row.
-        final compact = width < 850;
+        final compact = width < 900;
 
         return Container(
-          height: 88,
-          padding: EdgeInsets.symmetric(horizontal: compact ? 20 : 40),
+          height: 72,
+          padding: EdgeInsets.symmetric(horizontal: compact ? 20 : 32),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
@@ -33,82 +30,79 @@ class CTTopNavigation extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // NAVIGATION
-              if (!compact)
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List.generate(
-                        _items.length,
-                        (index) => _buildNavItem(
-                          label: _items[index],
-                          selected: selectedIndex == index,
-                          onTap: () => onSelected(index),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-              // SEARCH
+              // ------------------------------------------------------------
+              // TOP NAVIGATION
+              // ------------------------------------------------------------
               Expanded(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: compact ? 420 : 300),
-                  child: SizedBox(
-                    height: 46,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search...',
-                        hintStyle: const TextStyle(
-                          color: Color(0xFF8A94A3),
-                          fontSize: 15,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: Color(0xFF4B5563),
-                          size: 24,
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF6F7FB),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(
+                      _items.length,
+                      (index) => _buildNavItem(
+                        label: _items[index],
+                        selected: selectedIndex == index,
+                        onTap: () => onSelected(index),
                       ),
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(width: 16),
+              // ------------------------------------------------------------
+              // SEARCH
+              // ------------------------------------------------------------
+              SizedBox(
+                width: compact ? 180 : 320,
+                height: 44,
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    hintStyle: const TextStyle(
+                      color: Color(0xFF8A94A3),
+                      fontSize: 14,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFF4B5563),
+                      size: 23,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF6F7FB),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                  ),
+                ),
+              ),
 
+              const SizedBox(width: 18),
+
+              // ------------------------------------------------------------
               // NOTIFICATIONS
+              // ------------------------------------------------------------
               _buildIconButton(
                 icon: Icons.notifications_none_rounded,
                 onTap: () {},
               ),
 
-              if (!compact) ...[
-                const SizedBox(width: 16),
+              const SizedBox(width: 8),
 
-                // HELP
-                _buildIconButton(
-                  icon: Icons.help_outline_rounded,
-                  onTap: () {},
-                ),
+              // ------------------------------------------------------------
+              // HELP
+              // ------------------------------------------------------------
+              _buildIconButton(icon: Icons.help_outline_rounded, onTap: () {}),
 
-                const SizedBox(width: 24),
-              ] else
-                const SizedBox(width: 8),
+              const SizedBox(width: 12),
 
+              // ------------------------------------------------------------
               // PROFILE
+              // ------------------------------------------------------------
               Container(
-                width: 48,
-                height: 48,
+                width: 44,
+                height: 44,
                 decoration: const BoxDecoration(
                   color: Color(0xFFF0F1F5),
                   shape: BoxShape.circle,
@@ -116,7 +110,7 @@ class CTTopNavigation extends StatelessWidget {
                 child: const Icon(
                   Icons.person_rounded,
                   color: Color(0xFF5B6472),
-                  size: 25,
+                  size: 23,
                 ),
               ),
             ],
@@ -133,9 +127,10 @@ class CTTopNavigation extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        height: 88,
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         alignment: Alignment.center,
         child: Stack(
           alignment: Alignment.center,
@@ -155,7 +150,7 @@ class CTTopNavigation extends StatelessWidget {
               Positioned(
                 bottom: 0,
                 child: Container(
-                  width: 62,
+                  width: 58,
                   height: 3,
                   decoration: BoxDecoration(
                     color: const Color(0xFF5B4BC4),
@@ -173,13 +168,16 @@ class CTTopNavigation extends StatelessWidget {
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 42,
-        height: 42,
-        child: Icon(icon, color: const Color(0xFF3D4756), size: 26),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: Icon(icon, color: const Color(0xFF3D4756), size: 25),
+        ),
       ),
     );
   }

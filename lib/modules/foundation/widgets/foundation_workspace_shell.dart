@@ -30,12 +30,19 @@ class FoundationWorkspaceShell extends StatefulWidget {
 
 class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
   int _selectedIndex = 0;
-
   int _topNavIndex = 0;
+
+  bool _isSidebarCollapsed = false;
 
   void _navigateTo(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  void _toggleSidebar() {
+    setState(() {
+      _isSidebarCollapsed = !_isSidebarCollapsed;
     });
   }
 
@@ -72,9 +79,16 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
     return Scaffold(
       body: Row(
         children: [
-          FoundationSidebar(
-            selectedIndex: _selectedIndex,
-            onSelected: _navigateTo,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            width: _isSidebarCollapsed ? 72 : 260,
+            child: FoundationSidebar(
+              selectedIndex: _selectedIndex,
+              onSelected: _navigateTo,
+              isCollapsed: _isSidebarCollapsed,
+              onToggleCollapse: _toggleSidebar,
+            ),
           ),
 
           Expanded(

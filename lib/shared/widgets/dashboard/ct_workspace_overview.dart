@@ -14,19 +14,14 @@ class CTWorkspaceOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: config.backgroundGradient,
-        ),
-        boxShadow: const [
+      padding: EdgeInsets.zero,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(28)),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 30,
-            offset: Offset(0, 16),
+            color: Color(0x26000000),
+            blurRadius: 28,
+            offset: Offset(0, 14),
           ),
         ],
       ),
@@ -52,28 +47,82 @@ class CTWorkspaceOverview extends StatelessWidget {
   ) {
     final isNarrow = constraints.maxWidth < 850;
 
-    if (isNarrow) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildCompletedText(),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 270),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF17142D), Color(0xFF30206F), Color(0xFF4B20D4)],
+            stops: [0.0, 0.52, 1.0],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Decorative purple glow
+            Positioned(
+              right: -120,
+              top: -180,
+              child: Container(
+                width: 520,
+                height: 520,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF8B5CF6).withValues(alpha: 0.65),
+                      const Color(0xFF5B21B6).withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-          const SizedBox(height: 24),
+            // Decorative lower-right glow
+            Positioned(
+              right: -100,
+              bottom: -220,
+              child: Container(
+                width: 600,
+                height: 420,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF6D28D9).withValues(alpha: 0.8),
+                      const Color(0xFF4C1D95).withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-          _buildCompletedIllustration(),
-        ],
-      );
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(flex: 6, child: _buildCompletedText()),
-
-        const SizedBox(width: 28),
-
-        Expanded(flex: 4, child: _buildCompletedIllustration()),
-      ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
+              child: isNarrow
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildCompletedText(),
+                        const SizedBox(height: 24),
+                        _buildCompletedIllustration(),
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(flex: 6, child: _buildCompletedText()),
+                        const SizedBox(width: 28),
+                        Expanded(flex: 4, child: _buildCompletedIllustration()),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -82,36 +131,58 @@ class CTWorkspaceOverview extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          config.greeting,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.white70,
+        // Workspace status pill
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 9,
+                height: 9,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF9BE564),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 9),
+              const Text(
+                'ORGANIZATION WORKSPACE',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
         ),
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 22),
 
         Text(
           config.welcomeMessage,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontSize: 30,
+            fontSize: 32,
             height: 1.18,
             fontWeight: FontWeight.w700,
             color: Colors.white,
           ),
         ),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
 
         Text(
           config.organizationName,
-          maxLines: 4,
+          maxLines: 3,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontSize: 16,
@@ -121,12 +192,13 @@ class CTWorkspaceOverview extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 24),
-
-        CTButton(
-          label: config.primaryButtonLabel,
-          onPressed: config.onPrimaryPressed,
-        ),
+        if (config.primaryButtonLabel.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          CTButton(
+            label: config.primaryButtonLabel,
+            onPressed: config.onPrimaryPressed,
+          ),
+        ],
       ],
     );
   }
@@ -136,79 +208,95 @@ class CTWorkspaceOverview extends StatelessWidget {
       height: 190,
       child: Center(
         child: Stack(
-          alignment: Alignment.bottomCenter,
+          alignment: Alignment.center,
           children: [
-            // Ground
+            // Glass organization card
             Container(
-              width: 280,
-              height: 24,
+              width: 220,
+              height: 165,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(100),
-              ),
-            ),
-
-            // Organization building
-            Container(
-              width: 180,
-              height: 125,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(18),
-                ),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                color: Colors.white.withValues(alpha: 0.13),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 30,
+                    offset: const Offset(0, 18),
+                  ),
+                ],
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 12),
-
                   Icon(
                     Icons.account_balance_rounded,
-                    size: 46,
-                    color: Colors.white.withValues(alpha: 0.92),
+                    size: 52,
+                    color: Colors.white.withValues(alpha: 0.95),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _illustrationWindow(),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       _illustrationWindow(),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       _illustrationWindow(),
                     ],
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
 
                   Container(
-                    width: 48,
+                    width: 62,
                     height: 20,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.20),
-                      borderRadius: BorderRadius.circular(7),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Status badge
+            // Green completed badge
             Positioned(
-              right: 8,
-              top: 18,
-              child: _illustrationBadge(icon: Icons.check_rounded),
+              right: 2,
+              top: 2,
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF8BCB5A),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
             ),
 
             // Activity badge
             Positioned(
-              left: 14,
-              top: 42,
-              child: _illustrationBadge(icon: Icons.trending_up_rounded),
+              left: 0,
+              top: 78,
+              child: _heroFloatingBadge(icon: Icons.trending_up_rounded),
+            ),
+
+            // Decorative sparkle
+            Positioned(
+              right: -8,
+              bottom: 42,
+              child: Icon(
+                Icons.auto_awesome,
+                size: 25,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
             ),
           ],
         ),
@@ -237,6 +325,19 @@ class CTWorkspaceOverview extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
       ),
       child: Icon(icon, size: 21, color: Colors.white),
+    );
+  }
+
+  Widget _heroFloatingBadge({required IconData icon}) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+      ),
+      child: Icon(icon, size: 23, color: Colors.white),
     );
   }
 

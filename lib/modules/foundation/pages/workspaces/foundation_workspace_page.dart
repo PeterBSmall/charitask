@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/foundation/pages/organization/organization_workspace.dart';
-import 'package:charitask/modules/foundation/pages/workspaces/foundation_metrics_data.dart';
+import 'package:charitask/shared/models/ct_metric.dart';
+import 'package:charitask/shared/widgets/dashboard/index.dart';
+import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_hero.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_workspace_shell.dart';
 
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
-import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_active_tasks.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_recent_activity.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_pinned_notes.dart';
@@ -101,35 +102,53 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Foundation',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF2F3A4A),
-              ),
-            ),
-
-            const SizedBox(height: 6),
-
-            const Text(
-              'Build the structure that supports your organization.',
-              style: TextStyle(fontSize: 16, color: Color(0xFF6B7280)),
-            ),
-
-            const SizedBox(height: 4),
-
             FoundationHero(journeyController: widget.journeyController),
 
             const SizedBox(height: 16),
 
             CTWorkspaceMetrics(
-              metrics: foundationMetrics,
-              onMetricSelected: (index) {
-                if (index == 1) {
-                  widget.onNavigate(2);
-                }
-              },
+              metrics: const [
+                CTMetric(
+                  icon: Icons.account_balance_outlined,
+                  value: 'View & manage',
+                  label: 'Org',
+                ),
+                CTMetric(
+                  icon: Icons.people_outline,
+                  value: '148 Members',
+                  label: 'People',
+                ),
+                CTMetric(
+                  icon: Icons.groups_outlined,
+                  value: '12 Teams',
+                  label: 'Groups',
+                ),
+                CTMetric(
+                  icon: Icons.location_on_outlined,
+                  value: '4 Active',
+                  label: 'Locations',
+                ),
+                CTMetric(
+                  icon: Icons.dashboard_customize_outlined,
+                  value: '7 Modules',
+                  label: 'Suites',
+                ),
+                CTMetric(
+                  icon: Icons.task_alt_outlined,
+                  value: '18 Pending',
+                  label: 'Tasks',
+                ),
+                CTMetric(
+                  icon: Icons.notifications_none_outlined,
+                  value: '3 Critical',
+                  label: 'Alerts',
+                ),
+                CTMetric(
+                  icon: Icons.campaign_outlined,
+                  value: '5 Channels',
+                  label: 'Communications',
+                ),
+              ],
             ),
 
             const SizedBox(height: 24),
@@ -138,28 +157,19 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
 
-                // Large desktop:
-                // Three equal cards matching the reference design.
                 if (width >= 1100) {
                   return const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(child: FoundationActiveTasks()),
-
                       SizedBox(width: 24),
-
                       Expanded(child: FoundationRecentActivity()),
-
                       SizedBox(width: 24),
-
                       Expanded(child: FoundationPinnedNotes()),
                     ],
                   );
                 }
 
-                // Medium width:
-                // Two columns, with the actual available width calculated
-                // instead of using a fixed card width.
                 if (width >= 700) {
                   final cardWidth = (width - 24) / 2;
 
@@ -171,12 +181,10 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
                         width: cardWidth,
                         child: const FoundationActiveTasks(),
                       ),
-
                       SizedBox(
                         width: cardWidth,
                         child: const FoundationRecentActivity(),
                       ),
-
                       SizedBox(
                         width: cardWidth,
                         child: const FoundationPinnedNotes(),
@@ -185,24 +193,19 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
                   );
                 }
 
-                // Narrow:
-                // One full-width card at a time.
                 return const Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     FoundationActiveTasks(),
-
                     SizedBox(height: 24),
-
                     FoundationRecentActivity(),
-
                     SizedBox(height: 24),
-
                     FoundationPinnedNotes(),
                   ],
                 );
               },
             ),
+
             const SizedBox(height: AppSpacing.lg),
           ],
         ),

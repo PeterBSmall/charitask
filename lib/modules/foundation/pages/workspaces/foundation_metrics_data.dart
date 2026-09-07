@@ -32,4 +32,10 @@ const foundationMetrics = [
     value: '3 Critical',
     label: 'Alerts',
   ),
+
+  CTMetric(
+    icon: Icons.campaign_outlined,
+    value: '5 Channels',
+    label: 'Communications',
+  ),
 ];

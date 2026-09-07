@@ -4,7 +4,6 @@ import 'package:charitask/shared/models/ct_metric.dart';
 import 'package:charitask/shared/design_system/foundations/app_colors.dart';
 import 'package:charitask/shared/design_system/foundations/app_radius.dart';
 import 'package:charitask/shared/design_system/foundations/app_shadows.dart';
-import 'package:charitask/shared/design_system/foundations/app_spacing.dart';
 
 class CTMetricCard extends StatelessWidget {
   final CTMetric metric;
@@ -27,7 +26,7 @@ class CTMetricCard extends StatelessWidget {
         return const Color(0xFF4F6FD6);
 
       case 'Groups':
-        return const Color(0xFF5B6472);
+        return const Color(0xFF6F9366);
 
       case 'Locations':
         return const Color(0xFFC8872E);
@@ -40,6 +39,9 @@ class CTMetricCard extends StatelessWidget {
 
       case 'Alerts':
         return const Color(0xFFC65A4A);
+
+      case 'Communications':
+        return const Color(0xFF6B5DD3);
 
       default:
         return AppColors.missionPurple;
@@ -62,25 +64,23 @@ class CTMetricCard extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOut,
-            constraints: const BoxConstraints(minHeight: 145),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.md,
-            ),
+
+            // Compact dashboard card height.
+            height: 80,
+
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+
             decoration: BoxDecoration(
               color: isSelected
                   ? color.withValues(alpha: 0.08)
                   : AppColors.surface,
-
               borderRadius: BorderRadius.circular(AppRadius.large),
-
               border: Border.all(
                 color: isSelected
                     ? color.withValues(alpha: 0.50)
                     : Colors.transparent,
                 width: isSelected ? 1.5 : 1,
               ),
-
               boxShadow: isSelected
                   ? [
                       BoxShadow(
@@ -91,52 +91,72 @@ class CTMetricCard extends StatelessWidget {
                     ]
                   : AppShadows.small,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+
+            child: Row(
               children: [
+                // Icon
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  width: 48,
-                  height: 48,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? color.withValues(alpha: 0.26)
                         : color.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(metric.icon, color: color, size: 24),
+                  child: Icon(metric.icon, color: color, size: 21),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(width: 12),
 
-                // Main category
-                Text(
-                  metric.label,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected ? color : const Color(0xFF2F3A4A),
-                    height: 1.15,
+                // Text
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        metric.label == 'Org' ? 'Org Profile' : metric.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                          color: isSelected ? color : const Color(0xFF2F3A4A),
+                          height: 1.15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 3),
+
+                      Text(
+                        metric.label == 'Org' ? 'View & manage' : metric.value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSelected
+                              ? FontWeight.w500
+                              : FontWeight.w400,
+                          color: isSelected ? color : const Color(0xFF7B8494),
+                          height: 1.15,
+                        ),
+                      ),
+                    ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
                 ),
 
-                const SizedBox(height: 5),
+                const SizedBox(width: 6),
 
-                // Detail / count
-                Text(
-                  metric.value,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-                    color: isSelected ? color : const Color(0xFF7B8494),
-                    height: 1.15,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+                // Arrow
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: color.withValues(alpha: 0.85),
                 ),
               ],
             ),
