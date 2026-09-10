@@ -29,71 +29,103 @@ class _WorkspaceTemplateSelectionPageState
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 900;
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FC),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isCompact = constraints.maxWidth < 900;
 
-        return SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(
-            isCompact ? 24 : 48,
-            isCompact ? 24 : 28,
-            isCompact ? 24 : 48,
-            isCompact ? 28 : 24,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1120),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
+          return SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              isCompact ? 24 : 48,
+              isCompact ? 24 : 28,
+              isCompact ? 24 : 48,
+              isCompact ? 28 : 24,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildBackButton(),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 10),
 
-                  _buildCategory(
-                    title: 'Mission & Community',
-                    icon: Icons.groups_outlined,
-                    templates: missionCommunityTemplates,
-                    isCompact: isCompact,
-                  ),
+                    _buildHeader(),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                  _buildCategory(
-                    title: 'Fundraising & Programs',
-                    icon: Icons.volunteer_activism_outlined,
-                    templates: fundraisingProgramsTemplates,
-                    isCompact: isCompact,
-                  ),
+                    _buildCategory(
+                      title: 'Mission & Community',
+                      icon: Icons.groups_outlined,
+                      templates: missionCommunityTemplates,
+                      isCompact: isCompact,
+                    ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                  _buildCategory(
-                    title: 'People, Resources & Compliance',
-                    icon: Icons.shield_outlined,
-                    templates: peopleResourcesComplianceTemplates,
-                    isCompact: isCompact,
-                  ),
+                    _buildCategory(
+                      title: 'Fundraising & Programs',
+                      icon: Icons.volunteer_activism_outlined,
+                      templates: fundraisingProgramsTemplates,
+                      isCompact: isCompact,
+                    ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                  _buildCategory(
-                    title: 'Creative & Flexible',
-                    icon: Icons.campaign_outlined,
-                    templates: creativeFlexibleTemplates,
-                    isCompact: isCompact,
-                  ),
+                    _buildCategory(
+                      title: 'People, Resources & Compliance',
+                      icon: Icons.shield_outlined,
+                      templates: peopleResourcesComplianceTemplates,
+                      isCompact: isCompact,
+                    ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
-                  _buildNavigation(),
-                ],
+                    _buildCategory(
+                      title: 'Creative & Flexible',
+                      icon: Icons.campaign_outlined,
+                      templates: creativeFlexibleTemplates,
+                      isCompact: isCompact,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    _buildNavigation(),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBackButton() {
+    return InkWell(
+      onTap: widget.onBack,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.arrow_back_rounded, size: 18, color: _purple),
+            SizedBox(width: 6),
+            Text(
+              'Back',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: _purple,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

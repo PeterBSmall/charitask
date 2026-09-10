@@ -5,7 +5,7 @@ import 'package:charitask/shared/widgets/workspace/ct_metric_card.dart';
 
 class CTWorkspaceMetrics extends StatefulWidget {
   final List<CTMetric> metrics;
-  final ValueChanged<int>? onMetricSelected;
+  final ValueChanged<CTMetric>? onMetricSelected;
 
   const CTWorkspaceMetrics({
     super.key,
@@ -61,7 +61,7 @@ class _CTWorkspaceMetricsState extends State<CTWorkspaceMetrics> {
       }
     });
 
-    widget.onMetricSelected?.call(index);
+    widget.onMetricSelected?.call(_metrics[index]);
   }
 
   void _startDrag(int index) {

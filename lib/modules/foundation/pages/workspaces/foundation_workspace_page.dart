@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/foundation/pages/organization/organization_workspace.dart';
-import 'package:charitask/shared/models/ct_metric.dart';
-import 'package:charitask/shared/widgets/dashboard/index.dart';
-import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
+import 'package:charitask/modules/foundation/widgets/foundation_active_tasks.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_hero.dart';
+import 'package:charitask/modules/foundation/widgets/foundation_pinned_notes.dart';
+import 'package:charitask/modules/foundation/widgets/foundation_recent_activity.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_workspace_shell.dart';
+import 'package:charitask/modules/people/pages/people_page.dart';
 
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
-import 'package:charitask/modules/foundation/widgets/foundation_active_tasks.dart';
-import 'package:charitask/modules/foundation/widgets/foundation_recent_activity.dart';
-import 'package:charitask/modules/foundation/widgets/foundation_pinned_notes.dart';
-import 'package:charitask/modules/people/pages/people_page.dart';
+import 'package:charitask/shared/models/ct_metric.dart';
+import 'package:charitask/shared/widgets/dashboard/index.dart';
+import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
+import 'package:charitask/modules/workspaces/templates/pages/workspace_template_selection_page.dart';
 
 class FoundationWorkspacePage extends StatelessWidget {
   final CTJourneyController journeyController;
@@ -58,6 +59,10 @@ class FoundationWorkspacePage extends StatelessWidget {
   }
 }
 
+// ============================================================================
+// FOUNDATION DASHBOARD
+// ============================================================================
+
 class FoundationDashboard extends StatefulWidget {
   final CTJourneyController journeyController;
   final ValueChanged<int> onNavigate;
@@ -102,10 +107,16 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ----------------------------------------------------------------
+            // HERO
+            // ----------------------------------------------------------------
             FoundationHero(journeyController: widget.journeyController),
 
             const SizedBox(height: 16),
 
+            // ----------------------------------------------------------------
+            // QUICK ACCESS CARDS
+            // ----------------------------------------------------------------
             CTWorkspaceMetrics(
               metrics: const [
                 CTMetric(
@@ -149,10 +160,51 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
                   label: 'Communications',
                 ),
               ],
-            ),
 
+              onMetricSelected: (metric) {
+                switch (metric.label) {
+                  case 'Org':
+                    // Organization
+                    widget.onNavigate(1);
+                    break;
+
+                  case 'People':
+                    // People
+                    widget.onNavigate(2);
+                    break;
+
+                  case 'Groups':
+                    // Groups
+                    widget.onNavigate(3);
+                    break;
+
+                  case 'Locations':
+                    // Locations will be connected when that page is ready.
+                    break;
+
+                  case 'Suites':
+                    // Suites will be connected when the module system is ready.
+                    break;
+
+                  case 'Tasks':
+                    // Tasks will be connected when the task workspace is ready.
+                    break;
+
+                  case 'Alerts':
+                    // Alerts will be connected when the alert center is ready.
+                    break;
+
+                  case 'Communications':
+                    // Communications will be connected when the communications workspace is ready.
+                    break;
+                }
+              },
+            ),
             const SizedBox(height: 24),
 
+            // ----------------------------------------------------------------
+            // DASHBOARD PANELS
+            // ----------------------------------------------------------------
             LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
@@ -213,6 +265,10 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
     );
   }
 }
+
+// ============================================================================
+// PLACEHOLDER PAGE
+// ============================================================================
 
 class _FoundationPlaceholderPage extends StatelessWidget {
   final String title;

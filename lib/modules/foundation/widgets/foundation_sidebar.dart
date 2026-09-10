@@ -13,6 +13,7 @@ class FoundationSidebar extends StatelessWidget {
 
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
+  final VoidCallback onCreateWorkspace;
 
   const FoundationSidebar({
     super.key,
@@ -20,6 +21,7 @@ class FoundationSidebar extends StatelessWidget {
     required this.onSelected,
     required this.isCollapsed,
     required this.onToggleCollapse,
+    required this.onCreateWorkspace,
   });
 
   @override
@@ -36,7 +38,13 @@ class FoundationSidebar extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             const SizedBox(height: 12),
+            const SizedBox(height: 12),
+
             const FoundationWorkspaceSwitcher(),
+
+            const SizedBox(height: 6),
+
+            _buildCreateWorkspaceButton(),
 
             const SizedBox(height: 8),
 
@@ -171,9 +179,61 @@ class FoundationSidebar extends StatelessWidget {
     );
   }
 
+  Widget _buildCreateWorkspaceButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onCreateWorkspace,
+          child: Container(
+            height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8F0),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.transparent),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFE9D0),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    size: 28,
+                    color: Color(0xFFE87500),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Create Workspace',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF2F3A4A),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCollapsedSidebar(BuildContext context) {
     return Container(
-      color: const Color(0xFFF1EEE8),
+      color: const Color(0xFFF8F7FF),
       child: Column(
         children: [
           const SizedBox(height: 24),
