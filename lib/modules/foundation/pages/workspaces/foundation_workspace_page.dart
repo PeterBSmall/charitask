@@ -23,6 +23,7 @@ class FoundationWorkspacePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FoundationWorkspaceShell(
+      firstName: journeyController.firstName,
       dashboardBuilder: (onNavigate) => FoundationDashboard(
         journeyController: journeyController,
         onNavigate: onNavigate,

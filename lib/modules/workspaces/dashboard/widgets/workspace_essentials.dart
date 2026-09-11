@@ -86,11 +86,6 @@ class WorkspaceEssentials extends StatelessWidget {
                   ],
                 ),
               ),
-              OutlinedButton.icon(
-                onPressed: null,
-                icon: Icon(Icons.settings_outlined, size: 16),
-                label: Text('Customize Dashboard'),
-              ),
             ],
           ),
 

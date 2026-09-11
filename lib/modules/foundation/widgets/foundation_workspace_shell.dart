@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'foundation_sidebar.dart';
-
 import 'package:charitask/shared/widgets/navigation/ct_top_navigation.dart';
-
 import 'package:charitask/modules/workspaces/templates/pages/workspace_template_selection_page.dart';
 import 'package:charitask/modules/workspaces/templates/data/workspace_template_data.dart';
 
@@ -14,6 +12,7 @@ import 'package:charitask/modules/workspaces/dashboard/pages/workspace_dashboard
 
 class FoundationWorkspaceShell extends StatefulWidget {
   final Widget Function(ValueChanged<int> onNavigate) dashboardBuilder;
+  final String firstName;
   final Widget organization;
   final Widget people;
   final Widget groups;
@@ -24,6 +23,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
   const FoundationWorkspaceShell({
     super.key,
     required this.dashboardBuilder,
+    required this.firstName,
     required this.organization,
     required this.people,
     required this.groups,
@@ -43,13 +43,14 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
 
   bool _isSidebarCollapsed = false;
   bool _isCreatingWorkspace = false;
-
+  bool _isCustomizingDashboard = false;
   CTWorkspace? _activeWorkspace;
 
   void _navigateTo(int index) {
     setState(() {
       _selectedIndex = index;
       _activeWorkspace = null;
+      _isCustomizingDashboard = false;
     });
   }
 
@@ -62,6 +63,12 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
   void _createWorkspace() {
     setState(() {
       _isCreatingWorkspace = true;
+    });
+  }
+
+  void _toggleDashboardCustomization() {
+    setState(() {
+      _isCustomizingDashboard = !_isCustomizingDashboard;
     });
   }
 
@@ -104,7 +111,12 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
     }
 
     if (_activeWorkspace != null) {
-      return WorkspaceDashboardPage(workspace: _activeWorkspace!);
+      return WorkspaceDashboardPage(
+        workspace: _activeWorkspace!,
+        firstName: widget.firstName,
+        isCustomizing: _isCustomizingDashboard,
+        onToggleCustomization: _toggleDashboardCustomization,
+      );
     }
 
     switch (_selectedIndex) {
@@ -139,17 +151,12 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
     return Scaffold(
       body: Row(
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOut,
-            width: _isSidebarCollapsed ? 72 : 260,
-            child: FoundationSidebar(
-              selectedIndex: _selectedIndex,
-              onSelected: _navigateTo,
-              isCollapsed: _isSidebarCollapsed,
-              onToggleCollapse: _toggleSidebar,
-              onCreateWorkspace: _createWorkspace,
-            ),
+          FoundationSidebar(
+            selectedIndex: _selectedIndex,
+            isCollapsed: _isSidebarCollapsed,
+            onSelected: _navigateTo,
+            onToggleCollapse: _toggleSidebar,
+            onCreateWorkspace: _createWorkspace,
           ),
           Expanded(
             child: Column(
@@ -161,6 +168,8 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
                       _topNavIndex = index;
                     });
                   },
+                  onCustomize: _toggleDashboardCustomization,
+                  isCustomizing: _isCustomizingDashboard,
                 ),
                 Expanded(child: _currentPage),
               ],

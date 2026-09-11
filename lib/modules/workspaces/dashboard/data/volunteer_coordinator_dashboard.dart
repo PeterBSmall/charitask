@@ -4,7 +4,7 @@ import '../models/workspace_dashboard_config.dart';
 
 const volunteerCoordinatorDashboardConfig = WorkspaceDashboardConfig(
   workspaceLabel: 'VOLUNTEER COORDINATOR',
-  greeting: 'Good morning, Peter!',
+  greeting: 'Good morning!',
   headline: 'Your volunteer program is\nmaking a difference.',
   description:
       'Manage volunteers, fill shifts, track hours, and\nkeep your team engaged from one place.',

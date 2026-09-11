@@ -67,7 +67,13 @@ class PersonalDetailsStep extends StatelessWidget {
       children: [
         Expanded(flex: 4, child: _buildIntroductionPanel()),
         Container(width: 1, color: const Color(0xFFE5E7EB)),
-        Expanded(flex: 6, child: _buildDetailsPanel()),
+        Expanded(
+          flex: 6,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.zero,
+            child: _buildDetailsPanel(),
+          ),
+        ),
       ],
     );
   }

@@ -4,6 +4,11 @@ import 'package:charitask/modules/foundation/pages/identity/complete_personal_pr
 import 'package:charitask/modules/foundation/pages/onboarding/personal_workspace/steps/personal_details_step.dart';
 import 'package:charitask/modules/onboarding/controllers/onboarding_controller.dart';
 import 'package:charitask/modules/workspaces/templates/pages/workspace_template_selection_page.dart';
+import 'package:charitask/shared/workspaces/models/ct_workspace.dart';
+import 'package:charitask/shared/workspaces/services/ct_workspace_service.dart';
+import 'package:charitask/modules/workspaces/dashboard/pages/workspace_dashboard_page.dart';
+import 'package:charitask/modules/workspaces/templates/data/workspace_template_data.dart';
+import 'package:charitask/shared/widgets/navigation/ct_top_navigation.dart';
 
 class PersonalWorkspaceSetupPage extends StatefulWidget {
   final OnboardingController onboardingController;
@@ -307,9 +312,49 @@ class _PersonalWorkspaceSetupPageState
   void _handleTemplateContinue(String templateId) {
     debugPrint('>>> PERSONAL WORKSPACE TEMPLATE SELECTED: $templateId');
 
-    setState(() {
-      _selectedTemplate = templateId;
-    });
+    final allTemplates = [
+      ...missionCommunityTemplates,
+      ...fundraisingProgramsTemplates,
+      ...peopleResourcesComplianceTemplates,
+      ...creativeFlexibleTemplates,
+    ];
+
+    final template = allTemplates.firstWhere((item) => item.id == templateId);
+
+    final workspace = CTWorkspaceService.createWorkspace(
+      id: 'personal_${template.id}',
+      name: template.title,
+      type: CTWorkspaceType.personal,
+      icon: template.icon,
+      color: template.accentColor,
+    );
+
+    debugPrint('>>> CREATED PERSONAL WORKSPACE: ${workspace.name}');
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          body: Column(
+            children: [
+              CTTopNavigation(
+                selectedIndex: 0,
+                onSelected: (index) {},
+                onCustomize: () {},
+                isCustomizing: false,
+              ),
+              Expanded(
+                child: WorkspaceDashboardPage(
+                  workspace: workspace,
+                  firstName: onboardingController.person?.firstName ?? '',
+                  isCustomizing: false,
+                  onToggleCustomization: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // ---------------------------------------------------------------------------

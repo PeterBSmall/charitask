@@ -20,44 +20,46 @@ class VolunteersGlanceCard extends StatelessWidget {
           Row(
             children: [
               _Avatar(initials: 'JD', color: const Color(0xFFE8DFFF)),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               _Avatar(initials: 'MK', color: const Color(0xFFDDEBFF)),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               _Avatar(initials: 'AL', color: const Color(0xFFFFE4D6)),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               _Avatar(initials: 'RT', color: const Color(0xFFDDF4EA)),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               _Avatar(initials: 'EV', color: const Color(0xFFE8DFFF)),
               const SizedBox(width: 7),
               Container(
-                width: 38,
-                height: 38,
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF0EDFF),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFFFFFFF), width: 2),
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
                 child: const Center(
                   child: Text(
                     '+137',
                     style: TextStyle(
-                      fontSize: 9,
+                      fontSize: 8,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF6241D8),
                     ),
                   ),
                 ),
               ),
-              const Spacer(),
-              const Text(
-                '142 active volunteers',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF6241D8),
-                ),
-              ),
             ],
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            '142 active volunteers',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF6241D8),
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -71,7 +73,7 @@ class VolunteersGlanceCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
 
           _PersonRow(
             initials: 'JD',
@@ -104,8 +106,8 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 38,
-      height: 38,
+      width: 34,
+      height: 34,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
@@ -115,7 +117,7 @@ class _Avatar extends StatelessWidget {
         child: Text(
           initials,
           style: const TextStyle(
-            fontSize: 9,
+            fontSize: 8,
             fontWeight: FontWeight.w800,
             color: Color(0xFF4E4770),
           ),
@@ -180,7 +182,7 @@ class _PersonRow extends StatelessWidget {
           ),
           Text(
             joined,
-            style: const TextStyle(fontSize: 9, color: Color(0xFF7A8498)),
+            style: const TextStyle(fontSize: 8, color: Color(0xFF7A8498)),
           ),
         ],
       ),

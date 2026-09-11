@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class CTTopNavigation extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final VoidCallback onCustomize;
+  final bool isCustomizing;
 
   const CTTopNavigation({
     super.key,
     required this.selectedIndex,
     required this.onSelected,
+    required this.onCustomize,
+    required this.isCustomizing,
   });
 
   static const _items = ['Overview', 'Tasks', 'Activity', 'Notes', 'Reports'];
@@ -48,6 +52,33 @@ class CTTopNavigation extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // ------------------------------------------------------------
+              // CUSTOMIZE DASHBOARD
+              // ------------------------------------------------------------
+              TextButton.icon(
+                onPressed: onCustomize,
+                icon: Icon(
+                  isCustomizing
+                      ? Icons.check_rounded
+                      : Icons.dashboard_customize_outlined,
+                  size: 17,
+                ),
+                label: Text(isCustomizing ? 'Done' : 'Customize Dashboard'),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF5B4BC4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 14),
 
               // ------------------------------------------------------------
               // SEARCH
@@ -145,7 +176,6 @@ class CTTopNavigation extends StatelessWidget {
                     : const Color(0xFF687385),
               ),
             ),
-
             if (selected)
               Positioned(
                 bottom: 0,

@@ -4,8 +4,13 @@ import '../models/workspace_dashboard_config.dart';
 
 class WorkspaceDashboardHero extends StatelessWidget {
   final WorkspaceDashboardConfig config;
+  final String firstName;
 
-  const WorkspaceDashboardHero({super.key, required this.config});
+  const WorkspaceDashboardHero({
+    super.key,
+    required this.config,
+    required this.firstName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +35,13 @@ class WorkspaceDashboardHero extends StatelessWidget {
   }
 
   Widget _buildBackground() {
-    if (config.heroImagePath != null) {
-      return Image.asset(
-        config.heroImagePath!,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildGradientBackground();
-        },
-      );
-    }
-
-    return _buildGradientBackground();
+    return Image.asset(
+      config.heroImagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return _buildGradientBackground();
+      },
+    );
   }
 
   Widget _buildGradientBackground() {
@@ -86,7 +87,9 @@ class WorkspaceDashboardHero extends StatelessWidget {
               _buildWorkspacePill(),
               const SizedBox(height: 22),
               Text(
-                config.greeting,
+                firstName.trim().isEmpty
+                    ? config.greeting
+                    : 'Good morning, ${firstName.trim()}!',
                 style: const TextStyle(
                   fontSize: 31,
                   height: 1.15,
