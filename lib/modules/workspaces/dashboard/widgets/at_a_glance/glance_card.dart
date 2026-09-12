@@ -60,12 +60,18 @@ class GlanceCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                headerAction,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: accentColor,
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  headerAction,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: accentColor,
+                  ),
                 ),
               ),
             ],

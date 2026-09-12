@@ -94,9 +94,7 @@ class PersonalDetailsStep extends StatelessWidget {
       child: Column(
         children: [
           _buildPersonIcon(),
-
           const SizedBox(height: 20),
-
           const Text(
             "Let's set up your\npersonal workspace",
             textAlign: TextAlign.center,
@@ -107,9 +105,7 @@ class PersonalDetailsStep extends StatelessWidget {
               color: Color(0xFF182230),
             ),
           ),
-
           const SizedBox(height: 14),
-
           const Text(
             "We've imported your details from your "
             "organization profile to help you get "
@@ -121,13 +117,9 @@ class PersonalDetailsStep extends StatelessWidget {
               color: Color(0xFF667085),
             ),
           ),
-
           const SizedBox(height: 28),
-
           _buildIllustration(),
-
           const SizedBox(height: 28),
-
           _buildPrivacyNotice(),
         ],
       ),
@@ -242,9 +234,7 @@ class PersonalDetailsStep extends StatelessWidget {
               color: Color(0xFF182230),
             ),
           ),
-
           const SizedBox(height: 8),
-
           const Text(
             "We've imported the following information from your "
             "organization profile. You can review and edit anything "
@@ -255,9 +245,7 @@ class PersonalDetailsStep extends StatelessWidget {
               color: Color(0xFF667085),
             ),
           ),
-
           const SizedBox(height: 24),
-
           ImportedPersonDetails(
             firstName: firstName,
             lastName: lastName,
@@ -265,9 +253,7 @@ class PersonalDetailsStep extends StatelessWidget {
             phone: phone,
             organizationalRole: organizationalRole,
           ),
-
           const SizedBox(height: 28),
-
           const Text(
             "What's next?",
             style: TextStyle(
@@ -276,9 +262,7 @@ class PersonalDetailsStep extends StatelessWidget {
               color: Color(0xFF182230),
             ),
           ),
-
           const SizedBox(height: 8),
-
           const Text(
             "Confirm your details to set up your personal workspace, "
             "or edit your information if you'd like to make changes.",
@@ -288,13 +272,9 @@ class PersonalDetailsStep extends StatelessWidget {
               color: Color(0xFF667085),
             ),
           ),
-
           const SizedBox(height: 20),
-
           _buildActions(),
-
           const SizedBox(height: 20),
-
           _buildFutureWorkspaceOption(),
         ],
       ),

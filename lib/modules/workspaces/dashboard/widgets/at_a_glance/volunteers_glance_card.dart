@@ -17,38 +17,21 @@ class VolunteersGlanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _Avatar(initials: 'JD', color: const Color(0xFFE8DFFF)),
-              const SizedBox(width: 4),
-              _Avatar(initials: 'MK', color: const Color(0xFFDDEBFF)),
-              const SizedBox(width: 4),
-              _Avatar(initials: 'AL', color: const Color(0xFFFFE4D6)),
-              const SizedBox(width: 4),
-              _Avatar(initials: 'RT', color: const Color(0xFFDDF4EA)),
-              const SizedBox(width: 4),
-              _Avatar(initials: 'EV', color: const Color(0xFFE8DFFF)),
-              const SizedBox(width: 7),
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0EDFF),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: const Center(
-                  child: Text(
-                    '+137',
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF6241D8),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          _PersonRow(
+            initials: 'JD',
+            name: 'Jamie Diaz',
+            joined: 'Joined 2 days ago',
+          ),
+          _PersonRow(
+            initials: 'MK',
+            name: 'Morgan Kim',
+            joined: 'Joined 4 days ago',
+          ),
+          _PersonRow(
+            initials: 'AL',
+            name: 'Alex Lee',
+            joined: 'Joined 6 days ago',
+            showBottomBorder: false,
           ),
 
           const SizedBox(height: 8),

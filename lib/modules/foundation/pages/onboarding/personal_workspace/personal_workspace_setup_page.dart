@@ -6,9 +6,8 @@ import 'package:charitask/modules/onboarding/controllers/onboarding_controller.d
 import 'package:charitask/modules/workspaces/templates/pages/workspace_template_selection_page.dart';
 import 'package:charitask/shared/workspaces/models/ct_workspace.dart';
 import 'package:charitask/shared/workspaces/services/ct_workspace_service.dart';
-import 'package:charitask/modules/workspaces/dashboard/pages/workspace_dashboard_page.dart';
 import 'package:charitask/modules/workspaces/templates/data/workspace_template_data.dart';
-import 'package:charitask/shared/widgets/navigation/ct_top_navigation.dart';
+import 'package:charitask/modules/workspaces/personal/personal_workspace_shell.dart';
 
 class PersonalWorkspaceSetupPage extends StatefulWidget {
   final OnboardingController onboardingController;
@@ -333,25 +332,9 @@ class _PersonalWorkspaceSetupPageState
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => Scaffold(
-          body: Column(
-            children: [
-              CTTopNavigation(
-                selectedIndex: 0,
-                onSelected: (index) {},
-                onCustomize: () {},
-                isCustomizing: false,
-              ),
-              Expanded(
-                child: WorkspaceDashboardPage(
-                  workspace: workspace,
-                  firstName: onboardingController.person?.firstName ?? '',
-                  isCustomizing: false,
-                  onToggleCustomization: () {},
-                ),
-              ),
-            ],
-          ),
+        builder: (_) => PersonalWorkspaceShell(
+          workspace: workspace,
+          firstName: onboardingController.person?.firstName ?? '',
         ),
       ),
     );
