@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/domain/mission_profile/mission_profile.dart';
+import 'package:charitask/app/app_router.dart';
 
 class CTWorkspaceCompletionScreen extends StatelessWidget {
   final CTMissionProfile profile;
@@ -13,6 +14,7 @@ class CTWorkspaceCompletionScreen extends StatelessWidget {
     required this.onCompleteProfile,
     required this.onGoToWorkspace,
   });
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -50,9 +52,6 @@ class CTWorkspaceCompletionScreen extends StatelessWidget {
 
               // -------------------------------------------------------------
               // CARDS
-              //
-              // The cards now take ONLY the space remaining after the
-              // header/footer. No fixed height.
               // -------------------------------------------------------------
               SizedBox(
                 height: compact ? 320 : 360,
@@ -62,22 +61,21 @@ class CTWorkspaceCompletionScreen extends StatelessWidget {
                     Expanded(
                       child: _ActionCard(
                         icon: Icons.person_outline_rounded,
-                        title: 'Create Your Personal Workspace',
+                        title: 'Go to Personal Home',
                         description:
-                            'Set up your personal workspace to organize your work, tasks, and collaborations in one place.',
+                            'Access your personal workspaces, organizations, invitations, tasks, and more from one place.',
                         highlights: const [
-                          'Personal workspace setup',
-                          'Manage your tasks',
-                          'Organize your projects',
-                          'Customize your workspace',
+                          'Access your workspaces',
+                          'View your organizations',
+                          'Manage invitations',
+                          'Stay on top of your tasks',
                         ],
-                        buttonLabel: 'Create Workspace',
+                        buttonLabel: 'Go to Personal Home',
                         isPrimary: true,
-                        onPressed: onCompleteProfile,
+                        onPressed: () => AppRouter.goToPersonalHome(context),
                       ),
                     ),
                     SizedBox(width: narrow ? 12 : 18),
-
                     Expanded(
                       child: _ActionCard(
                         icon: Icons.account_balance_outlined,
@@ -139,9 +137,7 @@ class _CompletionHeader extends StatelessWidget {
             height: 1.15,
           ),
         ),
-
         SizedBox(height: compact ? 8 : 12),
-
         Text(
           'You’ve set up your organization and created your personal profile.\n'
           'Here are your next steps.',
@@ -199,13 +195,6 @@ class _ActionCard extends StatelessWidget {
             ? const Color(0xFFEAF0FF)
             : const Color(0xFFF0EBFF);
 
-        // ---------------------------------------------------------------
-        // Determine how aggressively the card should compact itself.
-        //
-        // We deliberately use a continuous scale rather than several
-        // hard breakpoints. This prevents the layout from suddenly
-        // changing when the window is resized by a few pixels.
-        // ---------------------------------------------------------------
         final widthScale = (availableWidth / 260.0).clamp(0.72, 1.0);
         final heightScale = (availableHeight / 420.0).clamp(0.62, 1.0);
 
@@ -303,13 +292,6 @@ class _ActionCard extends StatelessWidget {
 
                     // ---------------------------------------------------
                     // HIGHLIGHTS
-                    //
-                    // IMPORTANT:
-                    // No Expanded here.
-                    //
-                    // The entire card content is allowed to scale as
-                    // one unit so it can never push the button outside
-                    // the card.
                     // ---------------------------------------------------
                     Column(
                       mainAxisSize: MainAxisSize.min,
@@ -326,9 +308,7 @@ class _ActionCard extends StatelessWidget {
                                 color: accent,
                                 size: checkSize,
                               ),
-
                               SizedBox(width: 7.0 * contentScale),
-
                               Expanded(
                                 child: Text(
                                   highlight,
@@ -386,9 +366,7 @@ class _ActionCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-
                             SizedBox(width: 7.0 * contentScale),
-
                             Icon(Icons.arrow_forward_rounded, size: arrowSize),
                           ],
                         ),
@@ -422,9 +400,7 @@ class _FooterMessage extends StatelessWidget {
           size: 16,
           color: Color(0xFF7A8A7A),
         ),
-
         SizedBox(width: 8),
-
         Flexible(
           child: Text(
             'You can always access these options later from your dashboard.',

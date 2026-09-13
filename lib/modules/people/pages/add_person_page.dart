@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/people/widgets/add_person/access_step.dart';
+import 'package:charitask/modules/people/widgets/add_person/steps/organizational_role_step.dart';
 import 'package:charitask/modules/people/widgets/add_person/add_person_header.dart';
 import 'package:charitask/modules/people/widgets/add_person/add_person_stepper.dart';
 import 'package:charitask/modules/people/widgets/add_person/add_person_validation.dart';
 import 'package:charitask/modules/people/widgets/add_person/assignments_step.dart';
 import 'package:charitask/modules/people/widgets/add_person/basic_information_step.dart';
-import 'package:charitask/modules/people/widgets/add_person/connection_step.dart';
-import 'package:charitask/modules/people/widgets/add_person/membership_step.dart';
+
 import 'package:charitask/modules/people/widgets/add_person/review_create_step.dart';
 import 'package:charitask/modules/people/widgets/add_person/add_person_navigation.dart';
 
 import 'package:charitask/shared/widgets/workspace_canvas.dart';
-import 'package:charitask/shared/custom_types/custom_type.dart';
+
+import 'package:charitask/modules/people/data/repositories/people_repository_impl.dart';
+import 'package:charitask/modules/people/data/services/people_service.dart';
+import 'package:charitask/modules/people/domain/repositories/people_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddPersonPage extends StatefulWidget {
-  const AddPersonPage({super.key});
+  final String organizationId;
+
+  const AddPersonPage({super.key, required this.organizationId});
 
   @override
   State<AddPersonPage> createState() => _AddPersonPageState();
 }
 
 class _AddPersonPageState extends State<AddPersonPage> {
+  late final PeopleRepository _repository;
+
   int _currentStep = 0;
 
   bool _hasSystemAccess = false;
@@ -36,17 +44,16 @@ class _AddPersonPageState extends State<AddPersonPage> {
   final _dateOfBirthController = TextEditingController();
   final _joinDateController = TextEditingController();
   final _notesController = TextEditingController();
-  final List<CustomType> _customDonorTypes = [];
 
   String _membershipStatus = 'Active';
-  String _roleCategory = '';
-  String? _donorType;
+  String _organizationalRole = '';
+  String _primaryDepartment = '';
+  final _jobTitleController = TextEditingController();
   String? _preferredContactMethod;
 
   static const List<String> _steps = [
-    'Connection',
-    'Basic Information',
-    'Primary Relationship',
+    'Organizational Role',
+    'Personal Details',
     'Assignments',
     'Access',
     'Review & Create',
@@ -56,12 +63,39 @@ class _AddPersonPageState extends State<AddPersonPage> {
   void initState() {
     super.initState();
 
+    _repository = PeopleRepositoryImpl(PeopleService(Supabase.instance.client));
+
     _firstNameController.addListener(_onFormChanged);
     _lastNameController.addListener(_onFormChanged);
     _preferredNameController.addListener(_onFormChanged);
     _emailController.addListener(_onFormChanged);
     _phoneController.addListener(_onFormChanged);
   }
+
+  static const List<String> _organizationalRoleOptions = [
+    'Founder / Owner',
+    'Executive Leadership',
+    'Director',
+    'Manager',
+    'Team Lead',
+    'Staff Member',
+    'Volunteer',
+    'Board Member',
+  ];
+
+  final List<String> _departmentOptions = [
+    'Administration',
+    'Finance',
+    'Fundraising',
+    'Human Resources',
+    'Information Technology',
+    'Marketing & Communications',
+    'Operations',
+    'Other',
+    'Programs',
+    'ReStore / Retail',
+    'Volunteer Services',
+  ];
 
   void _onFormChanged() {
     setState(() {});
@@ -70,7 +104,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
   bool get _isCurrentStepValid {
     switch (_currentStep) {
       case 0:
-        return _connectionType != null;
+        return _organizationalRole.isNotEmpty;
 
       case 1:
         return AddPersonValidation.isBasicInformationValid(
@@ -81,16 +115,6 @@ class _AddPersonPageState extends State<AddPersonPage> {
         );
 
       case 2:
-        // A primary relationship must be selected.
-        if (_roleCategory.isEmpty) {
-          return false;
-        }
-
-        // If Donor is selected, a donor type is also required.
-        if (_roleCategory == 'Donor' && _donorType == null) {
-          return false;
-        }
-
         return true;
 
       default:
@@ -103,9 +127,9 @@ class _AddPersonPageState extends State<AddPersonPage> {
 
     switch (_currentStep) {
       case 0:
-        errorMessage = AddPersonValidation.validateConnectionType(
-          _connectionType,
-        );
+        if (_organizationalRole.isEmpty) {
+          errorMessage = 'Please select an organizational role.';
+        }
         break;
 
       case 1:
@@ -204,11 +228,20 @@ class _AddPersonPageState extends State<AddPersonPage> {
   Widget _buildStepContent() {
     switch (_currentStep) {
       case 0:
-        return ConnectionStep(
-          selectedType: _connectionType,
-          onSelected: (value) {
+        return OrganizationalRoleStep(
+          organizationalRole: _organizationalRole,
+          primaryDepartment: _primaryDepartment,
+          jobTitleController: _jobTitleController,
+          organizationalRoleOptions: _organizationalRoleOptions,
+          departmentOptions: _departmentOptions,
+          onOrganizationalRoleChanged: (value) {
             setState(() {
-              _connectionType = value;
+              _organizationalRole = value;
+            });
+          },
+          onPrimaryDepartmentChanged: (value) {
+            setState(() {
+              _primaryDepartment = value;
             });
           },
         );
@@ -223,7 +256,6 @@ class _AddPersonPageState extends State<AddPersonPage> {
           dateOfBirthController: _dateOfBirthController,
           notesController: _notesController,
           connectionType: _connectionType ?? '',
-
           preferredContactMethod: _preferredContactMethod,
           onPreferredContactMethodChanged: (value) {
             setState(() {
@@ -233,45 +265,9 @@ class _AddPersonPageState extends State<AddPersonPage> {
         );
 
       case 2:
-        return MembershipStep(
-          connectionType: _connectionType ?? 'internal',
-          membershipStatus: _membershipStatus,
-          roleCategory: _roleCategory,
-          donorType: _donorType,
-          joinDateController: _joinDateController,
-
-          onMembershipStatusChanged: (value) {
-            setState(() {
-              _membershipStatus = value;
-            });
-          },
-
-          onRoleCategoryChanged: (value) {
-            setState(() {
-              _roleCategory = value;
-            });
-          },
-
-          onDonorTypeChanged: (value) {
-            setState(() {
-              _donorType = value;
-            });
-          },
-
-          customTypes: _customDonorTypes,
-
-          onCustomTypeAdded: (customType) {
-            setState(() {
-              _customDonorTypes.add(customType);
-              _donorType = customType.id;
-            });
-          },
-        );
-
-      case 3:
         return const AssignmentsStep();
 
-      case 4:
+      case 3:
         return AccessStep(
           hasSystemAccess: _hasSystemAccess,
           onAccessChanged: (value) {
@@ -281,7 +277,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
           },
         );
 
-      case 5:
+      case 4:
         return ReviewCreateStep(
           connectionType: _connectionType ?? '',
           firstName: _firstNameController.text,
@@ -315,6 +311,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
     _preferredNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
+    _jobTitleController.dispose();
 
     _dateOfBirthController.dispose();
     _joinDateController.dispose();
@@ -323,7 +320,52 @@ class _AddPersonPageState extends State<AddPersonPage> {
     super.dispose();
   }
 
-  void _createPerson() {
-    // Person creation will be wired here next.
+  Future<void> _createPerson() async {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final preferredName = _preferredNameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+
+    try {
+      final person = await _repository.createPerson(
+        organizationId: widget.organizationId,
+        firstName: firstName,
+        lastName: lastName,
+        preferredName: preferredName.isEmpty ? null : preferredName,
+        email: email.isEmpty ? null : email,
+        phone: phone.isEmpty ? null : phone,
+        employmentType: null,
+      );
+
+      final personId = person['id'] as String?;
+
+      if (personId == null || personId.isEmpty) {
+        throw Exception('Person was created without an ID.');
+      }
+
+      final membershipStatus = _membershipStatus.toLowerCase() == 'inactive'
+          ? 'inactive'
+          : 'active';
+
+      await _repository.createOrganizationMembership(
+        organizationId: widget.organizationId,
+        personId: personId,
+        status: membershipStatus,
+      );
+
+      if (!mounted) return;
+
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unable to create person: $error'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

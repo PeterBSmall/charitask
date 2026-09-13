@@ -17,8 +17,13 @@ import 'package:charitask/modules/workspaces/templates/pages/workspace_template_
 
 class FoundationWorkspacePage extends StatelessWidget {
   final CTJourneyController journeyController;
+  final String organizationId;
 
-  const FoundationWorkspacePage({super.key, required this.journeyController});
+  const FoundationWorkspacePage({
+    super.key,
+    required this.journeyController,
+    required this.organizationId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +36,7 @@ class FoundationWorkspacePage extends StatelessWidget {
 
       organization: OrganizationWorkspace(journeyController: journeyController),
 
-      people: const PeoplePage(),
+      people: PeoplePage(organizationId: organizationId),
 
       groups: const _FoundationPlaceholderPage(
         title: 'Groups',

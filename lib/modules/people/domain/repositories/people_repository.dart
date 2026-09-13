@@ -12,4 +12,22 @@ abstract class PeopleRepository {
     String? phone,
     String? employmentType,
   });
+
+  Future<void> createOrganizationMembership({
+    required String organizationId,
+    required String personId,
+    required String status,
+  });
+
+  Future<List<Map<String, dynamic>>> getOrganizationalRoles({
+    required String organizationId,
+    required String roleCategory,
+  });
+
+  Future<void> createOrganizationalRoleAssignment({
+    required String organizationId,
+    required String personId,
+    required String organizationalRoleId,
+    bool isPrimary = true,
+  });
 }

@@ -4,13 +4,17 @@ import 'member_type_selector.dart';
 import '../external_relationship_selector.dart';
 import 'donor/donor_details_section.dart';
 import 'package:charitask/shared/custom_types/custom_type.dart';
+import 'organizational_role_selector.dart';
 
 class DetailsForm extends StatelessWidget {
   final String connectionType;
   final String roleCategory;
+  final String? organizationalRoleId;
+  final List<Map<String, dynamic>> organizationalRoles;
   final String? donorType;
 
   final ValueChanged<String> onRoleCategoryChanged;
+  final ValueChanged<String?> onOrganizationalRoleChanged;
   final ValueChanged<String?> onDonorTypeChanged;
 
   final List<CustomType> customTypes;
@@ -20,8 +24,11 @@ class DetailsForm extends StatelessWidget {
     super.key,
     required this.connectionType,
     required this.roleCategory,
+    required this.organizationalRoleId,
+    required this.organizationalRoles,
     required this.donorType,
     required this.onRoleCategoryChanged,
+    required this.onOrganizationalRoleChanged,
     required this.onDonorTypeChanged,
     required this.customTypes,
     required this.onCustomTypeAdded,
@@ -48,11 +55,21 @@ class DetailsForm extends StatelessWidget {
             value: roleCategory,
             onChanged: onRoleCategoryChanged,
           )
-        else
+        else ...[
           MemberTypeSelector(
             value: roleCategory,
             onChanged: onRoleCategoryChanged,
           ),
+
+          if (roleCategory == 'Staff' || roleCategory == 'Board Member') ...[
+            const SizedBox(height: 20),
+            OrganizationalRoleSelector(
+              roles: organizationalRoles,
+              selectedRoleId: organizationalRoleId,
+              onChanged: onOrganizationalRoleChanged,
+            ),
+          ],
+        ],
 
         // Show donor details only when Donor is selected.
         if (roleCategory == 'Donor') ...[

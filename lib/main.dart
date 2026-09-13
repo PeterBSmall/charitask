@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'platform/windows_protocol.dart';
+import 'package:app_links/app_links.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,9 +59,21 @@ Future<void> main(List<String> args) async {
           );
         }
       } catch (_) {}
+      debugPrint('>>> URI SCHEME: ${startupUri.scheme}');
+      debugPrint('>>> URI HOST: ${startupUri.host}');
+      debugPrint('>>> URI PATH: ${startupUri.path}');
+      debugPrint('>>> URI QUERY: ${startupUri.query}');
+
+      debugPrint('>>> URI SCHEME: ${startupUri.scheme}');
+      debugPrint('>>> URI HOST: ${startupUri.host}');
+      debugPrint('>>> URI PATH: ${startupUri.path}');
+      debugPrint('>>> URI QUERY: ${startupUri.query}');
+
       launchedFromAuthCallback =
           startupUri.scheme == 'chari-task' &&
           startupUri.host == 'auth-callback';
+
+      debugPrint('>>> AUTH CALLBACK DETECTED: $launchedFromAuthCallback');
 
       if (launchedFromAuthCallback) {
         debugPrint('>>> CHARITASK AUTH CALLBACK DETECTED');
@@ -69,14 +82,19 @@ Future<void> main(List<String> args) async {
   }
 
   // ---------------------------------------------------------------
-  // SUPABASE - LOCAL DEVELOPMENT
+  // SUPABASE - HOSTED DEVELOPMENT
   // ---------------------------------------------------------------
+
   await Supabase.initialize(
     url: 'http://127.0.0.1:54321',
     publishableKey: 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH',
   );
-
   final supabase = Supabase.instance.client;
+  // ---------------------------------------------------------------
+  // WINDOWS DEEP LINK LISTENER
+  // ---------------------------------------------------------------
+  // Supabase handles the OAuth callback and exchanges the code.
+  // We listen for the resulting auth state change in the UI layer.
 
   // ---------------------------------------------------------------
   // PROCESS WINDOWS AUTH CALLBACK
@@ -112,10 +130,7 @@ Future<void> main(List<String> args) async {
   //
   // Auth callback launches are excluded so email confirmation/login
   // can still establish the session normally.
-  if (!launchedFromAuthCallback) {
-    await supabase.auth.signOut();
-    debugPrint('>>> DEVELOPMENT AUTH RESET: SIGNED OUT');
-  }
+
   // ---------------------------------------------------------------
   // AUTH EVENTS
   // ---------------------------------------------------------------

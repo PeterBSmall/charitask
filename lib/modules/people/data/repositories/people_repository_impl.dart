@@ -1,4 +1,5 @@
 import '../../domain/repositories/people_repository.dart';
+
 import '../services/people_service.dart';
 
 class PeopleRepositoryImpl implements PeopleRepository {
@@ -31,6 +32,45 @@ class PeopleRepositoryImpl implements PeopleRepository {
       email: email,
       phone: phone,
       employmentType: employmentType,
+    );
+  }
+
+  @override
+  Future<void> createOrganizationMembership({
+    required String organizationId,
+    required String personId,
+    required String status,
+  }) {
+    return _service.createOrganizationMembership(
+      organizationId: organizationId,
+      personId: personId,
+      status: status,
+    );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getOrganizationalRoles({
+    required String organizationId,
+    required String roleCategory,
+  }) {
+    return _service.getOrganizationalRoles(
+      organizationId: organizationId,
+      roleCategory: roleCategory,
+    );
+  }
+
+  @override
+  Future<void> createOrganizationalRoleAssignment({
+    required String organizationId,
+    required String personId,
+    required String organizationalRoleId,
+    bool isPrimary = true,
+  }) {
+    return _service.createOrganizationalRoleAssignment(
+      organizationId: organizationId,
+      personId: personId,
+      organizationalRoleId: organizationalRoleId,
+      isPrimary: isPrimary,
     );
   }
 }

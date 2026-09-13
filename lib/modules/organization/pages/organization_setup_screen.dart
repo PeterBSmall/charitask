@@ -12,6 +12,8 @@ import 'package:charitask/shared/design_system/journey/ct_journey_engine.dart';
 import 'package:charitask/modules/foundation/pages/onboarding/steps/ct_workspace_creation_step.dart';
 import 'package:charitask/modules/foundation/pages/workspaces/foundation_workspace.dart';
 import 'package:charitask/modules/onboarding/controllers/onboarding_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:charitask/domain/organization/current_organization_context.dart';
 
 class OrganizationSetupScreen extends StatelessWidget {
   final void Function(CTJourneyController controller)? onComplete;
@@ -32,6 +34,32 @@ class OrganizationSetupScreen extends StatelessWidget {
     final journeyController = CTJourneyController();
 
     journeyController.updateFirstName(firstName);
+
+    Future<void> openFoundationWorkspace(
+      CTJourneyController journeyController,
+    ) async {
+      final organizationId = await CurrentOrganizationContext(
+        Supabase.instance.client,
+      ).getOrganizationId();
+
+      if (!context.mounted) return;
+
+      if (organizationId == null || organizationId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to load your organization.')),
+        );
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => FoundationWorkspace(
+            journeyController: journeyController,
+            organizationId: organizationId,
+          ),
+        ),
+      );
+    }
 
     return CTJourneyEngine(
       controller: journeyController,
@@ -73,12 +101,7 @@ class OrganizationSetupScreen extends StatelessWidget {
 
           // Go directly to the Foundation Workspace.
           onContinue: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) =>
-                    FoundationWorkspace(journeyController: journeyController),
-              ),
-            );
+            openFoundationWorkspace(journeyController);
           },
 
           // Complete Personal Profile remains a separate path.

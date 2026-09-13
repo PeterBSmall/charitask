@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PeopleTable extends StatefulWidget {
-  const PeopleTable({super.key});
+  final List<Map<String, dynamic>> people;
+
+  const PeopleTable({super.key, required this.people});
 
   @override
   State<PeopleTable> createState() => _PeopleTableState();
@@ -14,6 +16,38 @@ class _PeopleTableState extends State<PeopleTable> {
   void dispose() {
     _horizontalController.dispose();
     super.dispose();
+  }
+
+  String _initials(Map<String, dynamic> person) {
+    final firstName = (person['first_name'] as String?)?.trim() ?? '';
+    final lastName = (person['last_name'] as String?)?.trim() ?? '';
+
+    final firstInitial = firstName.isNotEmpty
+        ? firstName.substring(0, 1).toUpperCase()
+        : '';
+
+    final lastInitial = lastName.isNotEmpty
+        ? lastName.substring(0, 1).toUpperCase()
+        : '';
+
+    final initials = '$firstInitial$lastInitial';
+
+    return initials.isEmpty ? '?' : initials;
+  }
+
+  String _fullName(Map<String, dynamic> person) {
+    final firstName = (person['first_name'] as String?)?.trim() ?? '';
+    final lastName = (person['last_name'] as String?)?.trim() ?? '';
+
+    return '$firstName $lastName'.trim();
+  }
+
+  String _displayValue(dynamic value) {
+    if (value == null) return '—';
+
+    final text = value.toString().trim();
+
+    return text.isEmpty ? '—' : text;
   }
 
   @override
@@ -45,59 +79,43 @@ class _PeopleTableState extends State<PeopleTable> {
 
                   const Divider(height: 1),
 
-                  const _PeopleRow(
-                    initials: 'PS',
-                    name: 'Peter Small',
-                    email: 'peter@example.com',
-                    role: 'Administrator',
-                    groups: 'Leadership',
-                    locations: 'Main Office',
-                    status: 'Active',
-                    phone: '(508) 555-1234',
-                    lastActive: 'Now',
-                  ),
+                  if (widget.people.isEmpty)
+                    const Expanded(
+                      child: Center(
+                        child: Text(
+                          'No people found.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF7B8494),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    ...List.generate(widget.people.length, (index) {
+                      final person = widget.people[index];
 
-                  const Divider(height: 1),
+                      final status = _displayValue(person['status']);
 
-                  const _PeopleRow(
-                    initials: 'SJ',
-                    name: 'Sarah Johnson',
-                    email: 'sarah@example.com',
-                    role: 'Manager',
-                    groups: 'Operations',
-                    locations: 'Yarmouth',
-                    status: 'Active',
-                    phone: '(508) 555-2345',
-                    lastActive: '2 min ago',
-                  ),
+                      return Column(
+                        children: [
+                          _PeopleRow(
+                            initials: _initials(person),
+                            name: _fullName(person),
+                            email: _displayValue(person['email']),
+                            role: _displayValue(person['role']),
+                            groups: _displayValue(person['groups']),
+                            locations: _displayValue(person['locations']),
+                            status: status,
+                            phone: _displayValue(person['phone']),
+                            lastActive: '—',
+                          ),
 
-                  const Divider(height: 1),
-
-                  const _PeopleRow(
-                    initials: 'MB',
-                    name: 'Michael Brown',
-                    email: 'michael@example.com',
-                    role: 'Volunteer',
-                    groups: 'Volunteers',
-                    locations: 'Falmouth',
-                    status: 'Invited',
-                    phone: '(508) 555-3456',
-                    lastActive: '—',
-                  ),
-
-                  const Divider(height: 1),
-
-                  const _PeopleRow(
-                    initials: 'ED',
-                    name: 'Emily Davis',
-                    email: 'emily@example.com',
-                    role: 'Staff',
-                    groups: 'ReStore Team',
-                    locations: 'Yarmouth',
-                    status: 'Inactive',
-                    phone: '(508) 555-4567',
-                    lastActive: 'Aug 18',
-                  ),
+                          if (index < widget.people.length - 1)
+                            const Divider(height: 1),
+                        ],
+                      );
+                    }),
                 ],
               ),
             ),
@@ -120,17 +138,11 @@ class _PeopleTableHeader extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(width: 250, child: _HeaderText('NAME')),
-
             SizedBox(width: 120, child: _HeaderText('ROLE')),
-
             SizedBox(width: 120, child: _HeaderText('GROUP(S)')),
-
             SizedBox(width: 120, child: _HeaderText('LOCATION(S)')),
-
             SizedBox(width: 100, child: _HeaderText('STATUS')),
-
             SizedBox(width: 150, child: _HeaderText('PHONE')),
-
             SizedBox(width: 110, child: _HeaderText('LAST ACTIVE')),
           ],
         ),
@@ -184,14 +196,11 @@ class _PeopleRow extends StatelessWidget {
   });
 
   Color get _statusColor {
-    switch (status) {
-      case 'Active':
+    switch (status.toLowerCase()) {
+      case 'active':
         return const Color(0xFF5F8D63);
 
-      case 'Invited':
-        return const Color(0xFFC8872E);
-
-      case 'Inactive':
+      case 'inactive':
         return const Color(0xFF6B7280);
 
       default:
@@ -222,16 +231,14 @@ class _PeopleRow extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          name,
+                          name.isEmpty ? 'Unnamed person' : name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -240,9 +247,7 @@ class _PeopleRow extends StatelessWidget {
                             color: Color(0xFF2F3A4A),
                           ),
                         ),
-
                         const SizedBox(height: 3),
-
                         Text(
                           email,
                           maxLines: 1,

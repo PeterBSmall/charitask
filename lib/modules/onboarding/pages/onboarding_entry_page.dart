@@ -36,6 +36,13 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
     super.initState();
     _controller = OnboardingController();
 
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.signedIn && mounted) {
+        debugPrint('>>> ONBOARDING AUTH EVENT: SIGNED IN');
+        _resumeAuthenticatedOnboarding();
+      }
+    });
+
     _checkSession();
   }
 

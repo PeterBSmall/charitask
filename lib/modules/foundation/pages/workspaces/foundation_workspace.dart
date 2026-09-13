@@ -7,8 +7,13 @@ import 'package:charitask/shared/widgets/ct_workspace_welcome_dialog.dart';
 
 class FoundationWorkspace extends StatefulWidget {
   final CTJourneyController journeyController;
+  final String organizationId;
 
-  const FoundationWorkspace({super.key, required this.journeyController});
+  const FoundationWorkspace({
+    super.key,
+    required this.journeyController,
+    required this.organizationId,
+  });
 
   @override
   State<FoundationWorkspace> createState() => _FoundationWorkspaceState();
@@ -29,12 +34,9 @@ class _FoundationWorkspaceState extends State<FoundationWorkspace> {
 
     await CTWorkspaceWelcomeDialog.show(
       context: context,
-
       title: "Welcome to your organization's workspace!",
       subtitle: "Let's build something great together.",
-
       preferenceKey: 'organization_workspace_welcome_seen',
-
       features: const [
         CTWorkspaceWelcomeFeature(
           icon: Icons.business_outlined,
@@ -55,16 +57,12 @@ class _FoundationWorkspaceState extends State<FoundationWorkspace> {
               'Control roles, permissions, and access to your workspace.',
         ),
       ],
-
       primaryActionLabel: "Let's get started",
-
       onPrimaryAction: () {
         // The welcome dialog closes first.
         // The user remains in the Organization Workspace.
       },
-
       secondaryActionLabel: 'Learn more',
-
       onSecondaryAction: () {
         // We will connect the Learn More experience next.
       },
@@ -73,6 +71,9 @@ class _FoundationWorkspaceState extends State<FoundationWorkspace> {
 
   @override
   Widget build(BuildContext context) {
-    return FoundationWorkspacePage(journeyController: widget.journeyController);
+    return FoundationWorkspacePage(
+      journeyController: widget.journeyController,
+      organizationId: widget.organizationId,
+    );
   }
 }

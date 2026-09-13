@@ -11,11 +11,14 @@ class MembershipStep extends StatelessWidget {
   final String connectionType;
   final String membershipStatus;
   final String roleCategory;
+  final String? organizationalRoleId;
+  final List<Map<String, dynamic>> organizationalRoles;
   final String? donorType;
   final TextEditingController joinDateController;
 
   final ValueChanged<String> onMembershipStatusChanged;
   final ValueChanged<String> onRoleCategoryChanged;
+  final ValueChanged<String?> onOrganizationalRoleChanged;
   final ValueChanged<String?> onDonorTypeChanged;
 
   // Custom donor types.
@@ -27,10 +30,13 @@ class MembershipStep extends StatelessWidget {
     required this.connectionType,
     required this.membershipStatus,
     required this.roleCategory,
+    required this.organizationalRoleId,
+    required this.organizationalRoles,
     required this.donorType,
     required this.joinDateController,
     required this.onMembershipStatusChanged,
     required this.onRoleCategoryChanged,
+    required this.onOrganizationalRoleChanged,
     required this.onDonorTypeChanged,
     required this.customTypes,
     required this.onCustomTypeAdded,
@@ -48,8 +54,11 @@ class MembershipStep extends StatelessWidget {
       child: DetailsForm(
         connectionType: connectionType,
         roleCategory: roleCategory,
+        organizationalRoleId: organizationalRoleId,
+        organizationalRoles: organizationalRoles,
         donorType: donorType,
         onRoleCategoryChanged: onRoleCategoryChanged,
+        onOrganizationalRoleChanged: onOrganizationalRoleChanged,
         onDonorTypeChanged: onDonorTypeChanged,
 
         customTypes: customTypes,

@@ -59,7 +59,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   Future<void> _createAccount() async {
+    debugPrint('>>> CREATE ACCOUNT BUTTON CALLBACK FIRED');
+
     if (!_accountFormKey.currentState!.validate()) {
+      debugPrint('>>> ACCOUNT FORM VALIDATION FAILED');
       return;
     }
 
@@ -70,16 +73,21 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     final password = _passwordController.text;
 
     try {
-      final response = await Supabase.instance.client.auth.signUp(
-        email: email,
-        password: password,
-        emailRedirectTo: 'chari-task://auth-callback',
-        data: {
-          'first_name': firstName,
-          'last_name': lastName,
-          if (phone.isNotEmpty) 'phone': phone,
-        },
-      );
+      debugPrint('>>> STARTING SUPABASE SIGNUP');
+
+      final response = await Supabase.instance.client.auth
+          .signUp(
+            email: email,
+            password: password,
+            emailRedirectTo: 'chari-task://auth-callback',
+
+            data: {
+              'first_name': firstName,
+              'last_name': lastName,
+              if (phone.isNotEmpty) 'phone': phone,
+            },
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (!mounted) return;
 
@@ -110,7 +118,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         return;
       }
 
-      widget.onContinue();
       widget.onContinue();
     } on AuthException catch (error) {
       if (!mounted) return;

@@ -1,39 +1,54 @@
 import 'package:flutter/material.dart';
 
 class PeopleMetrics extends StatelessWidget {
-  const PeopleMetrics({super.key});
+  final List<Map<String, dynamic>> people;
+
+  const PeopleMetrics({super.key, required this.people});
 
   @override
   Widget build(BuildContext context) {
+    final total = people.length;
+
+    final active = people.where((person) {
+      return person['status'] == 'active';
+    }).length;
+
+    final inactive = people.where((person) {
+      return person['status'] == 'inactive';
+    }).length;
+
     const cards = [
       _PeopleMetricData(
         icon: Icons.people_outline,
-        value: '128',
         label: 'People',
         subtitle: 'Total',
         iconColor: Color(0xFF5B4BC4),
       ),
       _PeopleMetricData(
         icon: Icons.check_circle_outline,
-        value: '24',
-        label: 'Active Today',
-        subtitle: 'People clocked in',
+        label: 'Active',
+        subtitle: 'Currently active',
         iconColor: Color(0xFF6B8E62),
       ),
       _PeopleMetricData(
         icon: Icons.mail_outline,
-        value: '12',
         label: 'Invited',
         subtitle: 'Pending invitation',
         iconColor: Color(0xFF5B4BC4),
       ),
       _PeopleMetricData(
         icon: Icons.person_off_outlined,
-        value: '8',
         label: 'Inactive',
         subtitle: 'Not currently active',
         iconColor: Color(0xFF6B7280),
       ),
+    ];
+
+    final values = [
+      total.toString(),
+      active.toString(),
+      '—',
+      inactive.toString(),
     ];
 
     return LayoutBuilder(
@@ -48,20 +63,20 @@ class PeopleMetrics extends StatelessWidget {
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,
-          children: cards
-              .map(
-                (card) => SizedBox(
-                  width: cardWidth,
-                  child: _PeopleMetricCard(
-                    icon: card.icon,
-                    value: card.value,
-                    label: card.label,
-                    subtitle: card.subtitle,
-                    iconColor: card.iconColor,
-                  ),
-                ),
-              )
-              .toList(),
+          children: List.generate(cards.length, (index) {
+            final card = cards[index];
+
+            return SizedBox(
+              width: cardWidth,
+              child: _PeopleMetricCard(
+                icon: card.icon,
+                value: values[index],
+                label: card.label,
+                subtitle: card.subtitle,
+                iconColor: card.iconColor,
+              ),
+            );
+          }),
         );
       },
     );
@@ -70,14 +85,12 @@ class PeopleMetrics extends StatelessWidget {
 
 class _PeopleMetricData {
   final IconData icon;
-  final String value;
   final String label;
   final String subtitle;
   final Color iconColor;
 
   const _PeopleMetricData({
     required this.icon,
-    required this.value,
     required this.label,
     required this.subtitle,
     required this.iconColor,
