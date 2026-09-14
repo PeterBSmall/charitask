@@ -8,12 +8,12 @@ import 'package:charitask/modules/onboarding/pages/role/your_role_page.dart';
 import 'package:charitask/modules/organization/pages/organization_setup_screen.dart';
 
 import 'package:charitask/modules/foundation/pages/identity/complete_personal_profile_page.dart';
-import 'package:charitask/modules/foundation/pages/workspaces/foundation_app_page.dart';
 
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:charitask/modules/foundation/pages/onboarding/personal_workspace/personal_workspace_setup_page.dart';
+import 'package:charitask/modules/personal/pages/personal_home_page.dart';
 
 class OnboardingEntryPage extends StatefulWidget {
   final bool launchedFromAuthCallback;
@@ -117,17 +117,12 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
       debugPrint('>>> CHARITASK PERSON IDENTITY FOUND');
       debugPrint('>>> PERSON ID: ${identity['person_id']}');
       debugPrint('>>> RETURNING USER DETECTED');
-      debugPrint('>>> ROUTING TO FOUNDATION WORKSPACE');
+      debugPrint('>>> ROUTING TO PERSONAL HOME');
 
       if (!mounted) return;
 
-      final journeyController = CTJourneyController();
-
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) =>
-              FoundationAppPage(journeyController: journeyController),
-        ),
+        MaterialPageRoute(builder: (_) => const PersonalHomePage()),
       );
     } catch (error) {
       debugPrint('>>> ERROR CHECKING PERSON IDENTITY: $error');

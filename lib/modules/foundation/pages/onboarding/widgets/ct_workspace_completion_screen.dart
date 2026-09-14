@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:charitask/domain/mission_profile/mission_profile.dart';
 import 'package:charitask/app/app_router.dart';
+import 'package:charitask/domain/mission_profile/mission_profile.dart';
+
+import 'ct_workspace_completion_action_card.dart';
 
 class CTWorkspaceCompletionScreen extends StatelessWidget {
   final CTMissionProfile profile;
@@ -19,89 +21,22 @@ class CTWorkspaceCompletionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final height = constraints.maxHeight;
+        final compact = constraints.maxHeight < 760;
+        final narrow = constraints.maxWidth < 1050;
 
-        final compact = height < 760;
-        final veryCompact = height < 650;
-        final narrow = width < 900;
-
-        final horizontalPadding = narrow ? 16.0 : 28.0;
-
-        return Padding(
+        return SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
-            horizontalPadding,
+            narrow ? 16 : 28,
             compact ? 16 : 24,
-            horizontalPadding,
+            narrow ? 16 : 28,
             14,
           ),
           child: Column(
             children: [
-              // -------------------------------------------------------------
-              // HEADER
-              // -------------------------------------------------------------
-              _CompletionHeader(compact: compact),
+              if (narrow) _buildCardColumn(context) else _buildCardRow(context),
 
-              SizedBox(
-                height: veryCompact
-                    ? 8
-                    : compact
-                    ? 12
-                    : 18,
-              ),
+              SizedBox(height: compact ? 10 : 14),
 
-              // -------------------------------------------------------------
-              // CARDS
-              // -------------------------------------------------------------
-              SizedBox(
-                height: compact ? 320 : 360,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: _ActionCard(
-                        icon: Icons.person_outline_rounded,
-                        title: 'Go to Personal Home',
-                        description:
-                            'Access your personal workspaces, organizations, invitations, tasks, and more from one place.',
-                        highlights: const [
-                          'Access your workspaces',
-                          'View your organizations',
-                          'Manage invitations',
-                          'Stay on top of your tasks',
-                        ],
-                        buttonLabel: 'Go to Personal Home',
-                        isPrimary: true,
-                        onPressed: () => AppRouter.goToPersonalHome(context),
-                      ),
-                    ),
-                    SizedBox(width: narrow ? 12 : 18),
-                    Expanded(
-                      child: _ActionCard(
-                        icon: Icons.account_balance_outlined,
-                        title: 'Go to Organizational Workspace',
-                        description:
-                            'Explore your organization and start managing your team.',
-                        highlights: const [
-                          'Overview & activity',
-                          'Groups & teams',
-                          'People & roles',
-                          'Tasks & initiatives',
-                        ],
-                        buttonLabel: 'Go to Workspace',
-                        isWorkspace: true,
-                        onPressed: onGoToWorkspace,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: veryCompact ? 6 : 10),
-
-              // -------------------------------------------------------------
-              // FOOTER
-              // -------------------------------------------------------------
               const _FooterMessage(),
             ],
           ),
@@ -109,283 +44,89 @@ class CTWorkspaceCompletionScreen extends StatelessWidget {
       },
     );
   }
-}
 
-// =============================================================================
-// HEADER
-// =============================================================================
-
-class _CompletionHeader extends StatelessWidget {
-  final bool compact;
-
-  const _CompletionHeader({this.compact = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+  Widget _buildCardRow(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Your organization is ready!',
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: compact ? 28 : 34,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF273247),
-            height: 1.15,
-          ),
-        ),
-        SizedBox(height: compact ? 8 : 12),
-        Text(
-          'You’ve set up your organization and created your personal profile.\n'
-          'Here are your next steps.',
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: compact ? 13 : 15,
-            color: const Color(0xFF718096),
-            height: 1.4,
-          ),
-        ),
+        Expanded(child: _buildPersonalDetailsCard()),
+        const SizedBox(width: 16),
+        Expanded(child: _buildPersonalHomeCard(context)),
+        const SizedBox(width: 16),
+        Expanded(child: _buildOrganizationCard()),
       ],
     );
   }
-}
 
-// =============================================================================
-// ACTION CARD
-// =============================================================================
+  Widget _buildCardColumn(BuildContext context) {
+    return Column(
+      children: [
+        _buildPersonalDetailsCard(),
+        const SizedBox(height: 14),
+        _buildPersonalHomeCard(context),
+        const SizedBox(height: 14),
+        _buildOrganizationCard(),
+      ],
+    );
+  }
 
-class _ActionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  final List<String> highlights;
-  final String buttonLabel;
-  final bool isPrimary;
-  final bool isWorkspace;
-  final VoidCallback onPressed;
+  Widget _buildPersonalDetailsCard() {
+    return CTWorkspaceCompletionActionCard(
+      icon: Icons.person_outline_rounded,
+      title: 'Complete Your Personal Details',
+      description:
+          'Finish your personal profile so ChariTask can personalize your experience.',
+      highlights: const [
+        'Complete your personal profile',
+        'Add your preferred details',
+        'Set up your personal workspace',
+        'Continue into ChariTask',
+      ],
+      buttonLabel: 'Complete Personal Details',
+      accentColor: const Color(0xFF6547E8),
+      iconBackgroundColor: const Color(0xFFF0EBFF),
+      onPressed: onCompleteProfile,
+    );
+  }
 
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.highlights,
-    required this.buttonLabel,
-    required this.onPressed,
-    this.isPrimary = false,
-    this.isWorkspace = false,
-  });
+  Widget _buildPersonalHomeCard(BuildContext context) {
+    return CTWorkspaceCompletionActionCard(
+      icon: Icons.home_outlined,
+      title: 'Go to Your Personal Home',
+      description:
+          'Access your personal workspaces, organizations, invitations, tasks, and more.',
+      highlights: const [
+        'Access your workspaces',
+        'View your organizations',
+        'Manage invitations',
+        'Stay on top of your tasks',
+      ],
+      buttonLabel: 'Go to Personal Home',
+      accentColor: const Color(0xFF0FA3B1),
+      iconBackgroundColor: const Color(0xFFE5F8FA),
+      onPressed: () => AppRouter.goToPersonalHome(context),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth;
-        final availableHeight = constraints.maxHeight;
-
-        final accent = isWorkspace
-            ? const Color(0xFF5878D9)
-            : const Color(0xFF6547E8);
-
-        final iconBackground = isWorkspace
-            ? const Color(0xFFEAF0FF)
-            : const Color(0xFFF0EBFF);
-
-        final widthScale = (availableWidth / 260.0).clamp(0.72, 1.0);
-        final heightScale = (availableHeight / 420.0).clamp(0.62, 1.0);
-
-        final contentScale = widthScale < heightScale
-            ? widthScale
-            : heightScale;
-
-        final horizontalPadding = 18.0 * contentScale;
-        final iconSize = 58.0 * contentScale;
-        final iconGlyphSize = 29.0 * contentScale;
-
-        final titleSize = 20.0 * contentScale;
-        final descriptionSize = 13.0 * contentScale;
-        final highlightSize = 13.0 * contentScale;
-        final checkSize = 19.0 * contentScale;
-
-        final buttonHeight = (48.0 * contentScale).clamp(34.0, 48.0);
-        final buttonTextSize = (13.5 * contentScale).clamp(10.0, 13.5);
-        final arrowSize = (18.0 * contentScale).clamp(14.0, 18.0);
-
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE2DFEA)),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(horizontalPadding),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              child: SizedBox(
-                width: availableWidth > 0
-                    ? availableWidth - (horizontalPadding * 2)
-                    : 1,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ---------------------------------------------------
-                    // ICON
-                    // ---------------------------------------------------
-                    Center(
-                      child: Container(
-                        width: iconSize,
-                        height: iconSize,
-                        decoration: BoxDecoration(
-                          color: iconBackground,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(icon, color: accent, size: iconGlyphSize),
-                      ),
-                    ),
-
-                    SizedBox(height: 12.0 * contentScale),
-
-                    // ---------------------------------------------------
-                    // TITLE
-                    // ---------------------------------------------------
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: titleSize,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF273247),
-                        height: 1.15,
-                      ),
-                    ),
-
-                    SizedBox(height: 8.0 * contentScale),
-
-                    // ---------------------------------------------------
-                    // DESCRIPTION
-                    // ---------------------------------------------------
-                    Text(
-                      description,
-                      textAlign: TextAlign.center,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: descriptionSize,
-                        color: const Color(0xFF718096),
-                        height: 1.25,
-                      ),
-                    ),
-
-                    SizedBox(height: 12.0 * contentScale),
-
-                    const Divider(height: 1, color: Color(0xFFEAE7EF)),
-
-                    SizedBox(height: 8.0 * contentScale),
-
-                    // ---------------------------------------------------
-                    // HIGHLIGHTS
-                    // ---------------------------------------------------
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: highlights.map((highlight) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 3.0 * contentScale,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.check_circle_rounded,
-                                color: accent,
-                                size: checkSize,
-                              ),
-                              SizedBox(width: 7.0 * contentScale),
-                              Expanded(
-                                child: Text(
-                                  highlight,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: highlightSize,
-                                    color: const Color(0xFF59677D),
-                                    height: 1.2,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-
-                    SizedBox(height: 10.0 * contentScale),
-
-                    // ---------------------------------------------------
-                    // BUTTON
-                    // ---------------------------------------------------
-                    SizedBox(
-                      width: double.infinity,
-                      height: buttonHeight,
-                      child: ElevatedButton(
-                        onPressed: onPressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: accent,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.0 * contentScale,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              11.0 * contentScale,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                buttonLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: buttonTextSize,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 7.0 * contentScale),
-                            Icon(Icons.arrow_forward_rounded, size: arrowSize),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+  Widget _buildOrganizationCard() {
+    return CTWorkspaceCompletionActionCard(
+      icon: Icons.account_balance_outlined,
+      title: 'Go to Organizational Workspace',
+      description:
+          'Access your organization\'s people, groups, tools, and day-to-day operations.',
+      highlights: const [
+        'Manage your organization',
+        'View people and roles',
+        'Work with groups and teams',
+        'Access organization tools',
+      ],
+      buttonLabel: 'Go to Organization',
+      accentColor: const Color(0xFF5878D9),
+      iconBackgroundColor: const Color(0xFFEAF0FF),
+      onPressed: onGoToWorkspace,
     );
   }
 }
-
-// =============================================================================
-// FOOTER
-// =============================================================================
 
 class _FooterMessage extends StatelessWidget {
   const _FooterMessage();
