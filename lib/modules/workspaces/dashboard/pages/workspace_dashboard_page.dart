@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:charitask/shared/workspaces/models/ct_workspace.dart';
 
 import '../controllers/workspace_dashboard_layout_controller.dart';
-import '../data/volunteer_coordinator_dashboard.dart';
+import '../data/workspace_dashboard_registry.dart';
 import '../models/workspace_dashboard_config.dart';
 
 import '../widgets/workspace_dashboard_hero.dart';
@@ -17,7 +17,6 @@ import '../widgets/workspace_messaging.dart';
 import '../widgets/workspace_dashboard_customization_bar.dart';
 import '../widgets/workspace_dashboard_editable.dart';
 import '../widgets/workspace_dashboard_drop_target.dart';
-import '../data/workspace_dashboard_defaults.dart';
 
 class WorkspaceDashboardPage extends StatefulWidget {
   final CTWorkspace workspace;
@@ -39,7 +38,7 @@ class WorkspaceDashboardPage extends StatefulWidget {
 
 class _WorkspaceDashboardPageState extends State<WorkspaceDashboardPage> {
   late final WorkspaceDashboardLayoutController _layoutController;
-
+  late final WorkspaceDashboardDefinition? _dashboardDefinition;
   String? _draggingModuleId;
   List<String> _rightColumnOrder = ['health', 'activity', 'messaging'];
 
@@ -47,8 +46,12 @@ class _WorkspaceDashboardPageState extends State<WorkspaceDashboardPage> {
   void initState() {
     super.initState();
 
+    _dashboardDefinition = getWorkspaceDashboardDefinition(
+      widget.workspace.templateId,
+    );
+
     _layoutController = WorkspaceDashboardLayoutController(
-      modules: volunteerCoordinatorDashboardModules,
+      modules: _dashboardDefinition?.modules ?? const [],
     );
   }
 
@@ -139,7 +142,13 @@ class _WorkspaceDashboardPageState extends State<WorkspaceDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final config = volunteerCoordinatorDashboardConfig;
+    final definition = _dashboardDefinition;
+
+    if (definition == null) {
+      return _buildUnavailableDashboard();
+    }
+
+    final config = definition.config;
 
     return Container(
       color: const Color(0xFFF7F8FC),
@@ -174,6 +183,52 @@ class _WorkspaceDashboardPageState extends State<WorkspaceDashboardPage> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildUnavailableDashboard() {
+    final templateId = widget.workspace.templateId;
+
+    final message = templateId == null
+        ? 'This workspace does not have a dashboard template assigned yet.'
+        : 'The "${widget.workspace.name}" dashboard is not available yet.';
+
+    return Container(
+      color: const Color(0xFFF7F8FC),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.dashboard_customize_outlined,
+                  size: 56,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Workspace Dashboard',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

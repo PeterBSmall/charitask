@@ -58,13 +58,71 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
     if (!mounted) return;
 
     // ------------------------------------------------------------
-    // No authenticated session.
+    // No locally stored authenticated session.
     // Continue with account creation.
     // ------------------------------------------------------------
 
     if (session == null) {
       setState(() {
         _hasSession = false;
+        _resumeOnboarding = false;
+        _checkingSession = false;
+      });
+
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // The local database may have been reset while Supabase still
+    // has a persisted session on this device.
+    //
+    // Verify that the authenticated user actually exists before
+    // using the session for ChariTask onboarding.
+    // ------------------------------------------------------------
+
+    try {
+      final userResponse = await supabase.auth.getUser();
+      final authUser = userResponse.user;
+
+      if (authUser == null) {
+        debugPrint('>>> STORED SESSION IS INVALID: AUTH USER NOT FOUND');
+
+        await supabase.auth.signOut(scope: SignOutScope.local);
+
+        if (!mounted) return;
+
+        setState(() {
+          _hasSession = false;
+          _resumeOnboarding = false;
+          _checkingSession = false;
+        });
+
+        return;
+      }
+
+      debugPrint('>>> AUTH USER VERIFIED: ${authUser.email}');
+    } catch (error) {
+      // ----------------------------------------------------------
+      // The persisted session belongs to an auth user that no
+      // longer exists, commonly after a local Supabase DB reset.
+      //
+      // Clear only the local session and return to account creation.
+      // ----------------------------------------------------------
+
+      debugPrint('>>> INVALID/STALE AUTH SESSION DETECTED: $error');
+      debugPrint('>>> CLEARING LOCAL AUTH SESSION');
+
+      try {
+        await supabase.auth.signOut(scope: SignOutScope.local);
+      } catch (signOutError) {
+        debugPrint('>>> LOCAL SIGN OUT ERROR: $signOutError');
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _hasSession = false;
+        _resumeOnboarding = false;
         _checkingSession = false;
       });
 
@@ -129,10 +187,9 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
 
       if (!mounted) return;
 
-      // If we cannot determine the ChariTask identity, don't falsely
-      // send the user into the workspace.
       setState(() {
         _hasSession = true;
+        _resumeOnboarding = false;
         _checkingSession = false;
       });
     }

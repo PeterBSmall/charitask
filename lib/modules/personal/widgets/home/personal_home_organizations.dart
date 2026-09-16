@@ -5,58 +5,93 @@ class PersonalHomeOrganizations extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 650;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Expanded(
-              child: Text(
-                'My Organizations',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF273247),
+            // =============================================================
+            // SECTION HEADER
+            // =============================================================
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'My Organizations',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF273247),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'View All',
-                style: TextStyle(
-                  color: Color(0xFF6547E8),
-                  fontWeight: FontWeight.w700,
+                TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'View All',
+                    style: TextStyle(
+                      color: Color(0xFF6547E8),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
+
+            const SizedBox(height: 12),
+
+            // =============================================================
+            // ORGANIZATION CARDS
+            // =============================================================
+            if (isCompact)
+              const Column(
+                children: [
+                  _OrganizationCard(
+                    icon: Icons.home_work_outlined,
+                    name: 'Habitat for Humanity of Cape Cod',
+                    role: 'Director',
+                    status: 'Active',
+                    accent: Color(0xFF7C4DFF),
+                  ),
+                  SizedBox(height: 12),
+                  _OrganizationCard(
+                    icon: Icons.groups_outlined,
+                    name: 'Community Partners',
+                    role: 'Member',
+                    status: 'Active',
+                    accent: Color(0xFF06B6D4),
+                  ),
+                ],
+              )
+            else
+              const Row(
+                children: [
+                  Expanded(
+                    child: _OrganizationCard(
+                      icon: Icons.home_work_outlined,
+                      name: 'Habitat for Humanity of Cape Cod',
+                      role: 'Director',
+                      status: 'Active',
+                      accent: Color(0xFF7C4DFF),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: _OrganizationCard(
+                      icon: Icons.groups_outlined,
+                      name: 'Community Partners',
+                      role: 'Member',
+                      status: 'Active',
+                      accent: Color(0xFF06B6D4),
+                    ),
+                  ),
+                ],
+              ),
           ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: const [
-            Expanded(
-              child: _OrganizationCard(
-                icon: Icons.home_work_outlined,
-                name: 'Habitat for Humanity of Cape Cod',
-                role: 'Director',
-                status: 'Active',
-                accent: Color(0xFF7C4DFF),
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: _OrganizationCard(
-                icon: Icons.groups_outlined,
-                name: 'Community Partners',
-                role: 'Member',
-                status: 'Active',
-                accent: Color(0xFF06B6D4),
-              ),
-            ),
-          ],
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -85,6 +120,7 @@ class _OrganizationCard extends StatelessWidget {
         onTap: () {},
         borderRadius: BorderRadius.circular(18),
         child: Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
@@ -101,7 +137,9 @@ class _OrganizationCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: accent, size: 25),
               ),
+
               const SizedBox(width: 14),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +154,9 @@ class _OrganizationCard extends StatelessWidget {
                         color: Color(0xFF273247),
                       ),
                     ),
+
                     const SizedBox(height: 6),
+
                     Text(
                       role,
                       style: const TextStyle(
@@ -125,14 +165,17 @@ class _OrganizationCard extends StatelessWidget {
                         color: Color(0xFF59677D),
                       ),
                     ),
+
                     const SizedBox(height: 8),
+
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
                           width: 7,
                           height: 7,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF32A36A),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF32A36A),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -150,6 +193,9 @@ class _OrganizationCard extends StatelessWidget {
                   ],
                 ),
               ),
+
+              const SizedBox(width: 10),
+
               const Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,

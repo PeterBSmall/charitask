@@ -4,18 +4,37 @@ import 'package:charitask/modules/foundation/pages/identity/complete_personal_pr
 import 'package:charitask/modules/foundation/pages/onboarding/personal_workspace/steps/personal_details_step.dart';
 import 'package:charitask/modules/onboarding/controllers/onboarding_controller.dart';
 import 'package:charitask/modules/workspaces/templates/pages/workspace_template_selection_page.dart';
-import 'package:charitask/shared/workspaces/models/ct_workspace.dart';
 import 'package:charitask/shared/workspaces/services/ct_workspace_service.dart';
 import 'package:charitask/modules/workspaces/templates/data/workspace_template_data.dart';
 import 'package:charitask/modules/workspaces/personal/personal_workspace_shell.dart';
 
 class PersonalWorkspaceSetupPage extends StatefulWidget {
-  final OnboardingController onboardingController;
+  /// Present when this page is launched from the original onboarding flow.
+  final OnboardingController? onboardingController;
 
+  /// Used when this page is launched from Personal Home.
+  ///
+  /// Personal Home users have already completed onboarding, so they
+  /// should go directly to template selection.
+  final String? personalHomeFirstName;
+
+  /// Standard onboarding entry point.
   const PersonalWorkspaceSetupPage({
     super.key,
-    required this.onboardingController,
-  });
+    required OnboardingController onboardingController,
+  }) : onboardingController = onboardingController,
+       personalHomeFirstName = null;
+
+  /// Personal Home entry point.
+  ///
+  /// This intentionally skips Personal Details because the user has
+  /// already completed onboarding.
+  const PersonalWorkspaceSetupPage.fromPersonalHome({
+    super.key,
+    this.personalHomeFirstName,
+  }) : onboardingController = null;
+
+  bool get isFromPersonalHome => onboardingController == null;
 
   @override
   State<PersonalWorkspaceSetupPage> createState() =>
@@ -24,16 +43,39 @@ class PersonalWorkspaceSetupPage extends StatefulWidget {
 
 class _PersonalWorkspaceSetupPageState
     extends State<PersonalWorkspaceSetupPage> {
-  int _currentStep = 1;
+  late int _currentStep;
   String? _selectedTemplate;
 
-  OnboardingController get onboardingController => widget.onboardingController;
+  OnboardingController? get onboardingController => widget.onboardingController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Personal Home users already completed their personal details,
+    // so they start directly at template selection.
+    _currentStep = widget.isFromPersonalHome ? 2 : 1;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final person = onboardingController.person;
+    // ===============================================================
+    // PERSONAL HOME MODE
+    // ===============================================================
+    if (widget.isFromPersonalHome) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8F9FC),
+        body: SafeArea(child: _buildTemplateSelectionLayout()),
+      );
+    }
 
-    if (person == null) {
+    // ===============================================================
+    // ONBOARDING MODE
+    // ===============================================================
+    final controller = onboardingController;
+    final person = controller?.person;
+
+    if (controller == null || person == null) {
       return const Scaffold(
         body: Center(child: Text('Personal information is not available.')),
       );
@@ -48,8 +90,7 @@ class _PersonalWorkspaceSetupPageState
                 lastName: person.lastName,
                 email: person.email ?? '',
                 phone: person.phone,
-                organizationalRole:
-                    onboardingController.organizationRole?.name ?? '',
+                organizationalRole: controller.organizationRole?.name ?? '',
                 onEditDetails: _editDetails,
                 onConfirm: _continueToTemplateSelection,
                 onUseForFutureWorkspaces: (_) {},
@@ -70,7 +111,7 @@ class _PersonalWorkspaceSetupPageState
 
         if (isCompact) {
           return WorkspaceTemplateSelectionPage(
-            onBack: _backToPersonalDetails,
+            onBack: _backFromTemplateSelection,
             onContinue: _handleTemplateContinue,
           );
         }
@@ -81,7 +122,7 @@ class _PersonalWorkspaceSetupPageState
             SizedBox(width: 360, child: _buildTemplateSidebar()),
             Expanded(
               child: WorkspaceTemplateSelectionPage(
-                onBack: _backToPersonalDetails,
+                onBack: _backFromTemplateSelection,
                 onContinue: _handleTemplateContinue,
               ),
             ),
@@ -179,11 +220,16 @@ class _PersonalWorkspaceSetupPageState
               // BACK
               // -------------------------------------------------------------------
               TextButton.icon(
-                onPressed: _backToPersonalDetails,
+                onPressed: _backFromTemplateSelection,
                 icon: const Icon(Icons.arrow_back, size: 17),
-                label: const Text(
-                  'Back to Personal Details',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                label: Text(
+                  widget.isFromPersonalHome
+                      ? 'Back to Personal Home'
+                      : 'Back to Personal Details',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFF475467),
@@ -198,6 +244,21 @@ class _PersonalWorkspaceSetupPageState
   }
 
   Widget _buildTemplateProgress() {
+    // Personal Home users are entering directly into the workspace
+    // creation step, so show a simple single-step progress indicator.
+    if (widget.isFromPersonalHome) {
+      return Row(
+        children: [
+          _buildProgressCircle(
+            number: '1',
+            label: 'Workspace',
+            isComplete: false,
+            isActive: true,
+          ),
+        ],
+      );
+    }
+
     return Row(
       children: [
         _buildProgressCircle(
@@ -308,7 +369,11 @@ class _PersonalWorkspaceSetupPageState
     );
   }
 
-  void _handleTemplateContinue(String templateId) {
+  // ---------------------------------------------------------------------------
+  // CREATE WORKSPACE
+  // ---------------------------------------------------------------------------
+
+  Future<void> _handleTemplateContinue(String templateId) async {
     debugPrint('>>> PERSONAL WORKSPACE TEMPLATE SELECTED: $templateId');
 
     final allTemplates = [
@@ -320,45 +385,58 @@ class _PersonalWorkspaceSetupPageState
 
     final template = allTemplates.firstWhere((item) => item.id == templateId);
 
-    final workspace = CTWorkspaceService.createWorkspace(
-      id: 'personal_${template.id}',
+    final workspace = await CTWorkspaceService.createPersonalWorkspace(
       name: template.title,
-      type: CTWorkspaceType.personal,
+      description: template.description,
       icon: template.icon,
       color: template.accentColor,
+      templateId: templateId,
     );
 
     debugPrint('>>> CREATED PERSONAL WORKSPACE: ${workspace.name}');
+    debugPrint('>>> PERSONAL WORKSPACE ID: ${workspace.id}');
+    debugPrint('>>> PERSONAL WORKSPACE TEMPLATE: ${workspace.templateId}');
+
+    if (!mounted) return;
+
+    final firstName = widget.isFromPersonalHome
+        ? (widget.personalHomeFirstName ?? '')
+        : (onboardingController?.person?.firstName ?? '');
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => PersonalWorkspaceShell(
-          workspace: workspace,
-          firstName: onboardingController.person?.firstName ?? '',
-        ),
+        builder: (_) =>
+            PersonalWorkspaceShell(workspace: workspace, firstName: firstName),
       ),
     );
   }
 
   // ---------------------------------------------------------------------------
-  // STEP 1
+  // STEP 1 — ONBOARDING ONLY
   // ---------------------------------------------------------------------------
 
   void _editDetails() {
+    final controller = onboardingController;
+    final person = controller?.person;
+
+    if (controller == null || person == null) {
+      return;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => CompletePersonalProfilePage(
-          firstName: onboardingController.person?.firstName ?? '',
-          lastName: onboardingController.person?.lastName ?? '',
-          email: onboardingController.person?.email ?? '',
-          phone: onboardingController.person?.phone,
-          organizationalRole: onboardingController.organizationRole?.name ?? '',
+          firstName: person.firstName,
+          lastName: person.lastName,
+          email: person.email ?? '',
+          phone: person.phone,
+          organizationalRole: controller.organizationRole?.name ?? '',
           onSkip: () {
             Navigator.of(context).pop();
           },
           onComplete:
               ({String? preferredName, String? pronouns, String? phone}) async {
-                onboardingController.updatePerson(
+                controller.updatePerson(
                   preferredName: preferredName,
                   pronouns: pronouns,
                   phone: phone,
@@ -377,7 +455,16 @@ class _PersonalWorkspaceSetupPageState
     });
   }
 
-  void _backToPersonalDetails() {
+  // ---------------------------------------------------------------------------
+  // BACK
+  // ---------------------------------------------------------------------------
+
+  void _backFromTemplateSelection() {
+    if (widget.isFromPersonalHome) {
+      Navigator.of(context).pop();
+      return;
+    }
+
     setState(() {
       _currentStep = 1;
     });

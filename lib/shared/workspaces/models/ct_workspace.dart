@@ -8,6 +8,7 @@ class CTWorkspace {
   final CTWorkspaceType type;
   final IconData icon;
   final Color color;
+  final String? templateId;
 
   const CTWorkspace({
     required this.id,
@@ -15,6 +16,7 @@ class CTWorkspace {
     required this.type,
     required this.icon,
     required this.color,
+    this.templateId,
   });
 
   bool get isPersonal => type == CTWorkspaceType.personal;

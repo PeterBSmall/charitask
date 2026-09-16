@@ -22,8 +22,8 @@ class PersonalHomeStats extends StatelessWidget {
           child: _StatCard(
             icon: Icons.dashboard_outlined,
             title: 'Pinned Workspace',
-            value: 'Volunteer',
-            subtitle: 'Coordinator',
+            value: 'None',
+            subtitle: 'no workspace yet',
             iconBackground: Color(0xFFE8F8FC),
             iconColor: Color(0xFF08738A),
           ),

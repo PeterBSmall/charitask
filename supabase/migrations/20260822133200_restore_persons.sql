@@ -1,6 +1,7 @@
--- ChariTask Foundation: Persons
--- A person is an organization-owned human identity.
--- A person may exist without a Supabase login.
+-- ChariTask Foundation:
+-- Restore the Persons table.
+-- The original persons migration was recorded as applied
+-- but contained no SQL in the production deployment.
 
 CREATE TABLE public.persons (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -46,16 +47,13 @@ CREATE TABLE public.persons (
         REFERENCES public.persons(id)
 );
 
--- Required for organization-safe composite foreign keys.
 ALTER TABLE public.persons
     ADD CONSTRAINT persons_organization_id_id_key
     UNIQUE (organization_id, id);
 
--- Common tenant lookup path.
 CREATE INDEX persons_organization_id_idx
     ON public.persons (organization_id);
 
--- Common active-person lookup path.
 CREATE INDEX persons_active_organization_idx
     ON public.persons (organization_id)
     WHERE archived_at IS NULL;

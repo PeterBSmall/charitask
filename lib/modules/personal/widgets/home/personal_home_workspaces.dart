@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PersonalHomeWorkspaces extends StatelessWidget {
-  const PersonalHomeWorkspaces({super.key});
+  final VoidCallback onCreateWorkspace;
+  final void Function(Map<String, dynamic> workspace) onOpenWorkspace;
+
+  const PersonalHomeWorkspaces({
+    super.key,
+    required this.onCreateWorkspace,
+    required this.onOpenWorkspace,
+  });
 
   Future<List<Map<String, dynamic>>> _loadWorkspaces() async {
     final supabase = Supabase.instance.client;
@@ -45,14 +52,19 @@ class PersonalHomeWorkspaces extends StatelessWidget {
         .toList();
 
     // ===============================================================
-    // LOAD ACTIVE WORKSPACES
+    // LOAD ACTIVE PERSONAL WORKSPACES
+    //
+    // Personal Workspaces are identified by having a template_id.
+    // Organization workspaces such as "Main Workspace" normally have
+    // no template_id and therefore do not appear here.
     // ===============================================================
     final workspaces = await supabase
         .from('workspaces')
-        .select('id, name, description')
+        .select('id, name, description, template_id')
         .inFilter('id', workspaceIds)
         .eq('status', 'active')
-        .isFilter('archived_at', null);
+        .isFilter('archived_at', null)
+        .not('template_id', 'is', null);
 
     return List<Map<String, dynamic>>.from(workspaces);
   }
@@ -78,7 +90,9 @@ class PersonalHomeWorkspaces extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                // TODO: Open the full Personal Workspaces page.
+              },
               child: const Text(
                 'View All',
                 style: TextStyle(
@@ -106,20 +120,25 @@ class PersonalHomeWorkspaces extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
+              debugPrint('PersonalHomeWorkspaces error: ${snapshot.error}');
+
               return _WorkspaceMessage(
-                message: 'Unable to load your workspaces.',
+                message: 'Workspace error: ${snapshot.error}',
               );
             }
 
             final workspaces = snapshot.data ?? [];
 
+            // ===========================================================
+            // NO PERSONAL WORKSPACES YET
+            // ===========================================================
             if (workspaces.isEmpty) {
-              return const _WorkspaceMessage(
-                message: 'You do not have any active workspaces yet.',
-              );
+              return _CreateWorkspaceCard(onCreateWorkspace: onCreateWorkspace);
             }
 
-            // Personal Home currently displays up to three workspace cards.
+            // ===========================================================
+            // DISPLAY UP TO THREE PERSONAL WORKSPACES
+            // ===========================================================
             final visibleWorkspaces = workspaces.take(3).toList();
 
             return Row(
@@ -137,6 +156,7 @@ class PersonalHomeWorkspaces extends StatelessWidget {
                       description:
                           visibleWorkspaces[index]['description'] as String?,
                       accent: _accentForIndex(index),
+                      onTap: () => onOpenWorkspace(visibleWorkspaces[index]),
                     ),
                   ),
                 ],
@@ -154,6 +174,85 @@ class PersonalHomeWorkspaces extends StatelessWidget {
     return accents[index % accents.length];
   }
 }
+
+// ===========================================================================
+// CREATE PERSONAL WORKSPACE EMPTY STATE
+// ===========================================================================
+
+class _CreateWorkspaceCard extends StatelessWidget {
+  final VoidCallback onCreateWorkspace;
+
+  const _CreateWorkspaceCard({required this.onCreateWorkspace});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onCreateWorkspace,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFE7E8EE)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1EDFF),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Icon(
+                  Icons.add_rounded,
+                  size: 28,
+                  color: Color(0xFF7C4DFF),
+                ),
+              ),
+              const SizedBox(width: 18),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Create Your Personal Workspace',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF273247),
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'Set up a workspace designed around how you work. '
+                      'Choose a template and customize it to fit your needs.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: Color(0xFF718096),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Icon(Icons.arrow_forward_rounded, color: Color(0xFF7C4DFF)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ===========================================================================
+// EMPTY / ERROR MESSAGE
+// ===========================================================================
 
 class _WorkspaceMessage extends StatelessWidget {
   final String message;
@@ -178,15 +277,21 @@ class _WorkspaceMessage extends StatelessWidget {
   }
 }
 
+// ===========================================================================
+// PERSONAL WORKSPACE CARD
+// ===========================================================================
+
 class _WorkspaceCard extends StatelessWidget {
   final String name;
   final String? description;
   final Color accent;
+  final VoidCallback onTap;
 
   const _WorkspaceCard({
     required this.name,
     required this.description,
     required this.accent,
+    required this.onTap,
   });
 
   @override
@@ -195,7 +300,7 @@ class _WorkspaceCard extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         borderRadius: BorderRadius.circular(18),
         child: Container(
           padding: const EdgeInsets.all(20),
@@ -230,7 +335,7 @@ class _WorkspaceCard extends StatelessWidget {
               Text(
                 description?.trim().isNotEmpty == true
                     ? description!
-                    : 'Workspace',
+                    : 'Personal workspace',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

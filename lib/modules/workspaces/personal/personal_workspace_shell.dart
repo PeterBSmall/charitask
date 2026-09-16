@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:charitask/modules/personal/pages/personal_home_page.dart';
 import 'package:charitask/modules/workspaces/dashboard/pages/workspace_dashboard_page.dart';
 import 'package:charitask/shared/widgets/navigation/ct_top_navigation.dart';
 import 'package:charitask/shared/widgets/navigation/personal_workspace_sidebar.dart';
@@ -24,8 +25,14 @@ class _PersonalWorkspaceShellState extends State<PersonalWorkspaceShell> {
   bool _isCustomizingDashboard = false;
 
   String _selectedSidebarItem = 'Overview';
-
   int _topNavIndex = 0;
+
+  void _returnToPersonalHome(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const PersonalHomePage()),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +50,13 @@ class _PersonalWorkspaceShellState extends State<PersonalWorkspaceShell> {
               });
             },
             items: [
+              PersonalWorkspaceSidebarItem(
+                label: 'Personal Home',
+                icon: Icons.home_outlined,
+                onTap: () {
+                  _returnToPersonalHome(context);
+                },
+              ),
               PersonalWorkspaceSidebarItem(
                 label: 'Overview',
                 icon: Icons.grid_view_rounded,
@@ -90,7 +104,6 @@ class _PersonalWorkspaceShellState extends State<PersonalWorkspaceShell> {
               ),
             ],
           ),
-
           Expanded(
             child: Column(
               children: [
@@ -108,7 +121,6 @@ class _PersonalWorkspaceShellState extends State<PersonalWorkspaceShell> {
                   },
                   isCustomizing: _isCustomizingDashboard,
                 ),
-
                 Expanded(
                   child: WorkspaceDashboardPage(
                     workspace: widget.workspace,

@@ -22,10 +22,11 @@ class CTTopNavigation extends StatelessWidget {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final compact = width < 900;
+        final veryCompact = width < 650;
 
         return Container(
           height: 72,
-          padding: EdgeInsets.symmetric(horizontal: compact ? 20 : 32),
+          padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 32),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
@@ -34,57 +35,77 @@ class CTTopNavigation extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               // TOP NAVIGATION
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               Expanded(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: List.generate(
                       _items.length,
                       (index) => _buildNavItem(
                         label: _items[index],
                         selected: selectedIndex == index,
                         onTap: () => onSelected(index),
+                        compact: veryCompact,
                       ),
                     ),
                   ),
                 ),
               ),
 
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               // CUSTOMIZE DASHBOARD
-              // ------------------------------------------------------------
-              TextButton.icon(
-                onPressed: onCustomize,
-                icon: Icon(
-                  isCustomizing
-                      ? Icons.check_rounded
-                      : Icons.dashboard_customize_outlined,
-                  size: 17,
-                ),
-                label: Text(isCustomizing ? 'Done' : 'Customize Dashboard'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF5B4BC4),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
+              // ----------------------------------------------------------
+              if (veryCompact)
+                IconButton(
+                  tooltip: isCustomizing ? 'Done' : 'Customize Dashboard',
+                  onPressed: onCustomize,
+                  icon: Icon(
+                    isCustomizing
+                        ? Icons.check_rounded
+                        : Icons.dashboard_customize_outlined,
+                    size: 21,
+                    color: const Color(0xFF5B4BC4),
                   ),
-                  textStyle: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                )
+              else
+                TextButton.icon(
+                  onPressed: onCustomize,
+                  icon: Icon(
+                    isCustomizing
+                        ? Icons.check_rounded
+                        : Icons.dashboard_customize_outlined,
+                    size: 17,
+                  ),
+                  label: Text(isCustomizing ? 'Done' : 'Customize Dashboard'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF5B4BC4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 10,
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(width: 14),
+              SizedBox(width: veryCompact ? 4 : 14),
 
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               // SEARCH
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               SizedBox(
-                width: compact ? 180 : 320,
+                width: veryCompact
+                    ? 140
+                    : compact
+                    ? 180
+                    : 320,
                 height: 44,
                 child: TextField(
                   decoration: InputDecoration(
@@ -109,28 +130,32 @@ class CTTopNavigation extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 18),
+              SizedBox(width: veryCompact ? 4 : 18),
 
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               // NOTIFICATIONS
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               _buildIconButton(
                 icon: Icons.notifications_none_rounded,
                 onTap: () {},
               ),
 
-              const SizedBox(width: 8),
-
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               // HELP
-              // ------------------------------------------------------------
-              _buildIconButton(icon: Icons.help_outline_rounded, onTap: () {}),
+              // ----------------------------------------------------------
+              if (!veryCompact) ...[
+                const SizedBox(width: 8),
+                _buildIconButton(
+                  icon: Icons.help_outline_rounded,
+                  onTap: () {},
+                ),
+              ],
 
-              const SizedBox(width: 12),
+              SizedBox(width: veryCompact ? 4 : 12),
 
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               // PROFILE
-              // ------------------------------------------------------------
+              // ----------------------------------------------------------
               Container(
                 width: 44,
                 height: 44,
@@ -155,13 +180,14 @@ class CTTopNavigation extends StatelessWidget {
     required String label,
     required bool selected,
     required VoidCallback onTap,
+    required bool compact,
   }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 11 : 16),
         alignment: Alignment.center,
         child: Stack(
           alignment: Alignment.center,
@@ -169,7 +195,7 @@ class CTTopNavigation extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: compact ? 14 : 15,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: selected
                     ? const Color(0xFF5B4BC4)
@@ -180,7 +206,7 @@ class CTTopNavigation extends StatelessWidget {
               Positioned(
                 bottom: 0,
                 child: Container(
-                  width: 58,
+                  width: compact ? 48 : 58,
                   height: 3,
                   decoration: BoxDecoration(
                     color: const Color(0xFF5B4BC4),
@@ -203,10 +229,14 @@ class CTTopNavigation extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: SizedBox(
+        child: const SizedBox(
           width: 42,
           height: 42,
-          child: Icon(icon, color: const Color(0xFF3D4756), size: 25),
+          child: Icon(
+            Icons.notifications_none_rounded,
+            color: Color(0xFF3D4756),
+            size: 25,
+          ),
         ),
       ),
     );
