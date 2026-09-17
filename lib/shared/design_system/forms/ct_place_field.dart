@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:charitask/services/google_places/ct_google_places_service.dart';
-import 'package:charitask/shared/design_system/forms/ct_place_result_card.dart';
 import 'package:charitask/shared/models/ct_place.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_constants.dart';
 
@@ -28,46 +27,45 @@ class _CTLocationFieldState extends State<CTLocationField> {
 
   bool _loading = false;
   bool _suppressSearch = false;
+  bool _selectingPlace = false;
 
   @override
   void initState() {
     super.initState();
 
     widget.controller.addListener(_handleSearch);
-
     _placesService.startSession();
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-
     widget.controller.removeListener(_handleSearch);
-
     _removeOverlay();
-
     _placesService.endSession();
-
     super.dispose();
   }
 
+  // ============================================================
+  // SEARCH
+  // ============================================================
+
   void _handleSearch() {
-    // Do not search when we are setting the field after
-    // the user has selected a Google Places result.
-    if (_suppressSearch) return;
+    if (_suppressSearch || _selectingPlace) return;
 
     final query = widget.controller.text.trim();
 
     _debounce?.cancel();
 
     if (query.length < 3) {
-      setState(() {
-        _results = [];
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _results = [];
+          _loading = false;
+        });
+      }
 
       _removeOverlay();
-
       return;
     }
 
@@ -75,7 +73,7 @@ class _CTLocationFieldState extends State<CTLocationField> {
   }
 
   Future<void> _search(String query) async {
-    if (!mounted) return;
+    if (!mounted || _selectingPlace) return;
 
     setState(() {
       _loading = true;
@@ -84,14 +82,16 @@ class _CTLocationFieldState extends State<CTLocationField> {
     try {
       final predictions = await _placesService.autocomplete(query);
 
-      if (!mounted) return;
+      if (!mounted || _selectingPlace) return;
+
+      final results = predictions.map(_predictionToPlace).toList();
 
       setState(() {
-        _results = predictions.map(_predictionToPlace).toList();
+        _results = results;
         _loading = false;
       });
 
-      if (_results.isEmpty) {
+      if (results.isEmpty) {
         _removeOverlay();
       } else {
         _showOverlay();
@@ -126,22 +126,45 @@ class _CTLocationFieldState extends State<CTLocationField> {
     );
   }
 
-  Future<void> _selectPlace(CTPlace place) async {
-    if (place.placeId == null) return;
+  // ============================================================
+  // SELECT GOOGLE PLACE
+  // ============================================================
 
-    // Stop any pending search.
+  Future<void> _selectPlace(CTPlace place) async {
+    if (_selectingPlace) return;
+
+    final placeId = place.placeId;
+
+    if (placeId == null || placeId.isEmpty) {
+      debugPrint('CTLocationField: selected place has no placeId.');
+      return;
+    }
+
+    debugPrint(
+      'CTLocationField: selecting place '
+      '${place.primary} (${placeId})',
+    );
+
+    _selectingPlace = true;
     _debounce?.cancel();
 
-    // Remove the suggestions immediately.
+    // Close suggestions immediately.
     _removeOverlay();
 
-    setState(() {
-      _results = [];
-      _loading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _results = [];
+        _loading = true;
+      });
+    }
 
     try {
-      final details = await _placesService.getPlaceDetails(place.placeId!);
+      final details = await _placesService.getPlaceDetails(placeId);
+
+      debugPrint(
+        'CTLocationField: place details received: '
+        '${details.formattedAddress}',
+      );
 
       final selectedPlace = CTPlace(
         primary: place.primary,
@@ -149,21 +172,35 @@ class _CTLocationFieldState extends State<CTLocationField> {
         placeId: details.placeId,
         latitude: details.latitude,
         longitude: details.longitude,
+        streetAddress: details.streetAddress,
+        city: details.city,
+        state: details.state,
+        postalCode: details.postalCode,
+        country: details.country,
       );
 
-      // Prevent changing the controller text from triggering
-      // another Google Places search.
+      // Prevent controller update from triggering another search.
       _suppressSearch = true;
 
-      widget.controller.text = details.formattedAddress;
-
-      widget.controller.selection = TextSelection.collapsed(
-        offset: widget.controller.text.length,
+      widget.controller.value = TextEditingValue(
+        text: details.formattedAddress,
+        selection: TextSelection.collapsed(
+          offset: details.formattedAddress.length,
+        ),
       );
 
       _suppressSearch = false;
 
+      // Send structured address data back to AddLocationPage.
       widget.onChanged?.call(selectedPlace);
+
+      debugPrint(
+        'CTLocationField: structured address '
+        'street="${selectedPlace.streetAddress}", '
+        'city="${selectedPlace.city}", '
+        'state="${selectedPlace.state}", '
+        'zip="${selectedPlace.postalCode}"',
+      );
 
       if (!mounted) return;
 
@@ -172,12 +209,13 @@ class _CTLocationFieldState extends State<CTLocationField> {
         _loading = false;
       });
 
-      // Make absolutely sure the overlay is gone.
       _removeOverlay();
 
-      FocusScope.of(context).unfocus();
-    } catch (error) {
+      // Remove focus after selection.
+      FocusManager.instance.primaryFocus?.unfocus();
+    } catch (error, stackTrace) {
       debugPrint('CTLocationField place details error: $error');
+      debugPrint('$stackTrace');
 
       _suppressSearch = false;
 
@@ -189,33 +227,57 @@ class _CTLocationFieldState extends State<CTLocationField> {
       });
 
       _removeOverlay();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'We could not load the details for that address. '
+            'Please try selecting it again.',
+          ),
+        ),
+      );
+    } finally {
+      _suppressSearch = false;
+      _selectingPlace = false;
     }
   }
 
+  // ============================================================
+  // OVERLAY
+  // ============================================================
+
   void _showOverlay() {
+    if (!mounted || _results.isEmpty) return;
+
     if (_overlayEntry != null) {
       _overlayEntry!.markNeedsBuild();
       return;
     }
 
     _overlayEntry = OverlayEntry(
+      opaque: false,
       builder: (context) {
-        final renderBox = this.context.findRenderObject() as RenderBox?;
+        final renderObject = this.context.findRenderObject();
 
-        if (renderBox == null) {
+        if (renderObject is! RenderBox) {
           return const SizedBox.shrink();
         }
 
-        final width = renderBox.size.width;
-        final fieldHeight = renderBox.size.height;
+        final width = renderObject.size.width;
+        final height = renderObject.size.height;
 
-        return CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          offset: Offset(0, fieldHeight + 8),
-          child: Material(
-            color: Colors.transparent,
-            child: SizedBox(width: width, child: _buildResultsDropdown()),
+        return Positioned.fill(
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            offset: Offset(0, height + 8),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                color: Colors.transparent,
+                child: SizedBox(width: width, child: _buildResultsDropdown()),
+              ),
+            ),
           ),
         );
       },
@@ -229,39 +291,101 @@ class _CTLocationFieldState extends State<CTLocationField> {
     _overlayEntry = null;
   }
 
+  // ============================================================
+  // DROPDOWN
+  // ============================================================
+
   Widget _buildResultsDropdown() {
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 240),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CTJourneyColors.border, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.12),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: ListView.builder(
+    return Material(
+      color: Colors.white,
+      elevation: 8,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 260),
+        child: ListView.separated(
           padding: EdgeInsets.zero,
           shrinkWrap: true,
           itemCount: _results.length,
+          separatorBuilder: (context, index) {
+            return const Divider(height: 1, indent: 56, endIndent: 16);
+          },
           itemBuilder: (context, index) {
             final place = _results[index];
 
-            return CTPlaceResultCard(
-              place: place,
-              onTap: () => _selectPlace(place),
+            return InkWell(
+              onTap: () {
+                debugPrint(
+                  'CTLocationField: suggestion tapped: '
+                  '${place.primary}',
+                );
+
+                _selectPlace(place);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: CTJourneyColors.purple.withOpacity(.10),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.location_on_outlined,
+                        color: CTJourneyColors.purple,
+                        size: 21,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            place.primary,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: CTJourneyColors.title,
+                            ),
+                          ),
+                          if (place.secondary.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              place.secondary,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: CTJourneyColors.subtitle,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         ),
       ),
     );
   }
+
+  // ============================================================
+  // FIELD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
@@ -280,13 +404,11 @@ class _CTLocationFieldState extends State<CTLocationField> {
             color: CTJourneyColors.subtitle,
             fontSize: 17,
           ),
-
           prefixIcon: const Icon(
             Icons.location_on_outlined,
             color: CTJourneyColors.subtitle,
             size: 22,
           ),
-
           suffixIcon: _loading
               ? const Padding(
                   padding: EdgeInsets.all(14),
@@ -300,19 +422,15 @@ class _CTLocationFieldState extends State<CTLocationField> {
                   ),
                 )
               : null,
-
           filled: true,
           fillColor: CTJourneyColors.surface,
-
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 22,
             vertical: 20,
           ),
-
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(CTJourneySizes.textFieldRadius),
           ),
-
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(CTJourneySizes.textFieldRadius),
             borderSide: const BorderSide(
@@ -320,7 +438,6 @@ class _CTLocationFieldState extends State<CTLocationField> {
               width: 1.2,
             ),
           ),
-
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(CTJourneySizes.textFieldRadius),
             borderSide: const BorderSide(

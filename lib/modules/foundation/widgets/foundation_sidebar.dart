@@ -76,24 +76,31 @@ class FoundationSidebar extends StatelessWidget {
             ),
 
             CTTile(
-              icon: Icons.group_outlined,
-              label: 'Groups',
+              icon: Icons.location_on_outlined,
+              label: 'Locations',
               selected: selectedIndex == 3,
               onTap: () => onSelected(3),
             ),
 
             CTTile(
-              icon: Icons.shield_outlined,
-              label: 'Security',
+              icon: Icons.group_outlined,
+              label: 'Groups',
               selected: selectedIndex == 4,
               onTap: () => onSelected(4),
             ),
 
             CTTile(
-              icon: Icons.bar_chart_outlined,
-              label: 'Analytics',
+              icon: Icons.shield_outlined,
+              label: 'Security',
               selected: selectedIndex == 5,
               onTap: () => onSelected(5),
+            ),
+
+            CTTile(
+              icon: Icons.bar_chart_outlined,
+              label: 'Analytics',
+              selected: selectedIndex == 6,
+              onTap: () => onSelected(6),
             ),
 
             const Padding(
@@ -106,8 +113,8 @@ class FoundationSidebar extends StatelessWidget {
             CTTile(
               icon: Icons.sticky_note_2_outlined,
               label: 'Notes',
-              selected: selectedIndex == 6,
-              onTap: () => onSelected(6),
+              selected: selectedIndex == 7,
+              onTap: () => onSelected(7),
               trailing: Container(
                 width: 8,
                 height: 8,
@@ -121,8 +128,8 @@ class FoundationSidebar extends StatelessWidget {
             CTTile(
               icon: Icons.settings_outlined,
               label: 'Settings',
-              selected: selectedIndex == 7,
-              onTap: () => onSelected(7),
+              selected: selectedIndex == 8,
+              onTap: () => onSelected(8),
             ),
 
             const Padding(
@@ -143,7 +150,6 @@ class FoundationSidebar extends StatelessWidget {
           ],
         ),
       ),
-
       footer: Column(
         children: [
           const Divider(height: 1),
@@ -268,24 +274,31 @@ class FoundationSidebar extends StatelessWidget {
           ),
 
           _buildCollapsedIcon(
-            icon: Icons.group_outlined,
-            tooltip: 'Groups',
+            icon: Icons.location_on_outlined,
+            tooltip: 'Locations',
             selected: selectedIndex == 3,
             onTap: () => onSelected(3),
           ),
 
           _buildCollapsedIcon(
-            icon: Icons.shield_outlined,
-            tooltip: 'Security',
+            icon: Icons.group_outlined,
+            tooltip: 'Groups',
             selected: selectedIndex == 4,
             onTap: () => onSelected(4),
           ),
 
           _buildCollapsedIcon(
-            icon: Icons.bar_chart_outlined,
-            tooltip: 'Analytics',
+            icon: Icons.shield_outlined,
+            tooltip: 'Security',
             selected: selectedIndex == 5,
             onTap: () => onSelected(5),
+          ),
+
+          _buildCollapsedIcon(
+            icon: Icons.bar_chart_outlined,
+            tooltip: 'Analytics',
+            selected: selectedIndex == 6,
+            onTap: () => onSelected(6),
           ),
 
           const Spacer(),
@@ -293,16 +306,16 @@ class FoundationSidebar extends StatelessWidget {
           _buildCollapsedIcon(
             icon: Icons.sticky_note_2_outlined,
             tooltip: 'Notes',
-            selected: selectedIndex == 6,
-            onTap: () => onSelected(6),
+            selected: selectedIndex == 7,
+            onTap: () => onSelected(7),
             showDot: true,
           ),
 
           _buildCollapsedIcon(
             icon: Icons.settings_outlined,
             tooltip: 'Settings',
-            selected: selectedIndex == 7,
-            onTap: () => onSelected(7),
+            selected: selectedIndex == 8,
+            onTap: () => onSelected(8),
           ),
 
           const SizedBox(height: 8),

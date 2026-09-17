@@ -1,0 +1,7 @@
+-- ChariTask: System Administrator Location permissions
+--
+-- Location permissions are assigned to the organization's System
+-- Administrator functional role during organization provisioning.
+--
+-- This migration intentionally contains no data inserts because
+-- functional roles are organization-owned.

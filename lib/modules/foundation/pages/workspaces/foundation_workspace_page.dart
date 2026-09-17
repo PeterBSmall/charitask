@@ -6,6 +6,7 @@ import 'package:charitask/modules/foundation/widgets/foundation_hero.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_pinned_notes.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_recent_activity.dart';
 import 'package:charitask/modules/foundation/widgets/foundation_workspace_shell.dart';
+import 'package:charitask/modules/locations/pages/locations_page.dart';
 import 'package:charitask/modules/people/pages/people_page.dart';
 
 import 'package:charitask/shared/design_system/design_system.dart';
@@ -37,6 +38,8 @@ class FoundationWorkspacePage extends StatelessWidget {
       organization: OrganizationWorkspace(journeyController: journeyController),
 
       people: PeoplePage(organizationId: organizationId),
+
+      locations: LocationsPage(organizationId: organizationId),
 
       groups: const _FoundationPlaceholderPage(
         title: 'Groups',
@@ -166,26 +169,22 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
                   label: 'Communications',
                 ),
               ],
-
               onMetricSelected: (metric) {
                 switch (metric.label) {
                   case 'Org':
-                    // Organization
                     widget.onNavigate(1);
                     break;
 
                   case 'People':
-                    // People
                     widget.onNavigate(2);
                     break;
 
-                  case 'Groups':
-                    // Groups
+                  case 'Locations':
                     widget.onNavigate(3);
                     break;
 
-                  case 'Locations':
-                    // Locations will be connected when that page is ready.
+                  case 'Groups':
+                    widget.onNavigate(4);
                     break;
 
                   case 'Suites':
@@ -206,6 +205,7 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
                 }
               },
             ),
+
             const SizedBox(height: 24),
 
             // ----------------------------------------------------------------

@@ -85,7 +85,7 @@ class PeopleService {
         return location['status'] == 'active';
       }).toList();
 
-      String role = '—';
+      String role = 'â€”';
 
       if (activeRoleAssignments.isNotEmpty) {
         final primaryRoles = activeRoleAssignments.where((assignment) {
@@ -136,10 +136,38 @@ class PeopleService {
       return {
         ...person,
         'role': role,
-        'groups': groups.isEmpty ? '—' : groups,
-        'locations': locations.isEmpty ? '—' : locations,
+        'groups': groups.isEmpty ? 'â€”' : groups,
+        'locations': locations.isEmpty ? 'â€”' : locations,
       };
     }).toList();
+  }
+
+  /// Returns a single person by ID within the specified organization.
+  Future<Map<String, dynamic>?> getPerson({
+    required String organizationId,
+    required String personId,
+  }) async {
+    final response = await _supabase
+        .from('persons')
+        .select('''
+          id,
+          first_name,
+          last_name,
+          preferred_name,
+          email,
+          phone,
+          employment_type,
+          status
+        ''')
+        .eq('organization_id', organizationId)
+        .eq('id', personId)
+        .maybeSingle();
+
+    if (response == null) {
+      return null;
+    }
+
+    return Map<String, dynamic>.from(response);
   }
 
   /// Creates a new person within an organization.

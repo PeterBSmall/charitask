@@ -8,6 +8,10 @@ CTWorkspaceOverviewConfig foundationOverview(
   BuildContext context,
   CTJourneyController journeyController,
 ) {
+  final firstName = journeyController.firstName.trim().isEmpty
+      ? 'there'
+      : journeyController.firstName.trim();
+
   return CTWorkspaceOverviewConfig(
     // Identity
     icon: Icons.account_balance_rounded,
@@ -17,7 +21,8 @@ CTWorkspaceOverviewConfig foundationOverview(
     greeting: 'Foundation',
 
     // Completed workspace hero
-    welcomeMessage: 'Peter, your organization is active and running smoothly.',
+    welcomeMessage:
+        '$firstName, your organization is active and running smoothly.',
 
     organizationName:
         'You’ve built a strong foundation. Now you can manage people, '

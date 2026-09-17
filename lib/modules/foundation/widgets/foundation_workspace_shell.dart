@@ -15,6 +15,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
   final String firstName;
   final Widget organization;
   final Widget people;
+  final Widget locations;
   final Widget groups;
   final Widget security;
   final Widget analytics;
@@ -26,6 +27,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
     required this.firstName,
     required this.organization,
     required this.people,
+    required this.locations,
     required this.groups,
     required this.security,
     required this.analytics,
@@ -130,16 +132,22 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
         return widget.people;
 
       case 3:
-        return widget.groups;
+        return widget.locations;
 
       case 4:
-        return widget.security;
+        return widget.groups;
 
       case 5:
-        return widget.analytics;
+        return widget.security;
 
       case 6:
+        return widget.analytics;
+
+      case 7:
         return widget.notes;
+
+      case 8:
+        return const SizedBox.shrink();
 
       default:
         return widget.dashboardBuilder(_navigateTo);
