@@ -13,6 +13,7 @@ import 'package:charitask/modules/workspaces/dashboard/pages/workspace_dashboard
 class FoundationWorkspaceShell extends StatefulWidget {
   final Widget Function(ValueChanged<int> onNavigate) dashboardBuilder;
   final String firstName;
+  final VoidCallback? onPersonalHome;
   final Widget organization;
   final Widget people;
   final Widget locations;
@@ -25,6 +26,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
     super.key,
     required this.dashboardBuilder,
     required this.firstName,
+    this.onPersonalHome,
     required this.organization,
     required this.people,
     required this.locations,
@@ -165,6 +167,7 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
             onSelected: _navigateTo,
             onToggleCollapse: _toggleSidebar,
             onCreateWorkspace: _createWorkspace,
+            onPersonalHome: widget.onPersonalHome,
           ),
           Expanded(
             child: Column(

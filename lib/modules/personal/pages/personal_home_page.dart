@@ -13,9 +13,51 @@ import 'package:charitask/modules/personal/widgets/home/personal_home_workspaces
 import 'package:charitask/modules/foundation/pages/onboarding/personal_workspace/personal_workspace_setup_page.dart';
 import 'package:charitask/shared/workspaces/models/ct_workspace.dart';
 import 'package:charitask/modules/workspaces/personal/personal_workspace_shell.dart';
+import 'package:charitask/modules/organization/data/services/organization_service.dart';
+import 'package:charitask/app/app_router.dart';
 
 class PersonalHomePage extends StatelessWidget {
-  const PersonalHomePage({super.key});
+  PersonalHomePage({super.key});
+
+  Future<void> _openMyOrganizations(BuildContext context) async {
+    try {
+      final organizations = await _organizationService.getMyOrganizations();
+
+      if (!context.mounted) return;
+
+      if (organizations.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'You are not currently a member of any organizations.',
+            ),
+          ),
+        );
+        return;
+      }
+
+      if (organizations.length == 1) {
+        await AppRouter.goToOrganization(context, organizations.first.id);
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Multiple organizations found. Organization selection will be added next.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to load your organizations: $error')),
+      );
+    }
+  }
+
+  final OrganizationService _organizationService = OrganizationService();
 
   void _createPersonalWorkspace(BuildContext context) {
     Navigator.of(context).push(
@@ -77,7 +119,9 @@ class PersonalHomePage extends StatelessWidget {
       backgroundColor: const Color(0xFFF7F7FA),
       body: Row(
         children: [
-          const PersonalHomeSidebar(),
+          PersonalHomeSidebar(
+            onMyOrganizations: () => _openMyOrganizations(context),
+          ),
 
           Expanded(
             child: Column(

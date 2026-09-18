@@ -14,6 +14,7 @@ class FoundationSidebar extends StatelessWidget {
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
   final VoidCallback onCreateWorkspace;
+  final VoidCallback? onPersonalHome;
 
   const FoundationSidebar({
     super.key,
@@ -22,6 +23,7 @@ class FoundationSidebar extends StatelessWidget {
     required this.isCollapsed,
     required this.onToggleCollapse,
     required this.onCreateWorkspace,
+    this.onPersonalHome,
   });
 
   @override
@@ -40,7 +42,7 @@ class FoundationSidebar extends StatelessWidget {
             const SizedBox(height: 12),
             const SizedBox(height: 12),
 
-            const FoundationWorkspaceSwitcher(),
+            FoundationWorkspaceSwitcher(onPersonalHome: onPersonalHome),
 
             const SizedBox(height: 6),
 

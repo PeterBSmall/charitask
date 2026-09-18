@@ -1,23 +1,62 @@
 import 'package:flutter/material.dart';
 
-import 'package:charitask/shared/design_system/foundations/app_colors.dart';
 import 'package:charitask/shared/design_system/foundations/app_spacing.dart';
-import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:charitask/shared/widgets/cards/ct_module_card.dart';
 
-class OrganizationWorkspace extends StatelessWidget {
-  final CTJourneyController journeyController;
+class OrganizationWorkspace extends StatefulWidget {
+  final String organizationId;
 
-  const OrganizationWorkspace({super.key, required this.journeyController});
+  const OrganizationWorkspace({super.key, required this.organizationId});
+
+  @override
+  State<OrganizationWorkspace> createState() => _OrganizationWorkspaceState();
+}
+
+class _OrganizationWorkspaceState extends State<OrganizationWorkspace> {
+  String _organizationName = 'Organization';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrganization();
+  }
+
+  Future<void> _loadOrganization() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('organizations')
+          .select('name')
+          .eq('id', widget.organizationId)
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      final name = response?['name'] as String?;
+
+      setState(() {
+        _organizationName = name != null && name.trim().isNotEmpty
+            ? name.trim()
+            : 'Organization';
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final organizationName = journeyController.organization.identity.name
-        .trim();
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    final displayName = organizationName.isEmpty
-        ? 'Organization'
-        : organizationName;
+    final displayName = _organizationName;
 
     return Container(
       color: const Color(0xFFF7F8FC),

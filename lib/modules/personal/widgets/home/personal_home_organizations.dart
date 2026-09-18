@@ -39,6 +39,8 @@ class _PersonalHomeOrganizationsState extends State<PersonalHomeOrganizations> {
         _isLoading = false;
       });
     } catch (error) {
+      debugPrint('>>> PERSONAL HOME ORGANIZATIONS ERROR: $error');
+
       if (!mounted) return;
 
       setState(() {

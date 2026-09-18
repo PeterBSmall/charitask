@@ -29,7 +29,7 @@ class _PersonalWorkspaceShellState extends State<PersonalWorkspaceShell> {
 
   void _returnToPersonalHome(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const PersonalHomePage()),
+      MaterialPageRoute(builder: (_) => PersonalHomePage()),
       (route) => false,
     );
   }

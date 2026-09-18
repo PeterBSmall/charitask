@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:charitask/shared/models/ct_workspace_overview_config.dart';
 import 'package:charitask/shared/design_system/foundations/app_colors.dart';
-import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 
 CTWorkspaceOverviewConfig foundationOverview(
   BuildContext context,
-  CTJourneyController journeyController,
+  String firstName,
 ) {
-  final firstName = journeyController.firstName.trim().isEmpty
-      ? 'there'
-      : journeyController.firstName.trim();
+  final displayName = firstName.trim().isEmpty ? 'there' : firstName.trim();
 
   return CTWorkspaceOverviewConfig(
     // Identity
@@ -22,7 +19,7 @@ CTWorkspaceOverviewConfig foundationOverview(
 
     // Completed workspace hero
     welcomeMessage:
-        '$firstName, your organization is active and running smoothly.',
+        '$displayName, your organization is active and running smoothly.',
 
     organizationName:
         'You’ve built a strong foundation. Now you can manage people, '

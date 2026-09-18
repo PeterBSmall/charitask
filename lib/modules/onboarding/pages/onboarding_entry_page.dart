@@ -179,9 +179,9 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
 
       if (!mounted) return;
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PersonalHomePage()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => PersonalHomePage()));
     } catch (error) {
       debugPrint('>>> ERROR CHECKING PERSON IDENTITY: $error');
 

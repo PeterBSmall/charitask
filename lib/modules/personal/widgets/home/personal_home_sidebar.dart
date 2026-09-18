@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:charitask/modules/personal/widgets/home/personal_home_quote.dart';
 
 class PersonalHomeSidebar extends StatelessWidget {
-  const PersonalHomeSidebar({super.key});
+  final VoidCallback? onMyOrganizations;
+
+  const PersonalHomeSidebar({super.key, this.onMyOrganizations});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,7 @@ class PersonalHomeSidebar extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              children: const [
+              children: [
                 _NavigationItem(
                   icon: Icons.home_outlined,
                   label: 'Personal Home',
@@ -53,6 +55,7 @@ class PersonalHomeSidebar extends StatelessWidget {
                 _NavigationItem(
                   icon: Icons.business_outlined,
                   label: 'My Organizations',
+                  onTap: onMyOrganizations,
                 ),
                 _NavigationItem(
                   icon: Icons.mail_outline_rounded,
@@ -100,11 +103,13 @@ class _NavigationItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
+  final VoidCallback? onTap;
 
   const _NavigationItem({
     required this.icon,
     required this.label,
     this.selected = false,
+    this.onTap,
   });
 
   @override
@@ -116,6 +121,7 @@ class _NavigationItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: ListTile(
+        onTap: onTap,
         dense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12),
         leading: Icon(

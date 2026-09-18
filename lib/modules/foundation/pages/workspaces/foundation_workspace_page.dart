@@ -12,9 +12,8 @@ import 'package:charitask/modules/people/pages/people_page.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/models/ct_metric.dart';
-import 'package:charitask/shared/widgets/dashboard/index.dart';
+
 import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
-import 'package:charitask/modules/workspaces/templates/pages/workspace_template_selection_page.dart';
 
 class FoundationWorkspacePage extends StatelessWidget {
   final CTJourneyController journeyController;
@@ -30,12 +29,13 @@ class FoundationWorkspacePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return FoundationWorkspaceShell(
       firstName: journeyController.firstName,
+      onPersonalHome: () => Navigator.of(context).pop(),
       dashboardBuilder: (onNavigate) => FoundationDashboard(
         journeyController: journeyController,
         onNavigate: onNavigate,
       ),
 
-      organization: OrganizationWorkspace(journeyController: journeyController),
+      organization: OrganizationWorkspace(organizationId: organizationId),
 
       people: PeoplePage(organizationId: organizationId),
 
@@ -119,7 +119,7 @@ class _FoundationDashboardState extends State<FoundationDashboard> {
             // ----------------------------------------------------------------
             // HERO
             // ----------------------------------------------------------------
-            FoundationHero(journeyController: widget.journeyController),
+            FoundationHero(firstName: widget.journeyController.firstName),
 
             const SizedBox(height: 16),
 

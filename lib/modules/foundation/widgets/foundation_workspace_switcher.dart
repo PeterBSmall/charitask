@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class FoundationWorkspaceSwitcher extends StatefulWidget {
-  const FoundationWorkspaceSwitcher({super.key});
+  final VoidCallback? onPersonalHome;
+
+  const FoundationWorkspaceSwitcher({super.key, this.onPersonalHome});
 
   @override
   State<FoundationWorkspaceSwitcher> createState() =>
@@ -73,8 +75,8 @@ class _FoundationWorkspaceSwitcherState
 
           _WorkspaceCard(
             icon: Icons.person_rounded,
-            title: 'Personal Workspace',
-            subtitle: 'My Tasks & Projects',
+            title: 'Personal Home',
+            subtitle: 'Your personal hub',
             accentColor: const Color(0xFF6FA64A),
             backgroundColor: const Color(0xFFF0F7ED),
             selected: _selectedWorkspace == 'personal',
@@ -82,6 +84,8 @@ class _FoundationWorkspaceSwitcherState
               setState(() {
                 _selectedWorkspace = 'personal';
               });
+
+              widget.onPersonalHome?.call();
             },
           ),
         ],
