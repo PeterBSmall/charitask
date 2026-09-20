@@ -13,6 +13,7 @@ class WorkspaceService {
         .from('workspaces')
         .select()
         .eq('organization_id', organizationId)
+        .eq('workspace_type', 'organization')
         .eq('status', 'active')
         .isFilter('archived_at', null)
         .order('name', ascending: true);

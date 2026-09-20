@@ -50,15 +50,20 @@ class Location {
   /// Retained for compatibility with existing location data.
   final String? contactName;
 
-  /// Contact phone number.
-  ///
-  /// Retained for compatibility with existing location data.
+  /// Main phone number for this location.
   final String? phone;
 
-  /// Contact email address.
-  ///
-  /// Retained for compatibility with existing location data.
+  /// Main phone extension for this location.
+  final String? phoneExtension;
+
+  /// General email address for this location.
   final String? email;
+
+  /// Direct phone number for the primary contact.
+  final String? contactPhone;
+
+  /// Phone extension for the primary contact.
+  final String? contactPhoneExtension;
 
   /// Maximum building capacity.
   final int? buildingCapacity;
@@ -110,7 +115,10 @@ class Location {
     this.primaryContactPersonId,
     this.contactName,
     this.phone,
+    this.phoneExtension,
     this.email,
+    this.contactPhone,
+    this.contactPhoneExtension,
     this.buildingCapacity,
     this.parkingSpaces,
     this.volunteerCapacity,
@@ -143,7 +151,10 @@ class Location {
       primaryContactPersonId: map['primary_contact_person_id'] as String?,
       contactName: map['contact_name'] as String?,
       phone: map['phone'] as String?,
+      phoneExtension: map['phone_extension'] as String?,
       email: map['email'] as String?,
+      contactPhone: map['contact_phone'] as String?,
+      contactPhoneExtension: map['contact_phone_extension'] as String?,
       buildingCapacity: _parseInt(map['building_capacity']),
       parkingSpaces: _parseInt(map['parking_spaces']),
       volunteerCapacity: _parseInt(map['volunteer_capacity']),
@@ -177,7 +188,10 @@ class Location {
       'primary_contact_person_id': primaryContactPersonId,
       'contact_name': contactName,
       'phone': phone,
+      'phone_extension': phoneExtension,
       'email': email,
+      'contact_phone': contactPhone,
+      'contact_phone_extension': contactPhoneExtension,
       'building_capacity': buildingCapacity,
       'parking_spaces': parkingSpaces,
       'volunteer_capacity': volunteerCapacity,
@@ -209,7 +223,10 @@ class Location {
     String? primaryContactPersonId,
     String? contactName,
     String? phone,
+    String? phoneExtension,
     String? email,
+    String? contactPhone,
+    String? contactPhoneExtension,
     int? buildingCapacity,
     int? parkingSpaces,
     int? volunteerCapacity,
@@ -241,7 +258,11 @@ class Location {
           primaryContactPersonId ?? this.primaryContactPersonId,
       contactName: contactName ?? this.contactName,
       phone: phone ?? this.phone,
+      phoneExtension: phoneExtension ?? this.phoneExtension,
       email: email ?? this.email,
+      contactPhone: contactPhone ?? this.contactPhone,
+      contactPhoneExtension:
+          contactPhoneExtension ?? this.contactPhoneExtension,
       buildingCapacity: buildingCapacity ?? this.buildingCapacity,
       parkingSpaces: parkingSpaces ?? this.parkingSpaces,
       volunteerCapacity: volunteerCapacity ?? this.volunteerCapacity,

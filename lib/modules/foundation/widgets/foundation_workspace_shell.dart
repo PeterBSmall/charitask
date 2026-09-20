@@ -6,13 +6,14 @@ import 'package:charitask/modules/workspaces/templates/pages/workspace_template_
 import 'package:charitask/modules/workspaces/templates/data/workspace_template_data.dart';
 
 import 'package:charitask/shared/workspaces/models/ct_workspace.dart';
-import 'package:charitask/shared/workspaces/services/ct_workspace_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:charitask/modules/workspaces/dashboard/pages/workspace_dashboard_page.dart';
 
 class FoundationWorkspaceShell extends StatefulWidget {
   final Widget Function(ValueChanged<int> onNavigate) dashboardBuilder;
   final String firstName;
+  final String organizationId;
   final VoidCallback? onPersonalHome;
   final Widget organization;
   final Widget people;
@@ -26,6 +27,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
     super.key,
     required this.dashboardBuilder,
     required this.firstName,
+    required this.organizationId,
     this.onPersonalHome,
     required this.organization,
     required this.people,
@@ -58,6 +60,31 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
     });
   }
 
+  void _handleWorkspaceSelected(Map<String, dynamic> workspace) {
+    final workspaceId = workspace['id'] as String?;
+    final workspaceName = workspace['name'] as String?;
+
+    if (workspaceId == null || workspaceName == null) {
+      return;
+    }
+
+    debugPrint('>>> SWITCHING TO ORGANIZATION WORKSPACE: $workspaceName');
+    debugPrint('>>> WORKSPACE ID: $workspaceId');
+
+    setState(() {
+      _selectedIndex = 0;
+      _isCustomizingDashboard = false;
+      _activeWorkspace = CTWorkspace(
+        id: workspaceId,
+        name: workspaceName,
+        type: CTWorkspaceType.organization,
+        icon: Icons.workspaces_rounded,
+        color: const Color(0xFF5B4BC4),
+        templateId: workspace['template_id'] as String?,
+      );
+    });
+  }
+
   void _toggleSidebar() {
     setState(() {
       _isSidebarCollapsed = !_isSidebarCollapsed;
@@ -76,7 +103,7 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
     });
   }
 
-  void _finishWorkspaceCreation(String templateId) {
+  Future<void> _finishWorkspaceCreation(String templateId) async {
     final allTemplates = [
       ...missionCommunityTemplates,
       ...fundraisingProgramsTemplates,
@@ -86,20 +113,55 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
 
     final template = allTemplates.firstWhere((item) => item.id == templateId);
 
-    final workspace = CTWorkspaceService.createWorkspace(
-      id: template.id,
-      name: template.title,
-      type: CTWorkspaceType.team,
-      icon: template.icon,
-      color: template.accentColor,
-    );
+    try {
+      debugPrint('>>> CREATING ORGANIZATION WORKSPACE: ${template.title}');
 
-    debugPrint('>>> CREATED WORKSPACE: ${workspace.name}');
+      final supabase = Supabase.instance.client;
 
-    setState(() {
-      _activeWorkspace = workspace;
-      _isCreatingWorkspace = false;
-    });
+      final result = await supabase.rpc(
+        'create_organization_workspace',
+        params: {
+          'p_name': template.title,
+          'p_description': null,
+          'p_template_id': template.id,
+        },
+      );
+
+      final data = Map<String, dynamic>.from(result as Map);
+
+      final workspace = CTWorkspace(
+        id: data['workspace_id'] as String,
+        name: data['name'] as String,
+        type: CTWorkspaceType.organization,
+        icon: template.icon,
+        color: template.accentColor,
+        templateId: data['template_id'] as String?,
+      );
+
+      debugPrint('>>> CREATED ORGANIZATION WORKSPACE: ${workspace.name}');
+      debugPrint('>>> WORKSPACE ID: ${workspace.id}');
+      debugPrint('>>> TEMPLATE ID: ${workspace.templateId}');
+
+      if (!mounted) return;
+
+      setState(() {
+        _activeWorkspace = workspace;
+        _isCreatingWorkspace = false;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('>>> CREATE ORGANIZATION WORKSPACE FAILED: $error');
+      debugPrint('$stackTrace');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isCreatingWorkspace = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to create workspace: $error')),
+      );
+    }
   }
 
   Widget get _currentPage {
@@ -116,6 +178,7 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
 
     if (_activeWorkspace != null) {
       return WorkspaceDashboardPage(
+        key: ValueKey(_activeWorkspace!.id),
         workspace: _activeWorkspace!,
         firstName: widget.firstName,
         isCustomizing: _isCustomizingDashboard,
@@ -168,6 +231,8 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
             onToggleCollapse: _toggleSidebar,
             onCreateWorkspace: _createWorkspace,
             onPersonalHome: widget.onPersonalHome,
+            organizationId: widget.organizationId,
+            onWorkspaceSelected: _handleWorkspaceSelected,
           ),
           Expanded(
             child: Column(

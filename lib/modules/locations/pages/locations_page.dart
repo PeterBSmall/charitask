@@ -148,8 +148,8 @@ class _LocationsPageState extends State<LocationsPage> {
         itemBuilder: (context, index) {
           return _LocationCard(
             location: _locations[index],
-            onTap: () {
-              Navigator.of(context).push(
+            onTap: () async {
+              final updated = await Navigator.of(context).push<bool>(
                 MaterialPageRoute(
                   builder: (_) => LocationDetailsPage(
                     organizationId: widget.organizationId,
@@ -157,6 +157,10 @@ class _LocationsPageState extends State<LocationsPage> {
                   ),
                 ),
               );
+
+              if (updated == true && mounted) {
+                await _loadLocations();
+              }
             },
           );
         },

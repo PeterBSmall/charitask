@@ -20,6 +20,13 @@ class PersonalHomePage extends StatelessWidget {
   PersonalHomePage({super.key});
 
   Future<void> _openMyOrganizations(BuildContext context) async {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    debugPrint('=== PERSONAL HOME AUTH ===');
+    debugPrint('AUTH USER ID: ${user?.id}');
+    debugPrint('AUTH EMAIL: ${user?.email}');
+    debugPrint('AUTH METADATA: ${user?.userMetadata}');
+    debugPrint('==========================');
     try {
       final organizations = await _organizationService.getMyOrganizations();
 

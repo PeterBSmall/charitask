@@ -331,31 +331,8 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
           MaterialPageRoute(
             builder: (_) => EmailVerificationPage(
               controller: _controller,
-              onContinue: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => YourRolePage(
-                      controller: _controller,
-                      onBack: () {
-                        Navigator.of(context).pop();
-                      },
-                      onContinue: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => OrganizationSetupScreen(
-                              firstName: _controller.person?.firstName ?? '',
-                              onboardingController: _controller,
-                              onCompleteProfile: _openPersonalProfile,
-                              onComplete: (journeyController) {
-                                _openPersonalProfile(journeyController);
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
+              onContinue: () async {
+                await _checkSession();
               },
             ),
           ),

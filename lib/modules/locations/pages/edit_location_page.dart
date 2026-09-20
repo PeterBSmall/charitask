@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:charitask/shared/validation/ct_email_validator.dart';
+import 'package:charitask/shared/validation/ct_phone_validator.dart';
 
+import 'package:charitask/modules/foundation/domain/models/location.dart';
 import 'package:charitask/modules/locations/data/services/location_service.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/forms/ct_place_field.dart';
 import 'package:charitask/shared/models/ct_place.dart';
 
-import 'package:charitask/shared/validation/ct_email_validator.dart';
-import 'package:charitask/shared/validation/ct_phone_validator.dart';
-
-class AddLocationPage extends StatefulWidget {
+class EditLocationPage extends StatefulWidget {
   final String organizationId;
+  final Location location;
 
-  const AddLocationPage({super.key, required this.organizationId});
+  const EditLocationPage({
+    super.key,
+    required this.organizationId,
+    required this.location,
+  });
 
   @override
-  State<AddLocationPage> createState() => _AddLocationPageState();
+  State<EditLocationPage> createState() => _EditLocationPageState();
 }
 
-class _AddLocationPageState extends State<AddLocationPage> {
+class _EditLocationPageState extends State<EditLocationPage> {
   final _service = LocationService();
   final _formKey = GlobalKey<FormState>();
 
-  final _name = TextEditingController();
-  final _description = TextEditingController();
+  late final TextEditingController _name;
+  late final TextEditingController _description;
 
-  final _address = TextEditingController();
-  final _city = TextEditingController();
-  final _state = TextEditingController();
-  final _zip = TextEditingController();
+  late final TextEditingController _address;
+  late final TextEditingController _city;
+  late final TextEditingController _state;
+  late final TextEditingController _zip;
 
-  final _contactName = TextEditingController();
-  final _phone = TextEditingController();
-  final _phoneExtension = TextEditingController();
-  final _email = TextEditingController();
-  final _contactPhone = TextEditingController();
-  final _contactPhoneExtension = TextEditingController();
+  late final TextEditingController _contactName;
+  late final TextEditingController _phone;
+  late final TextEditingController _phoneExtension;
+  late final TextEditingController _email;
+  late final TextEditingController _contactPhone;
+  late final TextEditingController _contactPhoneExtension;
 
   static const _types = [
     'Office',
@@ -48,7 +53,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
     'Other',
   ];
 
-  String? _type;
+  late String? _type;
 
   List<Map<String, dynamic>> _tags = [];
   final Set<String> _selectedTags = {};
@@ -60,6 +65,30 @@ class _AddLocationPageState extends State<AddLocationPage> {
   @override
   void initState() {
     super.initState();
+
+    final location = widget.location;
+
+    _name = TextEditingController(text: location.name);
+    _description = TextEditingController(text: location.description ?? '');
+
+    _address = TextEditingController(text: location.addressLine1 ?? '');
+    _city = TextEditingController(text: location.city ?? '');
+    _state = TextEditingController(text: location.state ?? '');
+    _zip = TextEditingController(text: location.postalCode ?? '');
+
+    _contactName = TextEditingController(text: location.contactName ?? '');
+    _phone = TextEditingController(text: location.phone ?? '');
+    _phoneExtension = TextEditingController(
+      text: location.phoneExtension ?? '',
+    );
+    _email = TextEditingController(text: location.email ?? '');
+    _contactPhone = TextEditingController(text: location.contactPhone ?? '');
+    _contactPhoneExtension = TextEditingController(
+      text: location.contactPhoneExtension ?? '',
+    );
+
+    _type = location.locationType;
+
     _loadTags();
   }
 
@@ -89,10 +118,18 @@ class _AddLocationPageState extends State<AddLocationPage> {
         organizationId: widget.organizationId,
       );
 
+      final tagIds = await _service.getLocationTagIds(
+        locationId: widget.location.id,
+        organizationId: widget.organizationId,
+      );
+
       if (!mounted) return;
 
       setState(() {
         _tags = tags;
+        _selectedTags
+          ..clear()
+          ..addAll(tagIds);
         _loadingTags = false;
       });
     } catch (e) {
@@ -131,7 +168,9 @@ class _AddLocationPageState extends State<AddLocationPage> {
   Future<void> _save() async {
     FocusScope.of(context).unfocus();
 
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     if (_type == null) {
       setState(() {
@@ -146,22 +185,24 @@ class _AddLocationPageState extends State<AddLocationPage> {
     });
 
     try {
-      await _service.createLocation(
+      await _service.updateLocation(
+        locationId: widget.location.id,
         organizationId: widget.organizationId,
-        name: _name.text.trim(),
-        slug: _slug(_name.text),
-        locationType: _type,
-        description: _value(_description.text),
-        addressLine1: _value(_address.text),
-        city: _value(_city.text),
-        state: _value(_state.text),
-        postalCode: _value(_zip.text),
-        contactName: _value(_contactName.text),
-        phone: _value(_phone.text),
-        phoneExtension: _value(_phoneExtension.text),
-        email: _value(_email.text),
-        contactPhone: _value(_contactPhone.text),
-        contactPhoneExtension: _value(_contactPhoneExtension.text),
+        changes: {
+          'name': _name.text.trim(),
+          'location_type': _type,
+          'description': _value(_description.text),
+          'address_line_1': _value(_address.text),
+          'city': _value(_city.text),
+          'state': _value(_state.text),
+          'postal_code': _value(_zip.text),
+          'contact_name': _value(_contactName.text),
+          'phone': _value(_phone.text),
+          'phone_extension': _value(_phoneExtension.text),
+          'email': _value(_email.text),
+          'contact_phone': _value(_contactPhone.text),
+          'contact_phone_extension': _value(_contactPhoneExtension.text),
+        },
         tagIds: _selectedTags.toList(),
       );
 
@@ -183,34 +224,16 @@ class _AddLocationPageState extends State<AddLocationPage> {
     return result.isEmpty ? null : result;
   }
 
-  String _slug(String value) {
-    final result = value
-        .toLowerCase()
-        .trim()
-        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-        .replaceAll(RegExp(r'^-|-$'), '');
-
-    return result.isEmpty ? 'location' : result;
-  }
-
-  Widget _progressDot({bool active = false}) {
-    return Container(
-      width: active ? 24 : 8,
-      height: 8,
-      margin: const EdgeInsets.only(left: 5),
-      decoration: BoxDecoration(
-        color: active ? Colors.white : Colors.white.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(10),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FC),
       appBar: AppBar(
-        title: const Text('Add Location'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _saving ? null : () => Navigator.pop(context),
+        ),
+        title: const Text('Edit Location'),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -222,114 +245,33 @@ class _AddLocationPageState extends State<AddLocationPage> {
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF059669), Color(0xFF10B981)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.location_on_outlined,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.md),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Create a Location',
-                              style: AppTypography.title.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Add a physical or service location',
-                              style: AppTypography.body.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.lg),
-
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'STEP 1 OF 4',
-                            style: AppTypography.caption.copyWith(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _progressDot(active: true),
-                              _progressDot(),
-                              _progressDot(),
-                              _progressDot(),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                Text('Edit location', style: AppTypography.display),
+                const SizedBox(height: 6),
+                Text(
+                  'Update the information for this location.',
+                  style: AppTypography.body,
                 ),
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // ----------------------------------------------------------
-                // BASIC INFORMATION
-                // ----------------------------------------------------------
                 _section('Basic Information', Icons.location_on_outlined, [
                   TextFormField(
-                    controller: _name,
+                    controller: _phone,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: const [CTPhoneInputFormatter()],
                     decoration: const InputDecoration(
-                      labelText: 'Location Name',
-                      hintText: 'e.g. Falmouth ReStore',
+                      labelText: 'Phone',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Location name is required.';
-                      }
-
-                      return null;
+                      return CTPhoneValidator.validate(value, required: false);
                     },
                   ),
 
                   const SizedBox(height: AppSpacing.md),
 
                   DropdownButtonFormField<String>(
-                    initialValue: _type,
+                    initialValue: _types.contains(_type) ? _type : null,
                     decoration: const InputDecoration(
                       labelText: 'Location Type',
                       border: OutlineInputBorder(),
@@ -342,12 +284,14 @@ class _AddLocationPageState extends State<AddLocationPage> {
                           ),
                         )
                         .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _type = value;
-                        _error = null;
-                      });
-                    },
+                    onChanged: _saving
+                        ? null
+                        : (value) {
+                            setState(() {
+                              _type = value;
+                              _error = null;
+                            });
+                          },
                   ),
 
                   const SizedBox(height: AppSpacing.md),
@@ -365,9 +309,6 @@ class _AddLocationPageState extends State<AddLocationPage> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // ----------------------------------------------------------
-                // LOCATION TAGS
-                // ----------------------------------------------------------
                 _section('Location Tags', Icons.local_offer_outlined, [
                   Text(
                     'Select any categories that apply.',
@@ -400,15 +341,17 @@ class _AddLocationPageState extends State<AddLocationPage> {
                         return FilterChip(
                           label: Text(name),
                           selected: selected,
-                          onSelected: (value) {
-                            setState(() {
-                              if (value) {
-                                _selectedTags.add(id);
-                              } else {
-                                _selectedTags.remove(id);
-                              }
-                            });
-                          },
+                          onSelected: _saving
+                              ? null
+                              : (value) {
+                                  setState(() {
+                                    if (value) {
+                                      _selectedTags.add(id);
+                                    } else {
+                                      _selectedTags.remove(id);
+                                    }
+                                  });
+                                },
                         );
                       }).toList(),
                     ),
@@ -416,9 +359,6 @@ class _AddLocationPageState extends State<AddLocationPage> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // ----------------------------------------------------------
-                // ADDRESS
-                // ----------------------------------------------------------
                 _section('Address', Icons.home_work_outlined, [
                   Text(
                     'Start typing an address to search Google Places.',
@@ -446,31 +386,21 @@ class _AddLocationPageState extends State<AddLocationPage> {
                                 border: OutlineInputBorder(),
                               ),
                             ),
-
                             const SizedBox(height: AppSpacing.md),
-
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _state,
-                                    decoration: const InputDecoration(
-                                      labelText: 'State',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _zip,
-                                    decoration: const InputDecoration(
-                                      labelText: 'ZIP',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            TextFormField(
+                              controller: _state,
+                              decoration: const InputDecoration(
+                                labelText: 'State',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            TextFormField(
+                              controller: _zip,
+                              decoration: const InputDecoration(
+                                labelText: 'ZIP',
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                           ],
                         );
@@ -488,9 +418,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
                               ),
                             ),
                           ),
-
                           const SizedBox(width: AppSpacing.md),
-
                           Expanded(
                             child: TextFormField(
                               controller: _state,
@@ -500,9 +428,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
                               ),
                             ),
                           ),
-
                           const SizedBox(width: AppSpacing.md),
-
                           Expanded(
                             child: TextFormField(
                               controller: _zip,
@@ -520,9 +446,6 @@ class _AddLocationPageState extends State<AddLocationPage> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // ----------------------------------------------------------
-                // LOCATION & CONTACT
-                // ----------------------------------------------------------
                 _section('Location Information', Icons.phone_outlined, [
                   TextFormField(
                     controller: _phone,
@@ -607,22 +530,25 @@ class _AddLocationPageState extends State<AddLocationPage> {
                   ),
                 ]),
 
-                // ----------------------------------------------------------
-                // ERROR
-                // ----------------------------------------------------------
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.md),
-                  Text(
-                    _error!,
-                    style: const TextStyle(color: Color(0xFFB3261E)),
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE8E8),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      _error!,
+                      style: AppTypography.body.copyWith(
+                        color: const Color(0xFFB3261E),
+                      ),
+                    ),
                   ),
                 ],
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // ----------------------------------------------------------
-                // ACTIONS
-                // ----------------------------------------------------------
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -630,9 +556,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
                       onPressed: _saving ? null : () => Navigator.pop(context),
                       child: const Text('Cancel'),
                     ),
-
                     const SizedBox(width: AppSpacing.md),
-
                     FilledButton.icon(
                       onPressed: _saving ? null : _save,
                       icon: _saving
@@ -646,6 +570,8 @@ class _AddLocationPageState extends State<AddLocationPage> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: AppSpacing.lg),
               ],
             ),
           ),
@@ -670,9 +596,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
                 Text(title, style: AppTypography.title),
               ],
             ),
-
             const SizedBox(height: AppSpacing.lg),
-
             ...children,
           ],
         ),

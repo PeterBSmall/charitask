@@ -1,53 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class PersonalHomeStats extends StatelessWidget {
+import 'package:charitask/services/task_service.dart';
+
+class PersonalHomeStats extends StatefulWidget {
   const PersonalHomeStats({super.key});
 
   @override
+  State<PersonalHomeStats> createState() => _PersonalHomeStatsState();
+}
+
+class _PersonalHomeStatsState extends State<PersonalHomeStats> {
+  late final TaskService _taskService;
+
+  int _todayAndOverdueTaskCount = 0;
+  bool _loadingTasks = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _taskService = TaskService(Supabase.instance.client);
+
+    _loadTaskCount();
+  }
+
+  Future<void> _loadTaskCount() async {
+    try {
+      final tasks = await _taskService.getCurrentPersonTodayAndOverdueTasks();
+
+      if (!mounted) return;
+
+      setState(() {
+        _todayAndOverdueTaskCount = tasks.length;
+        _loadingTasks = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _todayAndOverdueTaskCount = 0;
+        _loadingTasks = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final taskSubtitle = _loadingTasks
+        ? 'loading...'
+        : _todayAndOverdueTaskCount == 0
+        ? 'nothing needs attention'
+        : _todayAndOverdueTaskCount == 1
+        ? 'task needs attention'
+        : 'tasks need attention';
+
     return Row(
-      children: const [
+      children: [
         Expanded(
           child: _StatCard(
             icon: Icons.calendar_today_outlined,
             title: "Today's Schedule",
             value: '4',
             subtitle: 'items today',
-            iconBackground: Color(0xFFF0EBFF),
-            iconColor: Color(0xFF7C4DFF),
+            iconBackground: const Color(0xFFF0EBFF),
+            iconColor: const Color(0xFF7C4DFF),
           ),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
-            icon: Icons.dashboard_outlined,
-            title: 'Pinned Workspace',
-            value: 'None',
-            subtitle: 'no workspace yet',
-            iconBackground: Color(0xFFE8F8FC),
-            iconColor: Color(0xFF08738A),
+            icon: Icons.priority_high_rounded,
+            title: "Today's Focus",
+            value: _loadingTasks ? '—' : _todayAndOverdueTaskCount.toString(),
+            subtitle: taskSubtitle,
+            iconBackground: const Color(0xFFE8F8FC),
+            iconColor: const Color(0xFF08738A),
           ),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
             icon: Icons.check_circle_outline_rounded,
             title: 'Active Tasks',
             value: '7',
             subtitle: 'open tasks',
-            iconBackground: Color(0xFFF3F4F6),
-            iconColor: Color(0xFF475467),
+            iconBackground: const Color(0xFFF3F4F6),
+            iconColor: const Color(0xFF475467),
           ),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
             icon: Icons.event_outlined,
             title: 'Upcoming Events',
             value: '3',
             subtitle: 'this week',
-            iconBackground: Color(0xFFFFF4E8),
-            iconColor: Color(0xFFB76E00),
+            iconBackground: const Color(0xFFFFF4E8),
+            iconColor: const Color(0xFFB76E00),
           ),
         ),
       ],

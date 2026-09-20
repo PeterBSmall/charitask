@@ -14,6 +14,7 @@ import 'package:charitask/shared/design_system/journey/ct_journey_controller.dar
 import 'package:charitask/shared/models/ct_metric.dart';
 
 import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
+import 'package:charitask/app/app_router.dart';
 
 class FoundationWorkspacePage extends StatelessWidget {
   final CTJourneyController journeyController;
@@ -29,7 +30,8 @@ class FoundationWorkspacePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return FoundationWorkspaceShell(
       firstName: journeyController.firstName,
-      onPersonalHome: () => Navigator.of(context).pop(),
+      organizationId: organizationId,
+      onPersonalHome: () => AppRouter.goToPersonalHome(context),
       dashboardBuilder: (onNavigate) => FoundationDashboard(
         journeyController: journeyController,
         onNavigate: onNavigate,

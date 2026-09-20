@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 class CTPhoneValidator {
   const CTPhoneValidator._();
 
@@ -52,5 +54,22 @@ class CTPhoneValidator {
   /// (508) 555-1234 → 5085551234
   static String normalize(String value) {
     return digitsOnly(value);
+  }
+}
+
+class CTPhoneInputFormatter extends TextInputFormatter {
+  const CTPhoneInputFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final formatted = CTPhoneValidator.format(newValue.text);
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
   }
 }

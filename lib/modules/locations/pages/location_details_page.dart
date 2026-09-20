@@ -6,6 +6,7 @@ import 'package:charitask/modules/people/data/services/people_service.dart';
 import 'package:charitask/modules/locations/data/services/location_service.dart';
 import 'package:charitask/modules/locations/data/services/location_operating_hours_service.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
+import 'package:charitask/modules/locations/pages/edit_location_page.dart';
 
 class LocationDetailsPage extends StatefulWidget {
   final String organizationId;
@@ -230,16 +231,27 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
               ),
               const SizedBox(width: AppSpacing.md),
               OutlinedButton.icon(
-                onPressed: () {
-                  // Edit Location will be connected in a later module.
+                onPressed: () async {
+                  final saved = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => EditLocationPage(
+                        organizationId: widget.organizationId,
+                        location: _location!,
+                      ),
+                    ),
+                  );
+
+                  if (!mounted) return;
+
+                  if (saved == true) {
+                    Navigator.of(context).pop(true);
+                  }
                 },
                 icon: const Icon(Icons.edit_outlined),
                 label: const Text('Edit Location'),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          _buildQuickStats(),
         ],
       ),
     );

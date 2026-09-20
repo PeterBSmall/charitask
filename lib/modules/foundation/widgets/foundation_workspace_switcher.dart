@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:charitask/data/workspace/services/workspace_service.dart';
 
 class FoundationWorkspaceSwitcher extends StatefulWidget {
+  final String organizationId;
   final VoidCallback? onPersonalHome;
+  final ValueChanged<Map<String, dynamic>>? onWorkspaceSelected;
 
-  const FoundationWorkspaceSwitcher({super.key, this.onPersonalHome});
+  const FoundationWorkspaceSwitcher({
+    super.key,
+    required this.organizationId,
+    this.onPersonalHome,
+    this.onWorkspaceSelected,
+  });
 
   @override
   State<FoundationWorkspaceSwitcher> createState() =>
@@ -12,7 +22,46 @@ class FoundationWorkspaceSwitcher extends StatefulWidget {
 
 class _FoundationWorkspaceSwitcherState
     extends State<FoundationWorkspaceSwitcher> {
-  String _selectedWorkspace = 'organization';
+  late final WorkspaceService _workspaceService;
+
+  List<Map<String, dynamic>> _workspaces = [];
+  bool _isLoading = true;
+  String? _selectedWorkspaceId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _workspaceService = WorkspaceService(Supabase.instance.client);
+    _loadWorkspaces();
+  }
+
+  Future<void> _loadWorkspaces() async {
+    try {
+      final workspaces = await _workspaceService.getWorkspaces(
+        organizationId: widget.organizationId,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _workspaces = workspaces;
+        _isLoading = false;
+
+        if (workspaces.isNotEmpty) {
+          _selectedWorkspaceId = workspaces.first['id'] as String?;
+        }
+      });
+    } catch (error) {
+      debugPrint('>>> LOAD ORGANIZATION WORKSPACES FAILED: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +81,7 @@ class _FoundationWorkspaceSwitcherState
               ),
             ),
           ),
-
           const SizedBox(height: 6),
-
           Row(
             children: [
               const Spacer(),
@@ -54,24 +101,40 @@ class _FoundationWorkspaceSwitcherState
               ),
             ],
           ),
-
           const SizedBox(height: 6),
 
-          _WorkspaceCard(
-            icon: Icons.account_balance_rounded,
-            title: 'Organization Workspace',
-            subtitle: 'Foundation',
-            accentColor: const Color(0xFF5B4BC4),
-            backgroundColor: const Color(0xFFF0EDFF),
-            selected: _selectedWorkspace == 'organization',
-            onTap: () {
-              setState(() {
-                _selectedWorkspace = 'organization';
-              });
-            },
-          ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            )
+          else
+            ..._workspaces.map(
+              (workspace) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: _WorkspaceCard(
+                  icon: Icons.workspaces_rounded,
+                  title: workspace['name'] as String? ?? 'Workspace',
+                  subtitle: 'Organization Workspace',
+                  accentColor: const Color(0xFF5B4BC4),
+                  backgroundColor: const Color(0xFFF0EDFF),
+                  selected: _selectedWorkspaceId == workspace['id'],
+                  onTap: () {
+                    setState(() {
+                      _selectedWorkspaceId = workspace['id'] as String?;
+                    });
 
-          const SizedBox(height: 6),
+                    widget.onWorkspaceSelected?.call(workspace);
+                  },
+                ),
+              ),
+            ),
 
           _WorkspaceCard(
             icon: Icons.person_rounded,
@@ -79,10 +142,10 @@ class _FoundationWorkspaceSwitcherState
             subtitle: 'Your personal hub',
             accentColor: const Color(0xFF6FA64A),
             backgroundColor: const Color(0xFFF0F7ED),
-            selected: _selectedWorkspace == 'personal',
+            selected: _selectedWorkspaceId == 'personal',
             onTap: () {
               setState(() {
-                _selectedWorkspace = 'personal';
+                _selectedWorkspaceId = 'personal';
               });
 
               widget.onPersonalHome?.call();
@@ -146,9 +209,7 @@ class _WorkspaceCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: Colors.white, size: 21),
               ),
-
               const SizedBox(width: 10),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +237,6 @@ class _WorkspaceCard extends StatelessWidget {
                   ],
                 ),
               ),
-
               if (selected)
                 Container(
                   width: 22,

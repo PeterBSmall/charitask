@@ -73,7 +73,12 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     final password = _passwordController.text;
 
     try {
-      debugPrint('>>> STARTING SUPABASE SIGNUP');
+      debugPrint('>>> STARTING NEW ACCOUNT SIGNUP');
+
+      // A new account must never inherit the previous user's session.
+      await Supabase.instance.client.auth.signOut(scope: SignOutScope.local);
+
+      debugPrint('>>> PREVIOUS LOCAL SESSION CLEARED');
 
       final response = await Supabase.instance.client.auth
           .signUp(
