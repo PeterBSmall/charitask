@@ -5,3 +5,4 @@ export 'permission.dart';
 export 'permission_tier_permission.dart';
 export 'functional_role_permission.dart';
 export 'authorization_relationship_status.dart';
+export 'authorization_service.dart';

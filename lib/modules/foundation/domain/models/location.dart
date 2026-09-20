@@ -50,6 +50,9 @@ class Location {
   /// Retained for compatibility with existing location data.
   final String? contactName;
 
+  /// Role or relationship of the primary contact to this location.
+  final String? contactRole;
+
   /// Main phone number for this location.
   final String? phone;
 
@@ -114,6 +117,7 @@ class Location {
     this.locationManagerPersonId,
     this.primaryContactPersonId,
     this.contactName,
+    this.contactRole,
     this.phone,
     this.phoneExtension,
     this.email,
@@ -150,6 +154,7 @@ class Location {
       locationManagerPersonId: map['location_manager_person_id'] as String?,
       primaryContactPersonId: map['primary_contact_person_id'] as String?,
       contactName: map['contact_name'] as String?,
+      contactRole: map['contact_role'] as String?,
       phone: map['phone'] as String?,
       phoneExtension: map['phone_extension'] as String?,
       email: map['email'] as String?,
@@ -187,6 +192,7 @@ class Location {
       'location_manager_person_id': locationManagerPersonId,
       'primary_contact_person_id': primaryContactPersonId,
       'contact_name': contactName,
+      'contact_role': contactRole,
       'phone': phone,
       'phone_extension': phoneExtension,
       'email': email,
@@ -222,6 +228,7 @@ class Location {
     String? locationManagerPersonId,
     String? primaryContactPersonId,
     String? contactName,
+    String? contactRole,
     String? phone,
     String? phoneExtension,
     String? email,
@@ -257,6 +264,7 @@ class Location {
       primaryContactPersonId:
           primaryContactPersonId ?? this.primaryContactPersonId,
       contactName: contactName ?? this.contactName,
+      contactRole: contactRole ?? this.contactRole,
       phone: phone ?? this.phone,
       phoneExtension: phoneExtension ?? this.phoneExtension,
       email: email ?? this.email,

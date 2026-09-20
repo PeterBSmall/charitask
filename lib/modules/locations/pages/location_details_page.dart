@@ -7,6 +7,7 @@ import 'package:charitask/modules/locations/data/services/location_service.dart'
 import 'package:charitask/modules/locations/data/services/location_operating_hours_service.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/modules/locations/pages/edit_location_page.dart';
+import '../../../platform/authorization/authorization.dart';
 
 class LocationDetailsPage extends StatefulWidget {
   final String organizationId;
@@ -24,6 +25,9 @@ class LocationDetailsPage extends StatefulWidget {
 
 class _LocationDetailsPageState extends State<LocationDetailsPage>
     with SingleTickerProviderStateMixin {
+  final AuthorizationService _authorizationService = AuthorizationService(
+    Supabase.instance.client,
+  );
   final LocationService _locationService = LocationService();
   final PeopleService _peopleService = PeopleService(Supabase.instance.client);
   final LocationOperatingHoursService _operatingHoursService =
@@ -38,6 +42,8 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
   Map<String, dynamic>? _primaryContact;
 
   bool _isLoading = true;
+  bool _canEdit = false;
+  bool _canDelete = false;
   String? _errorMessage;
 
   static const _tabs = [
@@ -80,6 +86,15 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
         throw Exception('Location not found.');
       }
 
+      final canEdit = await _authorizationService.hasPermission(
+        organizationId: widget.organizationId,
+        permissionKey: 'locations.edit',
+      );
+      final canDelete = await _authorizationService.hasPermission(
+        organizationId: widget.organizationId,
+        permissionKey: 'locations.delete',
+      );
+
       final tags = await _loadTags();
 
       final operatingHours = await _operatingHoursService.getOperatingHours(
@@ -108,6 +123,8 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
 
       setState(() {
         _location = location;
+        _canEdit = canEdit;
+        _canDelete = canDelete;
         _tags = tags;
         _operatingHours = operatingHours;
         _locationManager = locationManager;
@@ -121,6 +138,50 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
         _errorMessage = error.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _archiveLocation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Archive Location?'),
+          content: Text(
+            'Are you sure you want to archive "${_location?.name}"? '
+            'Archived locations will no longer appear in the active locations list.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Archive Location'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _locationService.archiveLocation(
+        locationId: widget.locationId,
+        organizationId: widget.organizationId,
+      );
+
+      if (!mounted) return;
+
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to archive location: $error')),
+      );
     }
   }
 
@@ -230,62 +291,39 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  final saved = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (_) => EditLocationPage(
-                        organizationId: widget.organizationId,
-                        location: _location!,
+              if (_canEdit)
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final saved = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (_) => EditLocationPage(
+                          organizationId: widget.organizationId,
+                          location: _location!,
+                        ),
                       ),
-                    ),
-                  );
+                    );
 
-                  if (!mounted) return;
+                    if (!mounted) return;
 
-                  if (saved == true) {
-                    Navigator.of(context).pop(true);
-                  }
-                },
-                icon: const Icon(Icons.edit_outlined),
-                label: const Text('Edit Location'),
-              ),
+                    if (saved == true) {
+                      Navigator.of(context).pop(true);
+                    }
+                  },
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Edit Location'),
+                ),
+              if (_canDelete) ...[
+                const SizedBox(width: AppSpacing.sm),
+                OutlinedButton.icon(
+                  onPressed: _archiveLocation,
+                  icon: const Icon(Icons.archive_outlined),
+                  label: const Text('Archive Location'),
+                ),
+              ],
             ],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildQuickStats() {
-    return Row(
-      children: [
-        _quickStat(icon: Icons.people_outline, label: 'People', value: '-'),
-        const SizedBox(width: AppSpacing.lg),
-        _quickStat(icon: Icons.groups_outlined, label: 'Groups', value: '-'),
-        const SizedBox(width: AppSpacing.lg),
-        _quickStat(
-          icon: Icons.workspaces_outline,
-          label: 'Workspaces',
-          value: '-',
-        ),
-      ],
-    );
-  }
-
-  Widget _quickStat({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: const Color(0xFF5B4BC4)),
-        const SizedBox(width: 8),
-        Text(label, style: AppTypography.body),
-        const SizedBox(width: 6),
-        Text(value, style: AppTypography.title),
-      ],
     );
   }
 
@@ -333,6 +371,7 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
           const SizedBox(height: AppSpacing.md),
           _section('Contact Information', Icons.contact_phone_outlined, [
             _infoRow('Contact Name', location.contactName),
+            _infoRow('Contact Role / Relationship', location.contactRole),
             _infoRow('Phone', location.phone),
             _infoRow('Email', location.email),
           ]),
@@ -450,7 +489,7 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
           value = 'Closed';
         } else {
           value =
-              '${_formatTime(hours.opensAt)} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ ${_formatTime(hours.closesAt)}';
+              '${_formatTime(hours.opensAt)} – ${_formatTime(hours.closesAt)}';
         }
 
         return Padding(

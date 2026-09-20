@@ -85,7 +85,7 @@ class PeopleService {
         return location['status'] == 'active';
       }).toList();
 
-      String role = 'â€”';
+      String role = '—';
 
       if (activeRoleAssignments.isNotEmpty) {
         final primaryRoles = activeRoleAssignments.where((assignment) {
@@ -136,10 +136,25 @@ class PeopleService {
       return {
         ...person,
         'role': role,
-        'groups': groups.isEmpty ? 'â€”' : groups,
-        'locations': locations.isEmpty ? 'â€”' : locations,
+        'groups': groups.isEmpty ? '—' : groups,
+        'locations': locations.isEmpty ? '—' : locations,
       };
     }).toList();
+  }
+
+  /// Returns the number of active people assigned to a location.
+  Future<int> getActivePeopleCountForLocation({
+    required String organizationId,
+    required String locationId,
+  }) async {
+    final response = await _supabase
+        .from('person_locations')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('location_id', locationId)
+        .eq('status', 'active');
+
+    return response.length;
   }
 
   /// Returns a single person by ID within the specified organization.

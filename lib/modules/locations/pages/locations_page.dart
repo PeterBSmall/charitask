@@ -5,6 +5,12 @@ import 'package:charitask/modules/locations/data/services/location_service.dart'
 import 'package:charitask/modules/locations/pages/add_location_page.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/modules/locations/pages/location_details_page.dart';
+import '../../../platform/authorization/authorization.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:charitask/modules/people/data/services/people_service.dart';
+import 'package:charitask/modules/locations/widgets/locations_hero.dart';
+import 'package:charitask/modules/locations/widgets/locations_kpi_row.dart';
+import 'package:charitask/modules/locations/widgets/locations_section.dart';
 
 class LocationsPage extends StatefulWidget {
   final String organizationId;
@@ -17,10 +23,16 @@ class LocationsPage extends StatefulWidget {
 
 class _LocationsPageState extends State<LocationsPage> {
   final LocationService _locationService = LocationService();
+  final PeopleService _peopleService = PeopleService(Supabase.instance.client);
+  final AuthorizationService _authorizationService = AuthorizationService(
+    Supabase.instance.client,
+  );
 
   bool _isLoading = true;
+  bool _canCreate = false;
   String? _errorMessage;
   List<Location> _locations = [];
+  Map<String, int> _peopleCounts = {};
 
   @override
   void initState() {
@@ -29,20 +41,45 @@ class _LocationsPageState extends State<LocationsPage> {
   }
 
   Future<void> _loadLocations() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    final canCreate = await _authorizationService.hasPermission(
+      organizationId: widget.organizationId,
+      permissionKey: 'locations.create',
+    );
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
       final locations = await _locationService.getLocations(
         organizationId: widget.organizationId,
       );
 
+      final peopleCounts = <String, int>{};
+
+      final peopleCountResults = await Future.wait(
+        locations.map(
+          (location) => _peopleService.getActivePeopleCountForLocation(
+            organizationId: widget.organizationId,
+            locationId: location.id,
+          ),
+        ),
+      );
+
+      for (var i = 0; i < locations.length; i++) {
+        peopleCounts[locations[i].id] = peopleCountResults[i];
+      }
+
       if (!mounted) return;
 
       setState(() {
         _locations = locations;
+        _peopleCounts = peopleCounts;
+
+        _canCreate = canCreate;
         _isLoading = false;
       });
     } catch (error) {
@@ -67,50 +104,24 @@ class _LocationsPageState extends State<LocationsPage> {
     }
   }
 
+  void _openLocation(Location location) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LocationDetailsPage(
+          organizationId: widget.organizationId,
+          locationId: location.id,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFFF7F8FC),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildHeader(),
-          Expanded(child: _buildBody()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.md,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Locations', style: AppTypography.display),
-                const SizedBox(height: 4),
-                Text(
-                  'Manage the places where your organization operates, serves, and gathers.',
-                  style: AppTypography.body,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          FilledButton.icon(
-            onPressed: _openAddLocation,
-            icon: const Icon(Icons.add),
-            label: const Text('Add Location'),
-          ),
-        ],
+        children: [Expanded(child: _buildBody())],
       ),
     );
   }
@@ -128,43 +139,32 @@ class _LocationsPageState extends State<LocationsPage> {
       return _buildEmptyState();
     }
 
-    return _buildLocationList();
+    return _buildLocationsDashboard();
   }
 
-  Widget _buildLocationList() {
-    return RefreshIndicator(
-      onRefresh: _loadLocations,
-      child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.lg,
+  Widget _buildLocationsDashboard() {
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        LocationsHero(canCreate: _canCreate, onAddLocation: _openAddLocation),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: LocationsKpiRow(
+            locations: _locations,
+            peopleCounts: _peopleCounts,
+          ),
         ),
-        itemCount: _locations.length,
-        separatorBuilder: (context, index) {
-          return const SizedBox(height: 12);
-        },
-        itemBuilder: (context, index) {
-          return _LocationCard(
-            location: _locations[index],
-            onTap: () async {
-              final updated = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => LocationDetailsPage(
-                    organizationId: widget.organizationId,
-                    locationId: _locations[index].id,
-                  ),
-                ),
-              );
-
-              if (updated == true && mounted) {
-                await _loadLocations();
-              }
-            },
-          );
-        },
-      ),
+        const SizedBox(height: AppSpacing.lg),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: LocationsSection(
+            locations: _locations,
+            peopleCounts: _peopleCounts,
+            onLocationTap: _openLocation,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+      ],
     );
   }
 
@@ -225,70 +225,13 @@ class _LocationsPageState extends State<LocationsPage> {
               style: AppTypography.body,
             ),
             const SizedBox(height: AppSpacing.md),
-            OutlinedButton.icon(
-              onPressed: _loadLocations,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try Again'),
-            ),
+            if (_canCreate)
+              OutlinedButton.icon(
+                onPressed: _loadLocations,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try Again'),
+              ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LocationCard extends StatelessWidget {
-  final Location location;
-  final VoidCallback onTap;
-
-  const _LocationCard({required this.location, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1EDFF),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.location_on_outlined,
-                  color: Color(0xFF5B4BC4),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(location.name, style: AppTypography.title),
-                    if (location.locationType != null &&
-                        location.locationType!.trim().isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Text(location.locationType!, style: AppTypography.body),
-                    ],
-                    if (location.fullAddress.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(location.fullAddress, style: AppTypography.body),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              const Icon(Icons.chevron_right, color: Color(0xFF7A7A85)),
-            ],
-          ),
         ),
       ),
     );

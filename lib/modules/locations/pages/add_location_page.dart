@@ -30,6 +30,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
   final _zip = TextEditingController();
 
   final _contactName = TextEditingController();
+  final _contactRole = TextEditingController();
   final _phone = TextEditingController();
   final _phoneExtension = TextEditingController();
   final _email = TextEditingController();
@@ -74,6 +75,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
     _zip.dispose();
 
     _contactName.dispose();
+    _contactRole.dispose();
     _phone.dispose();
     _phoneExtension.dispose();
     _email.dispose();
@@ -157,6 +159,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
         state: _value(_state.text),
         postalCode: _value(_zip.text),
         contactName: _value(_contactName.text),
+        contactRole: _value(_contactRole.text),
         phone: _value(_phone.text),
         phoneExtension: _value(_phoneExtension.text),
         email: _value(_email.text),
@@ -574,6 +577,17 @@ class _AddLocationPageState extends State<AddLocationPage> {
                     decoration: const InputDecoration(
                       labelText: 'Contact Name',
                       hintText: 'Optional',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  TextFormField(
+                    controller: _contactRole,
+                    decoration: const InputDecoration(
+                      labelText: 'Contact Role / Relationship',
+                      hintText: 'e.g. Store Manager',
                       border: OutlineInputBorder(),
                     ),
                   ),

@@ -35,6 +35,7 @@ class _EditLocationPageState extends State<EditLocationPage> {
   late final TextEditingController _zip;
 
   late final TextEditingController _contactName;
+  late final TextEditingController _contactRole;
   late final TextEditingController _phone;
   late final TextEditingController _phoneExtension;
   late final TextEditingController _email;
@@ -77,6 +78,7 @@ class _EditLocationPageState extends State<EditLocationPage> {
     _zip = TextEditingController(text: location.postalCode ?? '');
 
     _contactName = TextEditingController(text: location.contactName ?? '');
+    _contactRole = TextEditingController(text: location.contactRole ?? '');
     _phone = TextEditingController(text: location.phone ?? '');
     _phoneExtension = TextEditingController(
       text: location.phoneExtension ?? '',
@@ -103,6 +105,7 @@ class _EditLocationPageState extends State<EditLocationPage> {
     _zip.dispose();
 
     _contactName.dispose();
+    _contactRole.dispose();
     _phone.dispose();
     _phoneExtension.dispose();
     _email.dispose();
@@ -197,6 +200,7 @@ class _EditLocationPageState extends State<EditLocationPage> {
           'state': _value(_state.text),
           'postal_code': _value(_zip.text),
           'contact_name': _value(_contactName.text),
+          'contact_role': _value(_contactRole.text),
           'phone': _value(_phone.text),
           'phone_extension': _value(_phoneExtension.text),
           'email': _value(_email.text),
@@ -497,6 +501,17 @@ class _EditLocationPageState extends State<EditLocationPage> {
                     decoration: const InputDecoration(
                       labelText: 'Contact Name',
                       hintText: 'Optional',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  TextFormField(
+                    controller: _contactRole,
+                    decoration: const InputDecoration(
+                      labelText: 'Contact Role / Relationship',
+                      hintText: 'e.g. Store Manager',
                       border: OutlineInputBorder(),
                     ),
                   ),
