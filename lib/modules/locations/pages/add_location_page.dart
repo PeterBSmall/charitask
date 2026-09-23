@@ -4,14 +4,20 @@ import 'package:charitask/modules/locations/data/services/location_service.dart'
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/forms/ct_place_field.dart';
 import 'package:charitask/shared/models/ct_place.dart';
+import 'package:charitask/modules/locations/widgets/add_location_details_card.dart';
 
-import 'package:charitask/shared/validation/ct_email_validator.dart';
-import 'package:charitask/shared/validation/ct_phone_validator.dart';
+import 'package:charitask/modules/locations/widgets/add_location_classification_card.dart';
+import 'package:charitask/modules/locations/widgets/add_location_contact_card.dart';
 
 class AddLocationPage extends StatefulWidget {
   final String organizationId;
+  final VoidCallback? onCancel;
 
-  const AddLocationPage({super.key, required this.organizationId});
+  const AddLocationPage({
+    super.key,
+    required this.organizationId,
+    this.onCancel,
+  });
 
   @override
   State<AddLocationPage> createState() => _AddLocationPageState();
@@ -50,6 +56,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
   ];
 
   String? _type;
+  bool _isActive = true;
 
   List<Map<String, dynamic>> _tags = [];
   final Set<String> _selectedTags = {};
@@ -151,6 +158,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
       await _service.createLocation(
         organizationId: widget.organizationId,
         name: _name.text.trim(),
+        isActive: _isActive,
         slug: _slug(_name.text),
         locationType: _type,
         description: _value(_description.text),
@@ -196,15 +204,20 @@ class _AddLocationPageState extends State<AddLocationPage> {
     return result.isEmpty ? 'location' : result;
   }
 
-  Widget _progressDot({bool active = false}) {
-    return Container(
-      width: active ? 24 : 8,
-      height: 8,
-      margin: const EdgeInsets.only(left: 5),
-      decoration: BoxDecoration(
-        color: active ? Colors.white : Colors.white.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(10),
-      ),
+  Widget _heroFeature(IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 22, color: Colors.white),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: AppTypography.body.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 
@@ -217,452 +230,361 @@ class _AddLocationPageState extends State<AddLocationPage> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 850),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF059669), Color(0xFF10B981)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF047857), Color(0xFF10B981)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // ------------------------------------------------------------
+                  // LOCATION ICON
+                  // ------------------------------------------------------------
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    child: const Icon(
+                      Icons.location_on_outlined,
+                      color: Color(0xFF047857),
+                      size: 42,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(14),
+
+                  const SizedBox(width: AppSpacing.lg),
+
+                  // ------------------------------------------------------------
+                  // HERO CONTENT
+                  // ------------------------------------------------------------
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Create a Location',
+                          style: AppTypography.title.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.location_on_outlined,
-                          color: Colors.white,
-                          size: 28,
+                        const SizedBox(height: 4),
+                        Text(
+                          'Add a physical or service location where your organization '
+                          'operates, serves, or gathers.',
+                          style: AppTypography.body.copyWith(
+                            color: Colors.white.withValues(alpha: 0.92),
+                          ),
+                        ),
+
+                        const SizedBox(height: AppSpacing.md),
+
+                        // --------------------------------------------------------
+                        // LOCATION TYPES
+                        // --------------------------------------------------------
+                        Wrap(
+                          spacing: AppSpacing.lg,
+                          runSpacing: AppSpacing.sm,
+                          children: [
+                            _heroFeature(Icons.business_outlined, 'Offices'),
+                            _heroFeature(
+                              Icons.groups_outlined,
+                              'Program Sites',
+                            ),
+                            _heroFeature(
+                              Icons.storefront_outlined,
+                              'Retail Stores',
+                            ),
+                            _heroFeature(
+                              Icons.favorite_border,
+                              'Community Spaces',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: AppSpacing.xl),
+
+                  // ------------------------------------------------------------
+                  // MISSION MESSAGE
+                  // ------------------------------------------------------------
+                  Container(
+                    width: 1,
+                    height: 92,
+                    color: Colors.white.withValues(alpha: 0.35),
+                  ),
+
+                  const SizedBox(width: AppSpacing.xl),
+
+                  SizedBox(
+                    width: 245,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Stronger Communities',
+                                style: AppTypography.body.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Greater Impact',
+                                style: AppTypography.body.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Brighter Tomorrows',
+                                style: AppTypography.body.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: AppSpacing.md),
+
+                        Icon(
+                          Icons.eco_outlined,
+                          size: 76,
+                          color: Colors.white.withValues(alpha: 0.22),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // ----------------------------------------------------------
+            // BASIC INFORMATION
+            // ----------------------------------------------------------
+            AddLocationDetailsCard(
+              nameController: _name,
+              descriptionController: _description,
+              locationType: _type,
+              locationTypes: _types,
+              onLocationTypeChanged: (value) {
+                setState(() {
+                  _type = value;
+                  _error = null;
+                });
+              },
+              isActive: _isActive,
+              onStatusChanged: (value) {
+                if (value == null) return;
+
+                setState(() {
+                  _isActive = value;
+                });
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            AddLocationClassificationCard(
+              tags: _tags,
+              selectedTagIds: _selectedTags,
+              loading: _loadingTags,
+              onTagSelected: (tagId) {
+                setState(() {
+                  if (_selectedTags.contains(tagId)) {
+                    _selectedTags.remove(tagId);
+                  } else {
+                    _selectedTags.add(tagId);
+                  }
+                });
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // ----------------------------------------------------------
+            // ADDRESS
+            // ----------------------------------------------------------
+            _section('Address', Icons.home_work_outlined, [
+              Text(
+                'Start typing an address to search Google Places.',
+                style: AppTypography.body,
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
+              CTLocationField(
+                controller: _address,
+                onChanged: _handlePlaceSelected,
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth < 600) {
+                    return Column(
+                      children: [
+                        TextFormField(
+                          controller: _city,
+                          decoration: const InputDecoration(
+                            labelText: 'City',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+
+                        const SizedBox(height: AppSpacing.md),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _state,
+                                decoration: const InputDecoration(
+                                  labelText: 'State',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _zip,
+                                decoration: const InputDecoration(
+                                  labelText: 'ZIP',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextFormField(
+                          controller: _city,
+                          decoration: const InputDecoration(
+                            labelText: 'City',
+                            border: OutlineInputBorder(),
+                          ),
                         ),
                       ),
 
                       const SizedBox(width: AppSpacing.md),
 
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Create a Location',
-                              style: AppTypography.title.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Add a physical or service location',
-                              style: AppTypography.body.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
-                            ),
-                          ],
+                        child: TextFormField(
+                          controller: _state,
+                          decoration: const InputDecoration(
+                            labelText: 'State',
+                            border: OutlineInputBorder(),
+                          ),
                         ),
                       ),
 
-                      const SizedBox(width: AppSpacing.lg),
+                      const SizedBox(width: AppSpacing.md),
 
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'STEP 1 OF 4',
-                            style: AppTypography.caption.copyWith(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
-                            ),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _zip,
+                          decoration: const InputDecoration(
+                            labelText: 'ZIP',
+                            border: OutlineInputBorder(),
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _progressDot(active: true),
-                              _progressDot(),
-                              _progressDot(),
-                              _progressDot(),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ],
-                  ),
+                  );
+                },
+              ),
+            ]),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // ----------------------------------------------------------
+            // CONTACT INFORMATION
+            // ----------------------------------------------------------
+            AddLocationContactCard(
+              phoneController: _phone,
+              phoneExtensionController: _phoneExtension,
+              emailController: _email,
+              contactNameController: _contactName,
+              contactRoleController: _contactRole,
+              contactPhoneController: _contactPhone,
+              contactPhoneExtensionController: _contactPhoneExtension,
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // ----------------------------------------------------------
+            // ERROR
+            // ----------------------------------------------------------
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(_error!, style: const TextStyle(color: Color(0xFFB3261E))),
+            ],
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // ----------------------------------------------------------
+            // ACTIONS
+            // ----------------------------------------------------------
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton(
+                  onPressed: _saving ? null : widget.onCancel,
+                  child: const Text('Cancel'),
                 ),
 
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(width: AppSpacing.md),
 
-                // ----------------------------------------------------------
-                // BASIC INFORMATION
-                // ----------------------------------------------------------
-                _section('Basic Information', Icons.location_on_outlined, [
-                  TextFormField(
-                    controller: _name,
-                    decoration: const InputDecoration(
-                      labelText: 'Location Name',
-                      hintText: 'e.g. Falmouth ReStore',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Location name is required.';
-                      }
-
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  DropdownButtonFormField<String>(
-                    initialValue: _type,
-                    decoration: const InputDecoration(
-                      labelText: 'Location Type',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: _types
-                        .map(
-                          (type) => DropdownMenuItem<String>(
-                            value: type,
-                            child: Text(type),
-                          ),
+                FilledButton.icon(
+                  onPressed: _saving ? null : _save,
+                  icon: _saving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _type = value;
-                        _error = null;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _description,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      hintText: 'Optional',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ]),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // ----------------------------------------------------------
-                // LOCATION TAGS
-                // ----------------------------------------------------------
-                _section('Location Tags', Icons.local_offer_outlined, [
-                  Text(
-                    'Select any categories that apply.',
-                    style: AppTypography.body,
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  if (_loadingTags)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(12),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  else if (_tags.isEmpty)
-                    Text(
-                      'No location tags are available.',
-                      style: AppTypography.body,
-                    )
-                  else
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _tags.map((tag) {
-                        final id = tag['id'] as String;
-                        final name = tag['name'] as String;
-                        final selected = _selectedTags.contains(id);
-
-                        return FilterChip(
-                          label: Text(name),
-                          selected: selected,
-                          onSelected: (value) {
-                            setState(() {
-                              if (value) {
-                                _selectedTags.add(id);
-                              } else {
-                                _selectedTags.remove(id);
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                ]),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // ----------------------------------------------------------
-                // ADDRESS
-                // ----------------------------------------------------------
-                _section('Address', Icons.home_work_outlined, [
-                  Text(
-                    'Start typing an address to search Google Places.',
-                    style: AppTypography.body,
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  CTLocationField(
-                    controller: _address,
-                    onChanged: _handlePlaceSelected,
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (constraints.maxWidth < 600) {
-                        return Column(
-                          children: [
-                            TextFormField(
-                              controller: _city,
-                              decoration: const InputDecoration(
-                                labelText: 'City',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-
-                            const SizedBox(height: AppSpacing.md),
-
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _state,
-                                    decoration: const InputDecoration(
-                                      labelText: 'State',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _zip,
-                                    decoration: const InputDecoration(
-                                      labelText: 'ZIP',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      }
-
-                      return Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller: _city,
-                              decoration: const InputDecoration(
-                                labelText: 'City',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: AppSpacing.md),
-
-                          Expanded(
-                            child: TextFormField(
-                              controller: _state,
-                              decoration: const InputDecoration(
-                                labelText: 'State',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: AppSpacing.md),
-
-                          Expanded(
-                            child: TextFormField(
-                              controller: _zip,
-                              decoration: const InputDecoration(
-                                labelText: 'ZIP',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ]),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // ----------------------------------------------------------
-                // LOCATION & CONTACT
-                // ----------------------------------------------------------
-                _section('Location Information', Icons.phone_outlined, [
-                  TextFormField(
-                    controller: _phone,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: const [CTPhoneInputFormatter()],
-                    decoration: const InputDecoration(
-                      labelText: 'Location Phone',
-                      hintText: 'Optional',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      return CTPhoneValidator.validate(value, required: false);
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _phoneExtension,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Location Phone Extension',
-                      hintText: 'Optional',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Location Email',
-                      hintText: 'Optional',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      return CTEmailValidator.validate(value, required: false);
-                    },
-                  ),
-                ]),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                _section('Contact Information', Icons.contact_phone_outlined, [
-                  TextFormField(
-                    controller: _contactName,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Name',
-                      hintText: 'Optional',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _contactRole,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Role / Relationship',
-                      hintText: 'e.g. Store Manager',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _contactPhone,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: const [CTPhoneInputFormatter()],
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Phone',
-                      hintText: 'Optional',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      return CTPhoneValidator.validate(value, required: false);
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _contactPhoneExtension,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Phone Extension',
-                      hintText: 'Optional',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ]),
-
-                // ----------------------------------------------------------
-                // ERROR
-                // ----------------------------------------------------------
-                if (_error != null) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    _error!,
-                    style: const TextStyle(color: Color(0xFFB3261E)),
-                  ),
-                ],
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // ----------------------------------------------------------
-                // ACTIONS
-                // ----------------------------------------------------------
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    OutlinedButton(
-                      onPressed: _saving ? null : () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-
-                    const SizedBox(width: AppSpacing.md),
-
-                    FilledButton.icon(
-                      onPressed: _saving ? null : _save,
-                      icon: _saving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.check),
-                      label: Text(_saving ? 'Saving...' : 'Save Location'),
-                    ),
-                  ],
+                      : const Icon(Icons.check),
+                  label: Text(_saving ? 'Saving...' : 'Save Location'),
                 ),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -69,6 +69,7 @@ class LocationService {
     required String organizationId,
     required String name,
     required String slug,
+    bool isActive = true,
     String? description,
     String? locationType,
     String? addressLine1,

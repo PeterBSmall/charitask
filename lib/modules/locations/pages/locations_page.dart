@@ -30,6 +30,7 @@ class _LocationsPageState extends State<LocationsPage> {
 
   bool _isLoading = true;
   bool _canCreate = false;
+  bool _showAddLocation = false;
   String? _errorMessage;
   List<Location> _locations = [];
   Map<String, int> _peopleCounts = {};
@@ -92,16 +93,16 @@ class _LocationsPageState extends State<LocationsPage> {
     }
   }
 
-  Future<void> _openAddLocation() async {
-    final created = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => AddLocationPage(organizationId: widget.organizationId),
-      ),
-    );
+  void _openAddLocation() {
+    setState(() {
+      _showAddLocation = true;
+    });
+  }
 
-    if (created == true && mounted) {
-      await _loadLocations();
-    }
+  void _closeAddLocation() {
+    setState(() {
+      _showAddLocation = false;
+    });
   }
 
   void _openLocation(Location location) {
@@ -127,6 +128,13 @@ class _LocationsPageState extends State<LocationsPage> {
   }
 
   Widget _buildBody() {
+    if (_showAddLocation) {
+      return AddLocationPage(
+        organizationId: widget.organizationId,
+        onCancel: _closeAddLocation,
+      );
+    }
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
