@@ -116,23 +116,7 @@ class AddLocationPreview extends StatelessWidget {
 
                   if (_hasCoordinates) ...[
                     const SizedBox(height: AppSpacing.md),
-                    Container(
-                      height: 190,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Location Map',
-                          style: TextStyle(
-                            color: Color(0xFF64748B),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
+                    _buildMap(),
                   ],
 
                   if (_hasContactInformation) ...[

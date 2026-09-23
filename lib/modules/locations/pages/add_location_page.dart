@@ -240,48 +240,77 @@ class _AddLocationPageState extends State<AddLocationPage> {
             const AddLocationHero(),
             const SizedBox(height: 24),
 
-            AddLocationDetailsCard(
-              nameController: _name,
-              descriptionController: _description,
-              locationType: _type,
-              locationTypes: _types,
-              isActive: _isActive,
-              onLocationTypeChanged: (value) {
-                setState(() {
-                  _type = value;
-                });
-              },
-              onStatusChanged: (value) {
-                setState(() {
-                  _isActive = value ?? true;
-                });
-              },
-            ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 1100;
 
-            const SizedBox(height: 16),
+                final form = Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AddLocationDetailsCard(
+                      nameController: _name,
+                      descriptionController: _description,
+                      locationType: _type,
+                      locationTypes: _types,
+                      isActive: _isActive,
+                      onLocationTypeChanged: (value) {
+                        setState(() {
+                          _type = value;
+                        });
+                      },
+                      onStatusChanged: (value) {
+                        setState(() {
+                          _isActive = value ?? true;
+                        });
+                      },
+                    ),
 
-            AddLocationAddressCard(
-              addressController: _address,
-              cityController: _city,
-              stateController: _state,
-              zipController: _zip,
-              onPlaceSelected: _handlePlaceSelected,
-            ),
+                    const SizedBox(height: 16),
 
-            const SizedBox(height: 16),
+                    AddLocationClassificationCard(
+                      tags: _tags,
+                      selectedTagIds: _selectedTags,
+                      loading: _loadingTags,
+                      onTagSelected: (tagId) {
+                        setState(() {
+                          if (_selectedTags.contains(tagId)) {
+                            _selectedTags.remove(tagId);
+                          } else {
+                            _selectedTags.add(tagId);
+                          }
+                        });
+                      },
+                    ),
 
-            AddLocationClassificationCard(
-              tags: _tags,
-              selectedTagIds: _selectedTags,
-              loading: _loadingTags,
-              onTagSelected: (tagId) {
-                setState(() {
-                  if (_selectedTags.contains(tagId)) {
-                    _selectedTags.remove(tagId);
-                  } else {
-                    _selectedTags.add(tagId);
-                  }
-                });
+                    const SizedBox(height: 16),
+
+                    AddLocationAddressCard(
+                      addressController: _address,
+                      cityController: _city,
+                      stateController: _state,
+                      zipController: _zip,
+                      onPlaceSelected: _handlePlaceSelected,
+                    ),
+                  ],
+                );
+
+                final preview = _buildPreview();
+
+                if (!isWide) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [form, const SizedBox(height: 24), preview],
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: form),
+                    const SizedBox(width: 24),
+                    SizedBox(width: 400, child: preview),
+                  ],
+                );
               },
             ),
           ],
