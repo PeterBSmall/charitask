@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/locations/data/services/location_service.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
-import 'package:charitask/shared/design_system/forms/ct_place_field.dart';
+
 import 'package:charitask/shared/models/ct_place.dart';
 import 'package:charitask/modules/locations/widgets/add_location_details_card.dart';
-
+import 'package:charitask/modules/locations/widgets/add_location_address_card.dart';
 import 'package:charitask/modules/locations/widgets/add_location_classification_card.dart';
 import 'package:charitask/modules/locations/widgets/add_location_contact_card.dart';
+import 'package:charitask/modules/locations/widgets/add_location_preview.dart';
+import 'package:charitask/modules/locations/widgets/add_location_hero.dart';
 
 class AddLocationPage extends StatefulWidget {
   final String organizationId;
@@ -57,6 +59,8 @@ class _AddLocationPageState extends State<AddLocationPage> {
 
   String? _type;
   bool _isActive = true;
+  double? _latitude;
+  double? _longitude;
 
   List<Map<String, dynamic>> _tags = [];
   final Set<String> _selectedTags = {};
@@ -69,10 +73,33 @@ class _AddLocationPageState extends State<AddLocationPage> {
   void initState() {
     super.initState();
     _loadTags();
+    _name.addListener(_refreshPreview);
+    _description.addListener(_refreshPreview);
+    _address.addListener(_refreshPreview);
+    _city.addListener(_refreshPreview);
+    _state.addListener(_refreshPreview);
+    _zip.addListener(_refreshPreview);
+    _phone.addListener(_refreshPreview);
+    _email.addListener(_refreshPreview);
+    _contactName.addListener(_refreshPreview);
+    _contactRole.addListener(_refreshPreview);
+    _contactPhone.addListener(_refreshPreview);
   }
 
   @override
   void dispose() {
+    _name.removeListener(_refreshPreview);
+    _description.removeListener(_refreshPreview);
+    _address.removeListener(_refreshPreview);
+    _city.removeListener(_refreshPreview);
+    _state.removeListener(_refreshPreview);
+    _zip.removeListener(_refreshPreview);
+    _phone.removeListener(_refreshPreview);
+    _email.removeListener(_refreshPreview);
+    _contactName.removeListener(_refreshPreview);
+    _contactRole.removeListener(_refreshPreview);
+    _contactPhone.removeListener(_refreshPreview);
+
     _name.dispose();
     _description.dispose();
 
@@ -116,22 +143,13 @@ class _AddLocationPageState extends State<AddLocationPage> {
 
   void _handlePlaceSelected(CTPlace place) {
     setState(() {
-      if (place.streetAddress != null &&
-          place.streetAddress!.trim().isNotEmpty) {
-        _address.text = place.streetAddress!.trim();
-      }
+      _address.text = place.streetAddress ?? place.primary;
+      _city.text = place.city ?? '';
+      _state.text = place.state ?? '';
+      _zip.text = place.postalCode ?? '';
 
-      if (place.city != null && place.city!.trim().isNotEmpty) {
-        _city.text = place.city!.trim();
-      }
-
-      if (place.state != null && place.state!.trim().isNotEmpty) {
-        _state.text = place.state!.trim();
-      }
-
-      if (place.postalCode != null && place.postalCode!.trim().isNotEmpty) {
-        _zip.text = place.postalCode!.trim();
-      }
+      _latitude = place.latitude;
+      _longitude = place.longitude;
 
       _error = null;
     });
@@ -204,23 +222,6 @@ class _AddLocationPageState extends State<AddLocationPage> {
     return result.isEmpty ? 'location' : result;
   }
 
-  Widget _heroFeature(IconData icon, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 22, color: Colors.white),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: AppTypography.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -228,189 +229,46 @@ class _AddLocationPageState extends State<AddLocationPage> {
       appBar: AppBar(
         title: const Text('Add Location'),
         backgroundColor: Colors.white,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.md,
-              ),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF047857), Color(0xFF10B981)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // ------------------------------------------------------------
-                  // LOCATION ICON
-                  // ------------------------------------------------------------
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Icon(
-                      Icons.location_on_outlined,
-                      color: Color(0xFF047857),
-                      size: 42,
-                    ),
-                  ),
+            const AddLocationHero(),
+            const SizedBox(height: 24),
 
-                  const SizedBox(width: AppSpacing.lg),
-
-                  // ------------------------------------------------------------
-                  // HERO CONTENT
-                  // ------------------------------------------------------------
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Create a Location',
-                          style: AppTypography.title.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Add a physical or service location where your organization '
-                          'operates, serves, or gathers.',
-                          style: AppTypography.body.copyWith(
-                            color: Colors.white.withValues(alpha: 0.92),
-                          ),
-                        ),
-
-                        const SizedBox(height: AppSpacing.md),
-
-                        // --------------------------------------------------------
-                        // LOCATION TYPES
-                        // --------------------------------------------------------
-                        Wrap(
-                          spacing: AppSpacing.lg,
-                          runSpacing: AppSpacing.sm,
-                          children: [
-                            _heroFeature(Icons.business_outlined, 'Offices'),
-                            _heroFeature(
-                              Icons.groups_outlined,
-                              'Program Sites',
-                            ),
-                            _heroFeature(
-                              Icons.storefront_outlined,
-                              'Retail Stores',
-                            ),
-                            _heroFeature(
-                              Icons.favorite_border,
-                              'Community Spaces',
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(width: AppSpacing.xl),
-
-                  // ------------------------------------------------------------
-                  // MISSION MESSAGE
-                  // ------------------------------------------------------------
-                  Container(
-                    width: 1,
-                    height: 92,
-                    color: Colors.white.withValues(alpha: 0.35),
-                  ),
-
-                  const SizedBox(width: AppSpacing.xl),
-
-                  SizedBox(
-                    width: 245,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Stronger Communities',
-                                style: AppTypography.body.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Greater Impact',
-                                style: AppTypography.body.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Brighter Tomorrows',
-                                style: AppTypography.body.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: AppSpacing.md),
-
-                        Icon(
-                          Icons.eco_outlined,
-                          size: 76,
-                          color: Colors.white.withValues(alpha: 0.22),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // ----------------------------------------------------------
-            // BASIC INFORMATION
-            // ----------------------------------------------------------
             AddLocationDetailsCard(
               nameController: _name,
               descriptionController: _description,
               locationType: _type,
               locationTypes: _types,
+              isActive: _isActive,
               onLocationTypeChanged: (value) {
                 setState(() {
                   _type = value;
-                  _error = null;
                 });
               },
-              isActive: _isActive,
               onStatusChanged: (value) {
-                if (value == null) return;
-
                 setState(() {
-                  _isActive = value;
+                  _isActive = value ?? true;
                 });
               },
             ),
 
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: 16),
+
+            AddLocationAddressCard(
+              addressController: _address,
+              cityController: _city,
+              stateController: _state,
+              zipController: _zip,
+              onPlaceSelected: _handlePlaceSelected,
+            ),
+
+            const SizedBox(height: 16),
 
             AddLocationClassificationCard(
               tags: _tags,
@@ -426,193 +284,53 @@ class _AddLocationPageState extends State<AddLocationPage> {
                 });
               },
             ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // ----------------------------------------------------------
-            // ADDRESS
-            // ----------------------------------------------------------
-            _section('Address', Icons.home_work_outlined, [
-              Text(
-                'Start typing an address to search Google Places.',
-                style: AppTypography.body,
-              ),
-
-              const SizedBox(height: AppSpacing.md),
-
-              CTLocationField(
-                controller: _address,
-                onChanged: _handlePlaceSelected,
-              ),
-
-              const SizedBox(height: AppSpacing.md),
-
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  if (constraints.maxWidth < 600) {
-                    return Column(
-                      children: [
-                        TextFormField(
-                          controller: _city,
-                          decoration: const InputDecoration(
-                            labelText: 'City',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-
-                        const SizedBox(height: AppSpacing.md),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: _state,
-                                decoration: const InputDecoration(
-                                  labelText: 'State',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _zip,
-                                decoration: const InputDecoration(
-                                  labelText: 'ZIP',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }
-
-                  return Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: _city,
-                          decoration: const InputDecoration(
-                            labelText: 'City',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.md),
-
-                      Expanded(
-                        child: TextFormField(
-                          controller: _state,
-                          decoration: const InputDecoration(
-                            labelText: 'State',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.md),
-
-                      Expanded(
-                        child: TextFormField(
-                          controller: _zip,
-                          decoration: const InputDecoration(
-                            labelText: 'ZIP',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ]),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // ----------------------------------------------------------
-            // CONTACT INFORMATION
-            // ----------------------------------------------------------
-            AddLocationContactCard(
-              phoneController: _phone,
-              phoneExtensionController: _phoneExtension,
-              emailController: _email,
-              contactNameController: _contactName,
-              contactRoleController: _contactRole,
-              contactPhoneController: _contactPhone,
-              contactPhoneExtensionController: _contactPhoneExtension,
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // ----------------------------------------------------------
-            // ERROR
-            // ----------------------------------------------------------
-            if (_error != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(_error!, style: const TextStyle(color: Color(0xFFB3261E))),
-            ],
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // ----------------------------------------------------------
-            // ACTIONS
-            // ----------------------------------------------------------
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                OutlinedButton(
-                  onPressed: _saving ? null : widget.onCancel,
-                  child: const Text('Cancel'),
-                ),
-
-                const SizedBox(width: AppSpacing.md),
-
-                FilledButton.icon(
-                  onPressed: _saving ? null : _save,
-                  icon: _saving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(_saving ? 'Saving...' : 'Save Location'),
-                ),
-              ],
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _section(String title, IconData icon, List<Widget> children) {
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: const Color(0xFF5B4BC4)),
-                const SizedBox(width: 10),
-                Text(title, style: AppTypography.title),
-              ],
-            ),
+  bool _previewRefreshScheduled = false;
 
-            const SizedBox(height: AppSpacing.lg),
+  void _refreshPreview() {
+    if (!mounted || _previewRefreshScheduled) {
+      return;
+    }
 
-            ...children,
-          ],
-        ),
-      ),
+    _previewRefreshScheduled = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _previewRefreshScheduled = false;
+
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  Widget _buildPreview() {
+    final tagNames = _tags
+        .where((tag) => _selectedTags.contains(tag['id']?.toString()))
+        .map((tag) => tag['name']?.toString() ?? '')
+        .where((name) => name.isNotEmpty)
+        .toList();
+
+    return AddLocationPreview(
+      name: _name.text.trim(),
+      locationType: _type,
+      isActive: _isActive,
+      selectedTags: tagNames,
+      address: _address.text.trim(),
+      city: _city.text.trim(),
+      state: _state.text.trim(),
+      postalCode: _zip.text.trim(),
+      phone: _phone.text.trim(),
+      email: _email.text.trim(),
+      contactName: _contactName.text.trim(),
+      contactRole: _contactRole.text.trim(),
+      contactPhone: _contactPhone.text.trim(),
+      latitude: _latitude,
+      longitude: _longitude,
     );
   }
 }
