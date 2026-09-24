@@ -218,6 +218,7 @@ class AddLocationContactCard extends StatelessWidget {
     return TextFormField(
       controller: emailController,
       keyboardType: TextInputType.emailAddress,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: const InputDecoration(
         labelText: 'Location Email',
         hintText: 'office@example.org',
