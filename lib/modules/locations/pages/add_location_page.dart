@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/locations/data/services/location_service.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
-
+import 'package:charitask/shared/widgets/operating_hours/ct_operating_hours_day.dart';
 import 'package:charitask/shared/models/ct_place.dart';
 import 'package:charitask/modules/locations/widgets/add_location_details_card.dart';
 import 'package:charitask/modules/locations/widgets/add_location_address_card.dart';
@@ -10,6 +10,8 @@ import 'package:charitask/modules/locations/widgets/add_location_classification_
 import 'package:charitask/modules/locations/widgets/add_location_contact_card.dart';
 import 'package:charitask/modules/locations/widgets/add_location_preview.dart';
 import 'package:charitask/modules/locations/widgets/add_location_hero.dart';
+import 'package:charitask/modules/locations/data/services/location_operating_hours_service.dart';
+import 'package:charitask/shared/widgets/operating_hours/ct_operating_hours_card.dart';
 
 class AddLocationPage extends StatefulWidget {
   final String organizationId;
@@ -27,6 +29,7 @@ class AddLocationPage extends StatefulWidget {
 
 class _AddLocationPageState extends State<AddLocationPage> {
   final _service = LocationService();
+  final _operatingHoursService = LocationOperatingHoursService();
   final _formKey = GlobalKey<FormState>();
 
   final _name = TextEditingController();
@@ -46,6 +49,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
   final _contactPhoneExtension = TextEditingController();
 
   static const _types = [
+    'Headquarters',
     'Office',
     'Program Site',
     'Community Site',
@@ -64,6 +68,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
 
   List<Map<String, dynamic>> _tags = [];
   final Set<String> _selectedTags = {};
+  final List<CTOperatingHoursDay> _operatingHours = [];
 
   bool _loadingTags = true;
   bool _saving = false;
@@ -155,6 +160,27 @@ class _AddLocationPageState extends State<AddLocationPage> {
     });
   }
 
+  String? _validateOperatingHours() {
+    for (final day in _operatingHours) {
+      if (!day.isOpen) {
+        continue;
+      }
+
+      if (day.opensAt == null || day.closesAt == null) {
+        return '${day.dayName} is marked Open, but both opening and closing times are required.';
+      }
+
+      final opensMinutes = day.opensAt!.hour * 60 + day.opensAt!.minute;
+      final closesMinutes = day.closesAt!.hour * 60 + day.closesAt!.minute;
+
+      if (closesMinutes <= opensMinutes) {
+        return '${day.dayName} closing time must be later than opening time.';
+      }
+    }
+
+    return null;
+  }
+
   Future<void> _save() async {
     FocusScope.of(context).unfocus();
 
@@ -166,14 +192,26 @@ class _AddLocationPageState extends State<AddLocationPage> {
       });
       return;
     }
+    final operatingHoursError = _validateOperatingHours();
 
+    if (operatingHoursError != null) {
+      setState(() {
+        _error = operatingHoursError;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(operatingHoursError)));
+
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
     });
 
     try {
-      await _service.createLocation(
+      final location = await _service.createLocation(
         organizationId: widget.organizationId,
         name: _name.text.trim(),
         isActive: _isActive,
@@ -193,7 +231,16 @@ class _AddLocationPageState extends State<AddLocationPage> {
         contactPhoneExtension: _value(_contactPhoneExtension.text),
         tagIds: _selectedTags.toList(),
       );
-
+      for (final day in _operatingHours) {
+        await _operatingHoursService.saveDay(
+          organizationId: widget.organizationId,
+          locationId: location.id,
+          dayOfWeek: day.dayOfWeek,
+          isClosed: !day.isOpen,
+          opensAt: _formatTimeOfDay(day.opensAt),
+          closesAt: _formatTimeOfDay(day.closesAt),
+        );
+      }
       if (!mounted) return;
 
       Navigator.pop(context, true);
@@ -220,6 +267,20 @@ class _AddLocationPageState extends State<AddLocationPage> {
         .replaceAll(RegExp(r'^-|-$'), '');
 
     return result.isEmpty ? 'location' : result;
+  }
+
+  void _handleOperatingHoursChanged(CTOperatingHoursDay updatedDay) {
+    setState(() {
+      final index = _operatingHours.indexWhere(
+        (day) => day.dayOfWeek == updatedDay.dayOfWeek,
+      );
+
+      if (index == -1) {
+        _operatingHours.add(updatedDay);
+      } else {
+        _operatingHours[index] = updatedDay;
+      }
+    });
   }
 
   @override
@@ -291,6 +352,24 @@ class _AddLocationPageState extends State<AddLocationPage> {
                       zipController: _zip,
                       onPlaceSelected: _handlePlaceSelected,
                     ),
+
+                    const SizedBox(height: 16),
+
+                    AddLocationContactCard(
+                      phoneController: _phone,
+                      phoneExtensionController: _phoneExtension,
+                      emailController: _email,
+                      contactNameController: _contactName,
+                      contactRoleController: _contactRole,
+                      contactPhoneController: _contactPhone,
+                      contactPhoneExtensionController: _contactPhoneExtension,
+                    ),
+                    const SizedBox(height: 16),
+
+                    CTOperatingHoursCard(
+                      days: _operatingHours,
+                      onDayChanged: _handleOperatingHoursChanged,
+                    ),
                   ],
                 );
 
@@ -348,6 +427,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
       name: _name.text.trim(),
       locationType: _type,
       isActive: _isActive,
+      operatingHours: _operatingHours,
       selectedTags: tagNames,
       address: _address.text.trim(),
       city: _city.text.trim(),
@@ -361,5 +441,14 @@ class _AddLocationPageState extends State<AddLocationPage> {
       latitude: _latitude,
       longitude: _longitude,
     );
+  }
+
+  String? _formatTimeOfDay(TimeOfDay? time) {
+    if (time == null) return null;
+
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+
+    return '$hour:$minute:00';
   }
 }

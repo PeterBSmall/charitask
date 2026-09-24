@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-
+import 'package:charitask/shared/widgets/operating_hours/ct_operating_hours_day.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
+import 'package:charitask/modules/locations/widgets/add_location_preview_hours.dart';
 
 class AddLocationPreview extends StatelessWidget {
   final String name;
@@ -20,6 +21,7 @@ class AddLocationPreview extends StatelessWidget {
   final String contactPhone;
   final double? latitude;
   final double? longitude;
+  final List<CTOperatingHoursDay> operatingHours;
 
   const AddLocationPreview({
     super.key,
@@ -38,6 +40,7 @@ class AddLocationPreview extends StatelessWidget {
     required this.contactPhone,
     required this.latitude,
     required this.longitude,
+    required this.operatingHours,
   });
 
   bool get _hasCoordinates =>
@@ -45,6 +48,13 @@ class AddLocationPreview extends StatelessWidget {
       longitude != null &&
       latitude!.isFinite &&
       longitude!.isFinite;
+
+  bool get _hasContactInformation =>
+      phone.isNotEmpty ||
+      email.isNotEmpty ||
+      contactName.isNotEmpty ||
+      contactRole.isNotEmpty ||
+      contactPhone.isNotEmpty;
 
   String get _displayName => name.isNotEmpty ? name : 'Your Location Name';
 
@@ -93,40 +103,55 @@ class AddLocationPreview extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildLocationIdentity(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 700),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(),
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildLocationIdentity(),
 
-                  if (selectedTags.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.lg),
+
                     _buildClassification(),
-                  ],
 
-                  if (_displayAddress.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.lg),
+
                     _buildAddress(),
-                  ],
 
-                  if (_hasCoordinates) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    _buildMap(),
-                  ],
+                    if (_hasCoordinates) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      _buildMap(),
+                    ] else ...[
+                      const SizedBox(height: AppSpacing.md),
+                      _buildMapPlaceholder(),
+                    ],
 
-                  if (_hasContactInformation) ...[
+                    if (_hasContactInformation) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildContact(),
+                    ] else ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildEmptyContact(),
+                    ],
+
                     const SizedBox(height: AppSpacing.lg),
-                    _buildContact(),
+
+                    AddLocationPreviewHours(operatingHours: operatingHours),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    _buildRelationshipNotice(),
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -143,6 +168,7 @@ class AddLocationPreview extends StatelessWidget {
         border: Border(bottom: BorderSide(color: Color(0xFFDCFCE7))),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 38,
@@ -158,11 +184,26 @@ class AddLocationPreview extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Text(
-            'Location Preview',
-            style: AppTypography.title.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Location Preview',
+                  style: AppTypography.title.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'This is how your location will appear after creation.',
+                  style: AppTypography.caption.copyWith(
+                    color: const Color(0xFF64748B),
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -245,33 +286,38 @@ class AddLocationPreview extends StatelessWidget {
     return _buildSection(
       icon: Icons.sell_outlined,
       title: 'Classification',
-      child: Wrap(
-        spacing: 7,
-        runSpacing: 7,
-        children: selectedTags
-            .map(
-              (tag) => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F3FF),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE9D5FF)),
-                ),
-                child: Text(
-                  tag,
-                  style: const TextStyle(
-                    color: Color(0xFF6D28D9),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+      child: selectedTags.isEmpty
+          ? _buildSectionPlaceholder(
+              'Location tags will appear here.',
+              Icons.sell_outlined,
             )
-            .toList(),
-      ),
+          : Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: selectedTags
+                  .map(
+                    (tag) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F3FF),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE9D5FF)),
+                      ),
+                      child: Text(
+                        tag,
+                        style: const TextStyle(
+                          color: Color(0xFF6D28D9),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
     );
   }
 
@@ -279,24 +325,77 @@ class AddLocationPreview extends StatelessWidget {
     return _buildSection(
       icon: Icons.location_on_outlined,
       title: 'Address',
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 2),
-            child: Icon(Icons.location_on, color: Color(0xFF16A34A), size: 22),
-          ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              _displayAddress,
-              style: const TextStyle(
-                color: Color(0xFF374151),
-                fontSize: 14,
-                height: 1.5,
-                fontWeight: FontWeight.w500,
-              ),
+      child: _displayAddress.isEmpty
+          ? _buildSectionPlaceholder(
+              'Address details will appear here.',
+              Icons.location_on_outlined,
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Icon(
+                    Icons.location_on,
+                    color: Color(0xFF16A34A),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    _displayAddress,
+                    style: const TextStyle(
+                      color: Color(0xFF374151),
+                      fontSize: 14,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
+    );
+  }
+
+  Widget _buildMapPlaceholder() {
+    return Container(
+      height: 190,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: const BoxDecoration(
+              color: Color(0xFFE8F7F1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.map_outlined,
+              color: Color(0xFF16A34A),
+              size: 23,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Location map',
+            style: TextStyle(
+              color: Color(0xFF475569),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 3),
+          const Text(
+            'A map will appear when an address is selected.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
           ),
         ],
       ),
@@ -362,13 +461,6 @@ class AddLocationPreview extends StatelessWidget {
     );
   }
 
-  bool get _hasContactInformation =>
-      phone.isNotEmpty ||
-      email.isNotEmpty ||
-      contactName.isNotEmpty ||
-      contactRole.isNotEmpty ||
-      contactPhone.isNotEmpty;
-
   Widget _buildContact() {
     return _buildSection(
       icon: Icons.contact_phone_outlined,
@@ -411,6 +503,17 @@ class AddLocationPreview extends StatelessWidget {
     );
   }
 
+  Widget _buildEmptyContact() {
+    return _buildSection(
+      icon: Icons.contact_phone_outlined,
+      title: 'Contact',
+      child: _buildSectionPlaceholder(
+        'Contact information will appear here.',
+        Icons.contact_phone_outlined,
+      ),
+    );
+  }
+
   Widget _buildContactLine(IconData icon, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,6 +527,129 @@ class AddLocationPreview extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSectionPlaceholder(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 17, color: const Color(0xFF94A3B8)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRelationshipNotice() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE8F7F1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.hub_outlined,
+                  size: 17,
+                  color: Color(0xFF16A34A),
+                ),
+              ),
+              const SizedBox(width: 9),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Connected to your organization',
+                      style: TextStyle(
+                        color: Color(0xFF334155),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'After creation, you can connect people, programs, events, and assets to this location.',
+                      style: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              _buildRelationshipChip(Icons.people_outline, 'People'),
+              _buildRelationshipChip(Icons.work_outline, 'Programs'),
+              _buildRelationshipChip(Icons.event_outlined, 'Events'),
+              _buildRelationshipChip(Icons.inventory_2_outlined, 'Assets'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRelationshipChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: const Color(0xFF64748B)),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF475569),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
