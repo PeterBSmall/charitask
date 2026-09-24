@@ -243,7 +243,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
       }
       if (!mounted) return;
 
-      Navigator.pop(context, true);
+      widget.onCancel?.call();
     } catch (e) {
       if (!mounted) return;
 
@@ -305,72 +305,75 @@ class _AddLocationPageState extends State<AddLocationPage> {
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth >= 1100;
 
-                final form = Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    AddLocationDetailsCard(
-                      nameController: _name,
-                      descriptionController: _description,
-                      locationType: _type,
-                      locationTypes: _types,
-                      isActive: _isActive,
-                      onLocationTypeChanged: (value) {
-                        setState(() {
-                          _type = value;
-                        });
-                      },
-                      onStatusChanged: (value) {
-                        setState(() {
-                          _isActive = value ?? true;
-                        });
-                      },
-                    ),
+                final form = Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AddLocationDetailsCard(
+                        nameController: _name,
+                        descriptionController: _description,
+                        locationType: _type,
+                        locationTypes: _types,
+                        isActive: _isActive,
+                        onLocationTypeChanged: (value) {
+                          setState(() {
+                            _type = value;
+                          });
+                        },
+                        onStatusChanged: (value) {
+                          setState(() {
+                            _isActive = value ?? true;
+                          });
+                        },
+                      ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    AddLocationClassificationCard(
-                      tags: _tags,
-                      selectedTagIds: _selectedTags,
-                      loading: _loadingTags,
-                      onTagSelected: (tagId) {
-                        setState(() {
-                          if (_selectedTags.contains(tagId)) {
-                            _selectedTags.remove(tagId);
-                          } else {
-                            _selectedTags.add(tagId);
-                          }
-                        });
-                      },
-                    ),
+                      AddLocationClassificationCard(
+                        tags: _tags,
+                        selectedTagIds: _selectedTags,
+                        loading: _loadingTags,
+                        onTagSelected: (tagId) {
+                          setState(() {
+                            if (_selectedTags.contains(tagId)) {
+                              _selectedTags.remove(tagId);
+                            } else {
+                              _selectedTags.add(tagId);
+                            }
+                          });
+                        },
+                      ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    AddLocationAddressCard(
-                      addressController: _address,
-                      cityController: _city,
-                      stateController: _state,
-                      zipController: _zip,
-                      onPlaceSelected: _handlePlaceSelected,
-                    ),
+                      AddLocationAddressCard(
+                        addressController: _address,
+                        cityController: _city,
+                        stateController: _state,
+                        zipController: _zip,
+                        onPlaceSelected: _handlePlaceSelected,
+                      ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    AddLocationContactCard(
-                      phoneController: _phone,
-                      phoneExtensionController: _phoneExtension,
-                      emailController: _email,
-                      contactNameController: _contactName,
-                      contactRoleController: _contactRole,
-                      contactPhoneController: _contactPhone,
-                      contactPhoneExtensionController: _contactPhoneExtension,
-                    ),
-                    const SizedBox(height: 16),
+                      AddLocationContactCard(
+                        phoneController: _phone,
+                        phoneExtensionController: _phoneExtension,
+                        emailController: _email,
+                        contactNameController: _contactName,
+                        contactRoleController: _contactRole,
+                        contactPhoneController: _contactPhone,
+                        contactPhoneExtensionController: _contactPhoneExtension,
+                      ),
+                      const SizedBox(height: 16),
 
-                    CTOperatingHoursCard(
-                      days: _operatingHours,
-                      onDayChanged: _handleOperatingHoursChanged,
-                    ),
-                  ],
+                      CTOperatingHoursCard(
+                        days: _operatingHours,
+                        onDayChanged: _handleOperatingHoursChanged,
+                      ),
+                    ],
+                  ),
                 );
 
                 final preview = _buildPreview();
@@ -391,6 +394,36 @@ class _AddLocationPageState extends State<AddLocationPage> {
                   ],
                 );
               },
+            ),
+            const SizedBox(height: 24),
+
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton.icon(
+                onPressed: _saving ? null : _save,
+                icon: _saving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save_outlined),
+                label: Text(_saving ? 'Saving...' : 'Save Location'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5B4BC4),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
