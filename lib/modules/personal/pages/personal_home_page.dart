@@ -124,48 +124,41 @@ class PersonalHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7FA),
-      body: Row(
-        children: [
-          PersonalHomeSidebar(
-            onMyOrganizations: () => _openMyOrganizations(context),
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final showSidebar = constraints.maxWidth >= 900;
 
-          Expanded(
-            child: Column(
-              children: [
-                const PersonalHomeHeader(),
-
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = constraints.maxWidth;
-
-                      // ===================================================
-                      // RESPONSIVE BREAKPOINT
-                      // ===================================================
-                      //
-                      // Wide:
-                      //   Main Content | Right Rail
-                      //
-                      // Narrow:
-                      //   Main Content
-                      //   Right Rail
-                      //
-                      final showRightRailBesideContent = width >= 1100;
-
-                      return SingleChildScrollView(
-                        padding: EdgeInsets.all(width < 700 ? 16 : 24),
-                        child: showRightRailBesideContent
-                            ? _buildWideLayout(context)
-                            : _buildNarrowLayout(context),
-                      );
-                    },
-                  ),
+          return Row(
+            children: [
+              if (showSidebar)
+                PersonalHomeSidebar(
+                  onMyOrganizations: () => _openMyOrganizations(context),
                 ),
-              ],
-            ),
-          ),
-        ],
+              Expanded(
+                child: Column(
+                  children: [
+                    const PersonalHomeHeader(),
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, contentConstraints) {
+                          final width = contentConstraints.maxWidth;
+                          final showRightRailBesideContent = width >= 1100;
+
+                          return SingleChildScrollView(
+                            padding: EdgeInsets.all(width < 700 ? 16 : 24),
+                            child: showRightRailBesideContent
+                                ? _buildWideLayout(context)
+                                : _buildNarrowLayout(context),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
