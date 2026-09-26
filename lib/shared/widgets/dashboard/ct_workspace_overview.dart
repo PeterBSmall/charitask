@@ -185,34 +185,47 @@ class CTWorkspaceOverview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .10),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFA7E163),
-                ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 240;
+
+            return Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 10 : 16,
+                vertical: 8,
               ),
-              const SizedBox(width: 10),
-              const Text(
-                'ORGANIZATION WORKSPACE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: .10),
+                borderRadius: BorderRadius.circular(100),
               ),
-            ],
-          ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFA7E163),
+                    ),
+                  ),
+                  SizedBox(width: compact ? 7 : 10),
+                  Flexible(
+                    child: Text(
+                      compact ? 'WORKSPACE' : 'ORGANIZATION WORKSPACE',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
 
         const SizedBox(height: 28),
@@ -308,27 +321,77 @@ class CTWorkspaceOverview extends StatelessWidget {
                         size: 58,
                         color: Colors.white,
                       ),
-
                       const SizedBox(height: 20),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final availableWidth = constraints.maxWidth;
+                          final compact = availableWidth < 220;
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _avatarDot(),
-                          const SizedBox(width: 12),
-                          _avatarDot(),
-                          const SizedBox(width: 16),
-                          _line(90),
-                        ],
+                          if (compact) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _avatarDot(),
+                                    const SizedBox(width: 8),
+                                    _avatarDot(),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                _line(
+                                  (availableWidth * 0.55).clamp(40.0, 70.0),
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                _line(
+                                  (availableWidth * 0.45).clamp(30.0, 60.0),
+                                ),
+                              ],
+                            );
+                          }
+
+                          final lineWidth = availableWidth < 300
+                              ? (availableWidth * 0.42).clamp(50.0, 80.0)
+                              : 90.0;
+
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _avatarDot(),
+                                  const SizedBox(width: 12),
+                                  _avatarDot(),
+                                  const SizedBox(width: 16),
+                                  _line(lineWidth),
+                                ],
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              _line(
+                                availableWidth < 300
+                                    ? (availableWidth * 0.55).clamp(60.0, 100.0)
+                                    : 120.0,
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              _line(
+                                availableWidth < 300
+                                    ? (availableWidth * 0.45).clamp(50.0, 80.0)
+                                    : 90.0,
+                              ),
+                            ],
+                          );
+                        },
                       ),
-
-                      const SizedBox(height: 14),
-
-                      _line(120),
-
-                      const SizedBox(height: 12),
-
-                      _line(90),
                     ],
                   ),
                 ),

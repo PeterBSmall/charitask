@@ -57,13 +57,16 @@ class _PersonalHomeStatsState extends State<PersonalHomeStats> {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
 
+        // Keep the cards at a comfortable minimum width rather than
+        // relying on the overall application/window width.
         final columns = width >= 1000
             ? 4
-            : width >= 520
+            : width >= 560
             ? 2
             : 1;
 
-        final spacing = 16.0;
+        const spacing = 16.0;
+
         final cardWidth = columns == 1
             ? width
             : (width - spacing * (columns - 1)) / columns;
@@ -153,15 +156,18 @@ class _StatCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE7E8EE)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
+          SizedBox(
             width: 46,
             height: 46,
-            decoration: BoxDecoration(
-              color: iconBackground,
-              borderRadius: BorderRadius.circular(12),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: iconBackground,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 22, color: iconColor),
             ),
-            child: Icon(icon, size: 22, color: iconColor),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -173,6 +179,7 @@ class _StatCard extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  softWrap: false,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -184,6 +191,7 @@ class _StatCard extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  softWrap: false,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -195,6 +203,7 @@ class _StatCard extends StatelessWidget {
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  softWrap: false,
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF98A2B3),

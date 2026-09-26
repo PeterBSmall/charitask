@@ -15,100 +15,186 @@ class PersonalHomeWorkspaces extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ===============================================================
-        // SECTION HEADER
-        // ===============================================================
-        Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        debugPrint(
+          '=== PERSONAL HOME WORKSPACES INTERNAL === '
+          'width=${constraints.maxWidth} '
+          'height=${constraints.maxHeight}',
+        );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Expanded(
-              child: Text(
-                'My Workspaces',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF273247),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                // TODO: Open the full Personal Workspaces page.
+            // ===============================================================
+            // SECTION HEADER
+            // ===============================================================
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 280;
+
+                return Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'My Workspaces',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF273247),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () {
+                        // TODO: Open the full Personal Workspaces page.
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 6 : 12,
+                          vertical: 8,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        compact ? 'All' : 'View All',
+                        style: const TextStyle(
+                          color: Color(0xFF6547E8),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
               },
-              child: const Text(
-                'View All',
-                style: TextStyle(
-                  color: Color(0xFF6547E8),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ===============================================================
+            // REAL WORKSPACE DATA
+            // ===============================================================
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _workspaceService.getMyPersonalWorkspaces(),
+              builder: (context, snapshot) {
+                debugPrint(
+                  '=== PERSONAL HOME WORKSPACE FUTURE === '
+                  'state=${snapshot.connectionState} '
+                  'hasData=${snapshot.hasData} '
+                  'hasError=${snapshot.hasError} '
+                  'count=${snapshot.data?.length ?? 0}',
+                );
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  debugPrint('=== PERSONAL HOME WORKSPACE BRANCH === WAITING');
+
+                  return const SizedBox(
+                    height: 190,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  debugPrint(
+                    '=== PERSONAL HOME WORKSPACE BRANCH === ERROR '
+                    '${snapshot.error}',
+                  );
+
+                  return _WorkspaceMessage(
+                    message: 'Workspace error: ${snapshot.error}',
+                  );
+                }
+
+                final workspaces = snapshot.data ?? [];
+
+                debugPrint(
+                  '=== PERSONAL HOME WORKSPACE BRANCH === '
+                  'DATA count=${workspaces.length}',
+                );
+
+                if (workspaces.isEmpty) {
+                  debugPrint('=== PERSONAL HOME WORKSPACE BRANCH === EMPTY');
+
+                  return _CreateWorkspaceCard(
+                    onCreateWorkspace: onCreateWorkspace,
+                  );
+                }
+
+                final visibleWorkspaces = workspaces.take(3).toList();
+
+                debugPrint(
+                  '=== PERSONAL HOME WORKSPACE BRANCH === '
+                  'CARDS count=${visibleWorkspaces.length}',
+                );
+
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    debugPrint(
+                      '=== PERSONAL HOME WORKSPACE CARDS === '
+                      'width=${constraints.maxWidth} '
+                      'height=${constraints.maxHeight}',
+                    );
+
+                    final compact = constraints.maxWidth < 720;
+
+                    if (compact) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (
+                            int index = 0;
+                            index < visibleWorkspaces.length;
+                            index++
+                          ) ...[
+                            if (index > 0) const SizedBox(height: 12),
+                            _WorkspaceCard(
+                              name: visibleWorkspaces[index]['name'] as String,
+                              description:
+                                  visibleWorkspaces[index]['description']
+                                      as String?,
+                              accent: _accentForIndex(index),
+                              onTap: () =>
+                                  onOpenWorkspace(visibleWorkspaces[index]),
+                            ),
+                          ],
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (
+                          int index = 0;
+                          index < visibleWorkspaces.length;
+                          index++
+                        ) ...[
+                          if (index > 0) const SizedBox(width: 16),
+                          Expanded(
+                            child: _WorkspaceCard(
+                              name: visibleWorkspaces[index]['name'] as String,
+                              description:
+                                  visibleWorkspaces[index]['description']
+                                      as String?,
+                              accent: _accentForIndex(index),
+                              onTap: () =>
+                                  onOpenWorkspace(visibleWorkspaces[index]),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ],
-        ),
-
-        const SizedBox(height: 12),
-
-        // ===============================================================
-        // REAL WORKSPACE DATA
-        // ===============================================================
-        FutureBuilder<List<Map<String, dynamic>>>(
-          future: _workspaceService.getMyPersonalWorkspaces(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                height: 190,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (snapshot.hasError) {
-              debugPrint('PersonalHomeWorkspaces error: ${snapshot.error}');
-
-              return _WorkspaceMessage(
-                message: 'Workspace error: ${snapshot.error}',
-              );
-            }
-
-            final workspaces = snapshot.data ?? [];
-
-            // ===========================================================
-            // NO PERSONAL WORKSPACES YET
-            // ===========================================================
-            if (workspaces.isEmpty) {
-              return _CreateWorkspaceCard(onCreateWorkspace: onCreateWorkspace);
-            }
-
-            // ===========================================================
-            // DISPLAY UP TO THREE PERSONAL WORKSPACES
-            // ===========================================================
-            final visibleWorkspaces = workspaces.take(3).toList();
-
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (
-                  int index = 0;
-                  index < visibleWorkspaces.length;
-                  index++
-                ) ...[
-                  if (index > 0) const SizedBox(width: 16),
-                  Expanded(
-                    child: _WorkspaceCard(
-                      name: visibleWorkspaces[index]['name'] as String,
-                      description:
-                          visibleWorkspaces[index]['description'] as String?,
-                      accent: _accentForIndex(index),
-                      onTap: () => onOpenWorkspace(visibleWorkspaces[index]),
-                    ),
-                  ),
-                ],
-              ],
-            );
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -154,112 +240,162 @@ class _CreateWorkspaceCardState extends State<_CreateWorkspaceCard> {
               });
             },
             borderRadius: BorderRadius.circular(18),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-              child: Row(
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEDE9FE),
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                    child: const Icon(
-                      Icons.folder_open_rounded,
-                      size: 23,
-                      color: Color(0xFF6547E8),
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 600;
+                final veryCompact = constraints.maxWidth < 360;
+
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    veryCompact ? 12 : 20,
+                    18,
+                    veryCompact ? 12 : 20,
+                    20,
                   ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Create Your First Workspace',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF273247),
-                          ),
+                  child: compact
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              'Choose a workspace template during setup, or create '
+                              'a custom workspace that fits the way you work.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                height: 1.45,
+                                color: Color(0xFF59677D),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            FilledButton.icon(
+                              onPressed: widget.onCreateWorkspace,
+                              icon: const Icon(Icons.add_rounded, size: 18),
+                              label: const Text('Create Workspace'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF6547E8),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 13,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Choose a workspace template during setup, or create '
+                                'a custom workspace that fits the way you work.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  height: 1.45,
+                                  color: Color(0xFF59677D),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            FilledButton.icon(
+                              onPressed: widget.onCreateWorkspace,
+                              icon: const Icon(Icons.add_rounded, size: 18),
+                              label: const Text('Create Workspace'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF6547E8),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 13,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 5),
-                        Text(
-                          'Set up a personal workspace for tasks, notes, '
-                          'projects, and files.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            height: 1.4,
-                            color: Color(0xFF718096),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  TextButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _isExpanded = !_isExpanded;
-                      });
-                    },
-                    icon: Icon(
-                      _isExpanded
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
-                      size: 20,
-                    ),
-                    label: Text(
-                      _isExpanded ? 'Hide Setup Guide' : 'Show Details',
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF6547E8),
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
           if (_isExpanded) ...[
             const Divider(height: 1, color: Color(0xFFE7E0FA)),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Choose a workspace template during setup, or create '
-                      'a custom workspace that fits the way you work.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.45,
-                        color: Color(0xFF59677D),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 420;
+
+                  if (compact) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Choose a workspace template during setup, or create '
+                          'a custom workspace that fits the way you work.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.45,
+                            color: Color(0xFF59677D),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        FilledButton.icon(
+                          onPressed: widget.onCreateWorkspace,
+                          icon: const Icon(Icons.add_rounded, size: 18),
+                          label: const Text('Create Workspace'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF6547E8),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 13,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Choose a workspace template during setup, or create '
+                          'a custom workspace that fits the way you work.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.45,
+                            color: Color(0xFF59677D),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  FilledButton.icon(
-                    onPressed: widget.onCreateWorkspace,
-                    icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Create Workspace'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF6547E8),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 13,
+                      const SizedBox(width: 20),
+                      FilledButton.icon(
+                        onPressed: widget.onCreateWorkspace,
+                        icon: const Icon(Icons.add_rounded, size: 18),
+                        label: const Text('Create Workspace'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF6547E8),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 13,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -366,12 +502,16 @@ class _WorkspaceCard extends StatelessWidget {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Text(
-                    'Open Workspace',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: accent,
+                  Expanded(
+                    child: Text(
+                      'Open Workspace',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: accent,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 5),

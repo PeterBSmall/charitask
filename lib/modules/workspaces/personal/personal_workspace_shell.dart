@@ -36,107 +36,127 @@ class _PersonalWorkspaceShellState extends State<PersonalWorkspaceShell> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.sizeOf(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FC),
-      body: Row(
-        children: [
-          PersonalWorkspaceSidebar(
-            workspaceName: widget.workspace.name,
-            selectedItem: _selectedSidebarItem,
-            isCollapsed: _isSidebarCollapsed,
-            onToggleCollapse: () {
-              setState(() {
-                _isSidebarCollapsed = !_isSidebarCollapsed;
-              });
-            },
-            items: [
-              PersonalWorkspaceSidebarItem(
-                label: 'Personal Home',
-                icon: Icons.home_outlined,
-                onTap: () {
-                  _returnToPersonalHome(context);
-                },
-              ),
-              PersonalWorkspaceSidebarItem(
-                label: 'Overview',
-                icon: Icons.grid_view_rounded,
-                onTap: () {
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          debugPrint('==================================================');
+          debugPrint('CT SHELL DEBUG');
+          debugPrint('MediaQuery: ${screenSize.width} x ${screenSize.height}');
+          debugPrint(
+            'Shell constraints: '
+            '${constraints.maxWidth} x ${constraints.maxHeight}',
+          );
+          debugPrint('Sidebar width: ${_isSidebarCollapsed ? 72 : 250}');
+          debugPrint(
+            'Expected content width: '
+            '${constraints.maxWidth - (_isSidebarCollapsed ? 72 : 250)}',
+          );
+          debugPrint('==================================================');
+
+          return Row(
+            children: [
+              PersonalWorkspaceSidebar(
+                workspaceName: widget.workspace.name,
+                selectedItem: _selectedSidebarItem,
+                isCollapsed: _isSidebarCollapsed,
+                onToggleCollapse: () {
                   setState(() {
-                    _selectedSidebarItem = 'Overview';
+                    _isSidebarCollapsed = !_isSidebarCollapsed;
                   });
                 },
-              ),
-              PersonalWorkspaceSidebarItem(
-                label: 'Tasks',
-                icon: Icons.check_circle_outline_rounded,
-                onTap: () {
-                  setState(() {
-                    _selectedSidebarItem = 'Tasks';
-                  });
-                },
-              ),
-              PersonalWorkspaceSidebarItem(
-                label: 'Activity',
-                icon: Icons.history_rounded,
-                onTap: () {
-                  setState(() {
-                    _selectedSidebarItem = 'Activity';
-                  });
-                },
-              ),
-              PersonalWorkspaceSidebarItem(
-                label: 'Notes',
-                icon: Icons.sticky_note_2_outlined,
-                onTap: () {
-                  setState(() {
-                    _selectedSidebarItem = 'Notes';
-                  });
-                },
-              ),
-              PersonalWorkspaceSidebarItem(
-                label: 'Settings',
-                icon: Icons.settings_outlined,
-                onTap: () {
-                  setState(() {
-                    _selectedSidebarItem = 'Settings';
-                  });
-                },
-              ),
-            ],
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                CTTopNavigation(
-                  selectedIndex: _topNavIndex,
-                  onSelected: (index) {
-                    setState(() {
-                      _topNavIndex = index;
-                    });
-                  },
-                  onCustomize: () {
-                    setState(() {
-                      _isCustomizingDashboard = !_isCustomizingDashboard;
-                    });
-                  },
-                  isCustomizing: _isCustomizingDashboard,
-                ),
-                Expanded(
-                  child: WorkspaceDashboardPage(
-                    workspace: widget.workspace,
-                    firstName: widget.firstName,
-                    isCustomizing: _isCustomizingDashboard,
-                    onToggleCustomization: () {
+                items: [
+                  PersonalWorkspaceSidebarItem(
+                    label: 'Personal Home',
+                    icon: Icons.home_outlined,
+                    onTap: () {
+                      _returnToPersonalHome(context);
+                    },
+                  ),
+                  PersonalWorkspaceSidebarItem(
+                    label: 'Overview',
+                    icon: Icons.grid_view_rounded,
+                    onTap: () {
                       setState(() {
-                        _isCustomizingDashboard = !_isCustomizingDashboard;
+                        _selectedSidebarItem = 'Overview';
                       });
                     },
                   ),
+                  PersonalWorkspaceSidebarItem(
+                    label: 'Tasks',
+                    icon: Icons.check_circle_outline_rounded,
+                    onTap: () {
+                      setState(() {
+                        _selectedSidebarItem = 'Tasks';
+                      });
+                    },
+                  ),
+                  PersonalWorkspaceSidebarItem(
+                    label: 'Activity',
+                    icon: Icons.history_rounded,
+                    onTap: () {
+                      setState(() {
+                        _selectedSidebarItem = 'Activity';
+                      });
+                    },
+                  ),
+                  PersonalWorkspaceSidebarItem(
+                    label: 'Notes',
+                    icon: Icons.sticky_note_2_outlined,
+                    onTap: () {
+                      setState(() {
+                        _selectedSidebarItem = 'Notes';
+                      });
+                    },
+                  ),
+                  PersonalWorkspaceSidebarItem(
+                    label: 'Settings',
+                    icon: Icons.settings_outlined,
+                    onTap: () {
+                      setState(() {
+                        _selectedSidebarItem = 'Settings';
+                      });
+                    },
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    CTTopNavigation(
+                      selectedIndex: _topNavIndex,
+                      onSelected: (index) {
+                        setState(() {
+                          _topNavIndex = index;
+                        });
+                      },
+                      onCustomize: () {
+                        setState(() {
+                          _isCustomizingDashboard = !_isCustomizingDashboard;
+                        });
+                      },
+                      isCustomizing: _isCustomizingDashboard,
+                    ),
+                    Expanded(
+                      child: WorkspaceDashboardPage(
+                        workspace: widget.workspace,
+                        firstName: widget.firstName,
+                        isCustomizing: _isCustomizingDashboard,
+                        onToggleCustomization: () {
+                          setState(() {
+                            _isCustomizingDashboard = !_isCustomizingDashboard;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -248,118 +248,127 @@ class FoundationSidebar extends StatelessWidget {
   }
 
   Widget _buildCollapsedSidebar(BuildContext context) {
-    return Container(
-      color: const Color(0xFFF8F7FF),
-      child: Column(
-        children: [
-          const SizedBox(height: 24),
+    return SizedBox(
+      width: 72,
+      child: Container(
+        color: const Color(0xFFF8F7FF),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 24),
 
-          _buildCollapsedIcon(
-            icon: Icons.account_balance_rounded,
-            tooltip: 'Organization Workspace',
-            selected: false,
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.account_balance_rounded,
+                      tooltip: 'Organization Workspace',
+                      selected: false,
+                    ),
 
-          const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-          _buildCollapsedIcon(
-            icon: Icons.grid_view_rounded,
-            tooltip: 'Dashboard',
-            selected: selectedIndex == 0,
-            onTap: () => onSelected(0),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.grid_view_rounded,
+                      tooltip: 'Dashboard',
+                      selected: selectedIndex == 0,
+                      onTap: () => onSelected(0),
+                    ),
 
-          _buildCollapsedIcon(
-            icon: Icons.account_balance_outlined,
-            tooltip: 'Organization',
-            selected: selectedIndex == 1,
-            onTap: () => onSelected(1),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.account_balance_outlined,
+                      tooltip: 'Organization',
+                      selected: selectedIndex == 1,
+                      onTap: () => onSelected(1),
+                    ),
 
-          _buildCollapsedIcon(
-            icon: Icons.people_outline_rounded,
-            tooltip: 'People',
-            selected: selectedIndex == 2,
-            onTap: () => onSelected(2),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.people_outline_rounded,
+                      tooltip: 'People',
+                      selected: selectedIndex == 2,
+                      onTap: () => onSelected(2),
+                    ),
 
-          _buildCollapsedIcon(
-            icon: Icons.location_on_outlined,
-            tooltip: 'Locations',
-            selected: selectedIndex == 3,
-            onTap: () => onSelected(3),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.location_on_outlined,
+                      tooltip: 'Locations',
+                      selected: selectedIndex == 3,
+                      onTap: () => onSelected(3),
+                    ),
 
-          _buildCollapsedIcon(
-            icon: Icons.group_outlined,
-            tooltip: 'Groups',
-            selected: selectedIndex == 4,
-            onTap: () => onSelected(4),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.group_outlined,
+                      tooltip: 'Groups',
+                      selected: selectedIndex == 4,
+                      onTap: () => onSelected(4),
+                    ),
 
-          _buildCollapsedIcon(
-            icon: Icons.shield_outlined,
-            tooltip: 'Security',
-            selected: selectedIndex == 5,
-            onTap: () => onSelected(5),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.shield_outlined,
+                      tooltip: 'Security',
+                      selected: selectedIndex == 5,
+                      onTap: () => onSelected(5),
+                    ),
 
-          _buildCollapsedIcon(
-            icon: Icons.bar_chart_outlined,
-            tooltip: 'Analytics',
-            selected: selectedIndex == 6,
-            onTap: () => onSelected(6),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.bar_chart_outlined,
+                      tooltip: 'Analytics',
+                      selected: selectedIndex == 6,
+                      onTap: () => onSelected(6),
+                    ),
 
-          const Spacer(),
+                    const SizedBox(height: 8),
 
-          _buildCollapsedIcon(
-            icon: Icons.sticky_note_2_outlined,
-            tooltip: 'Notes',
-            selected: selectedIndex == 7,
-            onTap: () => onSelected(7),
-            showDot: true,
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.sticky_note_2_outlined,
+                      tooltip: 'Notes',
+                      selected: selectedIndex == 7,
+                      onTap: () => onSelected(7),
+                      showDot: true,
+                    ),
 
-          _buildCollapsedIcon(
-            icon: Icons.settings_outlined,
-            tooltip: 'Settings',
-            selected: selectedIndex == 8,
-            onTap: () => onSelected(8),
-          ),
+                    _buildCollapsedIcon(
+                      icon: Icons.settings_outlined,
+                      tooltip: 'Settings',
+                      selected: selectedIndex == 8,
+                      onTap: () => onSelected(8),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
-          const SizedBox(height: 8),
+            const Divider(height: 1),
 
-          _buildCollapsedIcon(
-            icon: Icons.chevron_right_rounded,
-            tooltip: 'Expand navigation',
-            selected: false,
-            onTap: onToggleCollapse,
-          ),
+            _buildCollapsedIcon(
+              icon: Icons.chevron_left_rounded,
+              tooltip: 'Expand navigation',
+              selected: false,
+              onTap: onToggleCollapse,
+            ),
 
-          const SizedBox(height: 12),
+            _buildCollapsedIcon(
+              icon: Icons.logout_rounded,
+              tooltip: 'Log Out',
+              selected: false,
+              onTap: () async {
+                try {
+                  await Supabase.instance.client.auth.signOut();
 
-          _buildCollapsedIcon(
-            icon: Icons.logout_rounded,
-            tooltip: 'Log Out',
-            selected: false,
-            onTap: () async {
-              try {
-                await Supabase.instance.client.auth.signOut();
+                  if (!context.mounted) return;
 
-                if (!context.mounted) return;
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/', (route) => false);
+                } catch (error) {
+                  debugPrint('>>> LOGOUT ERROR: $error');
+                }
+              },
+            ),
 
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/', (route) => false);
-              } catch (error) {
-                debugPrint('>>> LOGOUT ERROR: $error');
-              }
-            },
-          ),
-
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 12),
+          ],
+        ),
       ),
     );
   }

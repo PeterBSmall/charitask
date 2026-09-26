@@ -222,36 +222,68 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: [
-          FoundationSidebar(
-            selectedIndex: _selectedIndex,
-            isCollapsed: _isSidebarCollapsed,
-            onSelected: _navigateTo,
-            onToggleCollapse: _toggleSidebar,
-            onCreateWorkspace: _createWorkspace,
-            onPersonalHome: widget.onPersonalHome,
-            organizationId: widget.organizationId,
-            onWorkspaceSelected: _handleWorkspaceSelected,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                CTTopNavigation(
-                  selectedIndex: _topNavIndex,
-                  onSelected: (index) {
-                    setState(() {
-                      _topNavIndex = index;
-                    });
-                  },
-                  onCustomize: _toggleDashboardCustomization,
-                  isCustomizing: _isCustomizingDashboard,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          debugPrint(
+            '=== ORGANIZATION SHELL === '
+            'width=${constraints.maxWidth} '
+            'height=${constraints.maxHeight}',
+          );
+
+          final width = constraints.maxWidth;
+
+          final shouldCollapseSidebar = width < 1200;
+          final sidebarCollapsed = _isSidebarCollapsed || shouldCollapseSidebar;
+
+          debugPrint(
+            '=== ORGANIZATION SHELL MODE === '
+            'sidebarCollapsed=$sidebarCollapsed',
+          );
+
+          return Row(
+            children: [
+              FoundationSidebar(
+                selectedIndex: _selectedIndex,
+                isCollapsed: sidebarCollapsed,
+                onSelected: _navigateTo,
+                onToggleCollapse: _toggleSidebar,
+                onCreateWorkspace: _createWorkspace,
+                onPersonalHome: widget.onPersonalHome,
+                organizationId: widget.organizationId,
+                onWorkspaceSelected: _handleWorkspaceSelected,
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    CTTopNavigation(
+                      selectedIndex: _topNavIndex,
+                      onSelected: (index) {
+                        setState(() {
+                          _topNavIndex = index;
+                        });
+                      },
+                      onCustomize: _toggleDashboardCustomization,
+                      isCustomizing: _isCustomizingDashboard,
+                    ),
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, contentConstraints) {
+                          debugPrint(
+                            '=== ORGANIZATION CONTENT === '
+                            'width=${contentConstraints.maxWidth} '
+                            'height=${contentConstraints.maxHeight}',
+                          );
+
+                          return _currentPage;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(child: _currentPage),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }

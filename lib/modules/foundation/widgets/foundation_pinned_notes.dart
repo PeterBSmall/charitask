@@ -21,7 +21,7 @@ class FoundationPinnedNotes extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(context),
 
           const SizedBox(height: 20),
 
@@ -53,25 +53,39 @@ class FoundationPinnedNotes extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Pinned Notes',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF2F3A4A),
-          ),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.add_rounded),
-          tooltip: 'Add note',
-          color: AppColors.missionPurple,
-        ),
-      ],
+  Widget _buildHeader(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 220;
+
+        return Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Pinned Notes',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: compact ? 17 : 20,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2F3A4A),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.add_rounded),
+              tooltip: 'Add note',
+              color: AppColors.missionPurple,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              iconSize: compact ? 20 : 24,
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -27,6 +27,7 @@ class PersonalHomePage extends StatelessWidget {
     debugPrint('AUTH EMAIL: ${user?.email}');
     debugPrint('AUTH METADATA: ${user?.userMetadata}');
     debugPrint('==========================');
+
     try {
       final organizations = await _organizationService.getMyOrganizations();
 
@@ -126,6 +127,12 @@ class PersonalHomePage extends StatelessWidget {
       backgroundColor: const Color(0xFFF7F7FA),
       body: LayoutBuilder(
         builder: (context, constraints) {
+          debugPrint(
+            '=== PERSONAL HOME OUTER CONSTRAINT === '
+            'width=${constraints.maxWidth} '
+            'height=${constraints.maxHeight}',
+          );
+
           final showSidebar = constraints.maxWidth >= 900;
 
           return Row(
@@ -141,6 +148,12 @@ class PersonalHomePage extends StatelessWidget {
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, contentConstraints) {
+                          debugPrint(
+                            '=== PERSONAL HOME CONTENT CONSTRAINT === '
+                            'width=${contentConstraints.maxWidth} '
+                            'height=${contentConstraints.maxHeight}',
+                          );
+
                           final width = contentConstraints.maxWidth;
                           final showRightRailBesideContent = width >= 1100;
 
@@ -172,9 +185,7 @@ class PersonalHomePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: _buildMainContent(context)),
-
         const SizedBox(width: 24),
-
         const SizedBox(width: 300, child: PersonalHomeRightRail()),
       ],
     );
@@ -189,11 +200,8 @@ class PersonalHomePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildMainContent(context),
-
         const SizedBox(height: 28),
-
         const PersonalHomeRightRail(),
-
         const SizedBox(height: 24),
       ],
     );
@@ -204,37 +212,101 @@ class PersonalHomePage extends StatelessWidget {
   // =======================================================================
 
   Widget _buildMainContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const PersonalHomeHero(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        debugPrint(
+          '=== PERSONAL HOME _buildMainContent === '
+          'width=${constraints.maxWidth} '
+          'height=${constraints.maxHeight}',
+        );
 
-        const SizedBox(height: 20),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            LayoutBuilder(
+              builder: (context, c) {
+                debugPrint(
+                  '=== PERSONAL HOME HERO === '
+                  'width=${c.maxWidth}',
+                );
 
-        const PersonalHomeStats(),
+                return const PersonalHomeHero();
+              },
+            ),
 
-        const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
-        PersonalHomeWorkspaces(
-          onCreateWorkspace: () => _createPersonalWorkspace(context),
-          onOpenWorkspace: (workspace) =>
-              _openPersonalWorkspace(context, workspace),
-        ),
+            LayoutBuilder(
+              builder: (context, c) {
+                debugPrint(
+                  '=== PERSONAL HOME STATS === '
+                  'width=${c.maxWidth}',
+                );
 
-        const SizedBox(height: 28),
+                return const PersonalHomeStats();
+              },
+            ),
 
-        const PersonalHomeOrganizations(),
+            const SizedBox(height: 28),
 
-        const SizedBox(height: 28),
+            LayoutBuilder(
+              builder: (context, c) {
+                debugPrint(
+                  '=== PERSONAL HOME WORKSPACES === '
+                  'width=${c.maxWidth}',
+                );
 
-        const PersonalHomeActionCenter(),
+                return PersonalHomeWorkspaces(
+                  onCreateWorkspace: () => _createPersonalWorkspace(context),
+                  onOpenWorkspace: (workspace) =>
+                      _openPersonalWorkspace(context, workspace),
+                );
+              },
+            ),
 
-        const SizedBox(height: 28),
+            const SizedBox(height: 28),
 
-        const PersonalHomeActivity(),
+            LayoutBuilder(
+              builder: (context, c) {
+                debugPrint(
+                  '=== PERSONAL HOME ORGANIZATIONS === '
+                  'width=${c.maxWidth}',
+                );
 
-        const SizedBox(height: 24),
-      ],
+                return const PersonalHomeOrganizations();
+              },
+            ),
+
+            const SizedBox(height: 28),
+
+            LayoutBuilder(
+              builder: (context, c) {
+                debugPrint(
+                  '=== PERSONAL HOME ACTION CENTER === '
+                  'width=${c.maxWidth}',
+                );
+
+                return const PersonalHomeActionCenter();
+              },
+            ),
+
+            const SizedBox(height: 28),
+
+            LayoutBuilder(
+              builder: (context, c) {
+                debugPrint(
+                  '=== PERSONAL HOME ACTIVITY === '
+                  'width=${c.maxWidth}',
+                );
+
+                return const PersonalHomeActivity();
+              },
+            ),
+
+            const SizedBox(height: 24),
+          ],
+        );
+      },
     );
   }
 }
