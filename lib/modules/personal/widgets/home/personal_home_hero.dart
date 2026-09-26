@@ -68,67 +68,118 @@ class _PersonalHomeHeroState extends State<PersonalHomeHero> {
           Container(color: Colors.black.withValues(alpha: 0.45)),
 
           // Hero content
-          Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Spacer(),
-                const Text(
-                  'GOOD MORNING,',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.8,
-                    color: Colors.white,
-                  ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 500;
+              final veryNarrow = constraints.maxWidth < 400;
+
+              return Padding(
+                padding: EdgeInsets.all(
+                  veryNarrow
+                      ? 20
+                      : narrow
+                      ? 24
+                      : 28,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  firstName,
-                  style: const TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w800,
-                    height: 1.05,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Welcome to your ChariTask personal home.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
-                  runSpacing: 14,
-                  children: const [
-                    _HeroSummaryItem(
-                      icon: Icons.calendar_today_outlined,
-                      value: '4',
-                      label: "Today's Schedule",
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    if (!veryNarrow) const Spacer(),
+
+                    Text(
+                      'GOOD MORNING,',
+                      style: TextStyle(
+                        fontSize: veryNarrow
+                            ? 10
+                            : narrow
+                            ? 12
+                            : 13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: veryNarrow ? 1.2 : 1.8,
+                        color: Colors.white,
+                      ),
                     ),
-                    _HeroSummaryDivider(),
-                    _HeroSummaryItem(
-                      icon: Icons.check_circle_outline_rounded,
-                      value: '7',
-                      label: 'Active Tasks',
+
+                    SizedBox(height: veryNarrow ? 1 : 4),
+
+                    Text(
+                      firstName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: veryNarrow
+                            ? 26
+                            : narrow
+                            ? 33
+                            : 36,
+                        fontWeight: FontWeight.w800,
+                        height: 1.0,
+                        color: Colors.white,
+                      ),
                     ),
-                    _HeroSummaryDivider(),
-                    _HeroSummaryItem(
-                      icon: Icons.event_outlined,
-                      value: '3',
-                      label: 'Upcoming Events',
+
+                    SizedBox(height: veryNarrow ? 3 : 8),
+
+                    Text(
+                      'Welcome to your ChariTask personal home.',
+                      maxLines: veryNarrow ? 1 : 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: veryNarrow
+                            ? 11
+                            : narrow
+                            ? 14
+                            : 15,
+                        height: 1.2,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    SizedBox(
+                      height: veryNarrow
+                          ? 8
+                          : narrow
+                          ? 16
+                          : 28,
+                    ),
+
+                    Wrap(
+                      spacing: veryNarrow ? 6 : 12,
+                      runSpacing: veryNarrow ? 4 : 10,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _HeroSummaryItem(
+                          icon: Icons.calendar_today_outlined,
+                          value: '4',
+                          label: "Today's Schedule",
+                          compact: veryNarrow,
+                        ),
+
+                        if (!veryNarrow) const _HeroSummaryDivider(),
+
+                        _HeroSummaryItem(
+                          icon: Icons.check_circle_outline_rounded,
+                          value: '7',
+                          label: 'Active Tasks',
+                          compact: veryNarrow,
+                        ),
+
+                        if (!veryNarrow) const _HeroSummaryDivider(),
+
+                        _HeroSummaryItem(
+                          icon: Icons.event_outlined,
+                          value: '3',
+                          label: 'Upcoming Events',
+                          compact: veryNarrow,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
 
           // Customize button hover zone
@@ -226,11 +277,13 @@ class _HeroSummaryItem extends StatelessWidget {
   final IconData icon;
   final String value;
   final String label;
+  final bool compact;
 
   const _HeroSummaryItem({
     required this.icon,
     required this.value,
     required this.label,
+    this.compact = false,
   });
 
   @override
@@ -238,23 +291,26 @@ class _HeroSummaryItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 24, color: Colors.white),
-        const SizedBox(width: 10),
+        Icon(icon, size: compact ? 20 : 24, color: Colors.white),
+        SizedBox(width: compact ? 6 : 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: compact ? 20 : 24,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
               ),
             ),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: compact ? 10 : 12,
                 fontWeight: FontWeight.w600,
                 color: Colors.white.withValues(alpha: 0.82),
               ),
