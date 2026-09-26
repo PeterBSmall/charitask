@@ -8,7 +8,7 @@ import 'package:charitask/modules/foundation/widgets/foundation_recent_activity.
 import 'package:charitask/modules/foundation/widgets/foundation_workspace_shell.dart';
 import 'package:charitask/modules/locations/pages/locations_page.dart';
 import 'package:charitask/modules/people/pages/people_page.dart';
-
+import 'package:charitask/modules/groups/pages/groups_page.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/models/ct_metric.dart';
@@ -43,11 +43,7 @@ class FoundationWorkspacePage extends StatelessWidget {
 
       locations: LocationsPage(organizationId: organizationId),
 
-      groups: const _FoundationPlaceholderPage(
-        title: 'Groups',
-        subtitle: 'Organize people into teams, groups, and communities.',
-        icon: Icons.groups_outlined,
-      ),
+      groups: GroupsPage(organizationId: organizationId),
 
       security: const _FoundationPlaceholderPage(
         title: 'Security',

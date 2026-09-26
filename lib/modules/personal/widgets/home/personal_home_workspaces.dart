@@ -1,73 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:charitask/modules/personal/data/services/personal_workspace_service.dart';
 
 class PersonalHomeWorkspaces extends StatelessWidget {
   final VoidCallback onCreateWorkspace;
   final void Function(Map<String, dynamic> workspace) onOpenWorkspace;
 
-  const PersonalHomeWorkspaces({
+  final PersonalWorkspaceService _workspaceService = PersonalWorkspaceService();
+
+  PersonalHomeWorkspaces({
     super.key,
     required this.onCreateWorkspace,
     required this.onOpenWorkspace,
   });
-
-  Future<List<Map<String, dynamic>>> _loadWorkspaces() async {
-    final supabase = Supabase.instance.client;
-    final user = supabase.auth.currentUser;
-
-    if (user == null) {
-      return [];
-    }
-
-    // ===============================================================
-    // FIND THE CHARITASK PERSON
-    // ===============================================================
-    final identity = await supabase
-        .from('person_auth_identities')
-        .select('person_id')
-        .eq('auth_user_id', user.id)
-        .maybeSingle();
-
-    if (identity == null) {
-      return [];
-    }
-
-    final personId = identity['person_id'] as String;
-
-    // ===============================================================
-    // FIND ACTIVE WORKSPACE MEMBERSHIPS
-    // ===============================================================
-    final memberships = await supabase
-        .from('workspace_memberships')
-        .select('workspace_id, organization_id')
-        .eq('person_id', personId)
-        .eq('status', 'active');
-
-    if (memberships.isEmpty) {
-      return [];
-    }
-
-    final workspaceIds = memberships
-        .map((membership) => membership['workspace_id'] as String)
-        .toList();
-
-    // ===============================================================
-    // LOAD ACTIVE PERSONAL WORKSPACES
-    //
-    // Personal Workspaces are identified by having a template_id.
-    // Organization workspaces such as "Main Workspace" normally have
-    // no template_id and therefore do not appear here.
-    // ===============================================================
-    final workspaces = await supabase
-        .from('workspaces')
-        .select('id, name, description, template_id')
-        .inFilter('id', workspaceIds)
-        .eq('status', 'active')
-        .isFilter('archived_at', null)
-        .not('template_id', 'is', null);
-
-    return List<Map<String, dynamic>>.from(workspaces);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +54,7 @@ class PersonalHomeWorkspaces extends StatelessWidget {
         // REAL WORKSPACE DATA
         // ===============================================================
         FutureBuilder<List<Map<String, dynamic>>>(
-          future: _loadWorkspaces(),
+          future: _workspaceService.getMyPersonalWorkspaces(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
@@ -179,72 +123,147 @@ class PersonalHomeWorkspaces extends StatelessWidget {
 // CREATE PERSONAL WORKSPACE EMPTY STATE
 // ===========================================================================
 
-class _CreateWorkspaceCard extends StatelessWidget {
+class _CreateWorkspaceCard extends StatefulWidget {
   final VoidCallback onCreateWorkspace;
 
   const _CreateWorkspaceCard({required this.onCreateWorkspace});
 
   @override
+  State<_CreateWorkspaceCard> createState() => _CreateWorkspaceCardState();
+}
+
+class _CreateWorkspaceCardState extends State<_CreateWorkspaceCard> {
+  bool _isExpanded = true;
+
+  @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onCreateWorkspace,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9F7FF),
         borderRadius: BorderRadius.circular(18),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFE7E0FA)),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE7E8EE)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1EDFF),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: const Icon(
-                  Icons.add_rounded,
-                  size: 28,
-                  color: Color(0xFF7C4DFF),
-                ),
-              ),
-              const SizedBox(width: 18),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Create Your Personal Workspace',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF273247),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              child: Row(
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDE9FE),
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: const Icon(
+                      Icons.folder_open_rounded,
+                      size: 23,
+                      color: Color(0xFF6547E8),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Create Your First Workspace',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF273247),
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Set up a personal workspace for tasks, notes, '
+                          'projects, and files.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.4,
+                            color: Color(0xFF718096),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                    },
+                    icon: Icon(
+                      _isExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      size: 20,
+                    ),
+                    label: Text(
+                      _isExpanded ? 'Hide Setup Guide' : 'Show Details',
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF6547E8),
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Set up a workspace designed around how you work. '
-                      'Choose a template and customize it to fit your needs.',
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isExpanded) ...[
+            const Divider(height: 1, color: Color(0xFFE7E0FA)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Choose a workspace template during setup, or create '
+                      'a custom workspace that fits the way you work.',
                       style: TextStyle(
                         fontSize: 13,
-                        height: 1.4,
-                        color: Color(0xFF718096),
+                        height: 1.45,
+                        color: Color(0xFF59677D),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 20),
+                  FilledButton.icon(
+                    onPressed: widget.onCreateWorkspace,
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Create Workspace'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF6547E8),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 13,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              const Icon(Icons.arrow_forward_rounded, color: Color(0xFF7C4DFF)),
-            ],
-          ),
-        ),
+            ),
+          ],
+        ],
       ),
     );
   }

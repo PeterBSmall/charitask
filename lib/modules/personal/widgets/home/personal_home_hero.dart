@@ -1,180 +1,265 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class PersonalHomeHero extends StatelessWidget {
+import 'package:charitask/modules/personal/data/hero_images/hero_image.dart';
+import 'package:charitask/modules/personal/data/hero_images/hero_image_library.dart';
+import 'package:charitask/modules/personal/data/services/personal_preferences_service.dart';
+
+class PersonalHomeHero extends StatefulWidget {
   const PersonalHomeHero({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final user = Supabase.instance.client.auth.currentUser;
-    final metadata = user?.userMetadata ?? {};
+  State<PersonalHomeHero> createState() => _PersonalHomeHeroState();
+}
 
-    final firstName = (metadata['first_name'] as String?)?.trim() ?? '';
-    final greetingName = firstName.isEmpty ? 'there' : firstName;
+class _PersonalHomeHeroState extends State<PersonalHomeHero> {
+  final PersonalPreferencesService _preferencesService =
+      PersonalPreferencesService();
+
+  HeroImage _selectedImage = HeroImageLibrary.defaultImage;
+  bool _isHoveringHero = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedHeroImage();
+  }
+
+  Future<void> _loadSavedHeroImage() async {
+    final heroImageId = await _preferencesService.getHeroImageId();
+
+    if (!mounted || heroImageId == null) {
+      return;
+    }
+
+    HeroImage? savedImage;
+
+    for (final image in HeroImageLibrary.all) {
+      if (image.id == heroImageId) {
+        savedImage = image;
+        break;
+      }
+    }
+
+    if (savedImage == null) {
+      return;
+    }
+
+    setState(() {
+      _selectedImage = savedImage!;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final firstName =
+        Supabase.instance.client.auth.currentUser?.userMetadata?['first_name']
+            as String? ??
+        'Peter';
 
     return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 300),
+      height: 300,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFE7E0FA)),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 800;
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(_selectedImage.assetPath, fit: BoxFit.cover),
+          Container(color: Colors.black.withValues(alpha: 0.45)),
 
-          return Stack(
-            children: [
-              // Hero image on the right.
-              Positioned(
-                top: 0,
-                right: 0,
-                bottom: 0,
-                width: compact
-                    ? constraints.maxWidth * 0.42
-                    : constraints.maxWidth * 0.48,
-                child: Image.asset(
-                  'assets/images/hero_library/abstract/'
-                  'charitask_background_abstract.png',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.centerRight,
+          // Hero content
+          Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Spacer(),
+                const Text(
+                  'GOOD MORNING,',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.8,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  firstName,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w800,
+                    height: 1.05,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Welcome to your ChariTask personal home.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  runSpacing: 14,
+                  children: const [
+                    _HeroSummaryItem(
+                      icon: Icons.calendar_today_outlined,
+                      value: '4',
+                      label: "Today's Schedule",
+                    ),
+                    _HeroSummaryDivider(),
+                    _HeroSummaryItem(
+                      icon: Icons.check_circle_outline_rounded,
+                      value: '7',
+                      label: 'Active Tasks',
+                    ),
+                    _HeroSummaryDivider(),
+                    _HeroSummaryItem(
+                      icon: Icons.event_outlined,
+                      value: '3',
+                      label: 'Upcoming Events',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Customize button hover zone
+          Positioned(
+            top: 12,
+            right: 12,
+            child: MouseRegion(
+              onEnter: (_) {
+                setState(() {
+                  _isHoveringHero = true;
+                });
+              },
+              onExit: (_) {
+                setState(() {
+                  _isHoveringHero = false;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: AnimatedOpacity(
+                  opacity: _isHoveringHero ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 180),
+                  child: IgnorePointer(
+                    ignoring: !_isHoveringHero,
+                    child: _CustomizeButton(
+                      onPressed: () => _showHeroCustomizer(context),
+                    ),
+                  ),
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // Content.
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  compact ? 24 : 44,
-                  compact ? 26 : 38,
-                  compact
-                      ? constraints.maxWidth * 0.32
-                      : constraints.maxWidth * 0.43,
-                  compact ? 26 : 34,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'GOOD MORNING,',
-                      style: TextStyle(
-                        fontSize: compact ? 14 : 16,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.1,
-                        color: const Color(0xFF6547E8),
-                      ),
-                    ),
+  Future<void> _showHeroCustomizer(BuildContext context) async {
+    final selected = await showDialog<HeroImage>(
+      context: context,
+      builder: (context) {
+        return _HeroCustomizerDialog(selectedImage: _selectedImage);
+      },
+    );
 
-                    const SizedBox(height: 2),
+    if (!mounted || selected == null) {
+      return;
+    }
 
-                    Text(
-                      greetingName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: compact ? 34 : 42,
-                        fontWeight: FontWeight.w800,
-                        height: 1.05,
-                        color: const Color(0xFF273247),
-                      ),
-                    ),
+    setState(() {
+      _selectedImage = selected;
+    });
 
-                    const SizedBox(height: 18),
+    await _preferencesService.saveHeroImageId(selected.id);
+  }
+}
 
-                    Container(height: 1, color: const Color(0xFFE4E0F0)),
+class _CustomizeButton extends StatelessWidget {
+  final VoidCallback onPressed;
 
-                    const SizedBox(height: 18),
+  const _CustomizeButton({required this.onPressed});
 
-                    Text(
-                      'You have:',
-                      style: TextStyle(
-                        fontSize: compact ? 15 : 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF59677D),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    compact
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _HeroSummaryRow(
-                                icon: Icons.check_circle_outline_rounded,
-                                text: '2 tasks due today',
-                              ),
-                              const SizedBox(height: 9),
-                              _HeroSummaryRow(
-                                icon: Icons.mail_outline_rounded,
-                                text: '3 pending invitations',
-                              ),
-                              const SizedBox(height: 9),
-                              _HeroSummaryRow(
-                                icon: Icons.event_outlined,
-                                text: '1 event tomorrow',
-                              ),
-                            ],
-                          )
-                        : Row(
-                            children: [
-                              Expanded(
-                                child: _HeroSummaryRow(
-                                  icon: Icons.check_circle_outline_rounded,
-                                  text: '2 tasks due today',
-                                ),
-                              ),
-                              _HeroSummaryDivider(),
-                              Expanded(
-                                child: _HeroSummaryRow(
-                                  icon: Icons.mail_outline_rounded,
-                                  text: '3 pending invitations',
-                                ),
-                              ),
-                              _HeroSummaryDivider(),
-                              Expanded(
-                                child: _HeroSummaryRow(
-                                  icon: Icons.event_outlined,
-                                  text: '1 event tomorrow',
-                                ),
-                              ),
-                            ],
-                          ),
-                  ],
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.28),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.image_outlined, size: 18, color: Colors.white),
+              const SizedBox(width: 8),
+              const Text(
+                'Customize',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
                 ),
               ),
             ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 }
 
-class _HeroSummaryRow extends StatelessWidget {
+class _HeroSummaryItem extends StatelessWidget {
   final IconData icon;
-  final String text;
+  final String value;
+  final String label;
 
-  const _HeroSummaryRow({required this.icon, required this.text});
+  const _HeroSummaryItem({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 21, color: const Color(0xFF7C4DFF)),
-        const SizedBox(width: 9),
-        Expanded(
-          child: Text(
-            text,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF59677D),
+        Icon(icon, size: 24, color: Colors.white),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
-          ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.82),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -189,8 +274,257 @@ class _HeroSummaryDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 42,
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      color: const Color(0xFFE4E0F0),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      color: Colors.white.withValues(alpha: 0.30),
+    );
+  }
+}
+
+class _HeroCustomizerDialog extends StatefulWidget {
+  final HeroImage selectedImage;
+
+  const _HeroCustomizerDialog({required this.selectedImage});
+
+  @override
+  State<_HeroCustomizerDialog> createState() => _HeroCustomizerDialogState();
+}
+
+class _HeroCustomizerDialogState extends State<_HeroCustomizerDialog> {
+  late HeroImage _selectedImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedImage = widget.selectedImage;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 900, maxHeight: 700),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Customize Your Hero',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF273247),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Choose an image for your Personal Home.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF718096),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final category in HeroImageCategory.values) ...[
+                        _CategoryHeading(category: category),
+                        const SizedBox(height: 10),
+                        _buildCategoryGrid(category),
+                        const SizedBox(height: 22),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF6547E8),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context, _selectedImage);
+                    },
+                    child: const Text('Apply'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryGrid(HeroImageCategory category) {
+    final images = HeroImageLibrary.byCategory(category);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 700 ? 3 : 2;
+        const spacing = 12.0;
+
+        final width =
+            (constraints.maxWidth - spacing * (columns - 1)) / columns;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final image in images)
+              SizedBox(
+                width: width,
+                child: _HeroImageOption(
+                  image: image,
+                  selected: _selectedImage.id == image.id,
+                  onTap: () {
+                    setState(() {
+                      _selectedImage = image;
+                    });
+                  },
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CategoryHeading extends StatelessWidget {
+  final HeroImageCategory category;
+
+  const _CategoryHeading({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _categoryName(category),
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+        color: Color(0xFF273247),
+      ),
+    );
+  }
+
+  String _categoryName(HeroImageCategory category) {
+    switch (category) {
+      case HeroImageCategory.community:
+        return 'Community';
+      case HeroImageCategory.mission:
+        return 'Mission';
+      case HeroImageCategory.nature:
+        return 'Nature & Hope';
+      case HeroImageCategory.seasonal:
+        return 'Seasonal';
+    }
+  }
+}
+
+class _HeroImageOption extends StatelessWidget {
+  final HeroImage image;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _HeroImageOption({
+    required this.image,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected ? image.accentColor : const Color(0xFFE2E8F0),
+              width: selected ? 2 : 1,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AspectRatio(
+                aspectRatio: 2.4,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(image.assetPath, fit: BoxFit.cover),
+                    if (selected)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: image.accentColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  image.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF273247),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

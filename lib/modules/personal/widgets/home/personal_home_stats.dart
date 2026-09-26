@@ -19,9 +19,7 @@ class _PersonalHomeStatsState extends State<PersonalHomeStats> {
   @override
   void initState() {
     super.initState();
-
     _taskService = TaskService(Supabase.instance.client);
-
     _loadTaskCount();
   }
 
@@ -55,52 +53,74 @@ class _PersonalHomeStatsState extends State<PersonalHomeStats> {
         ? 'task needs attention'
         : 'tasks need attention';
 
-    return Row(
-      children: [
-        Expanded(
-          child: _StatCard(
-            icon: Icons.calendar_today_outlined,
-            title: "Today's Schedule",
-            value: '4',
-            subtitle: 'items today',
-            iconBackground: const Color(0xFFF0EBFF),
-            iconColor: const Color(0xFF7C4DFF),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.priority_high_rounded,
-            title: "Today's Focus",
-            value: _loadingTasks ? '—' : _todayAndOverdueTaskCount.toString(),
-            subtitle: taskSubtitle,
-            iconBackground: const Color(0xFFE8F8FC),
-            iconColor: const Color(0xFF08738A),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.check_circle_outline_rounded,
-            title: 'Active Tasks',
-            value: '7',
-            subtitle: 'open tasks',
-            iconBackground: const Color(0xFFF3F4F6),
-            iconColor: const Color(0xFF475467),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.event_outlined,
-            title: 'Upcoming Events',
-            value: '3',
-            subtitle: 'this week',
-            iconBackground: const Color(0xFFFFF4E8),
-            iconColor: const Color(0xFFB76E00),
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        final columns = width >= 1000
+            ? 4
+            : width >= 520
+            ? 2
+            : 1;
+
+        final spacing = 16.0;
+        final cardWidth = columns == 1
+            ? width
+            : (width - spacing * (columns - 1)) / columns;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              child: const _StatCard(
+                icon: Icons.calendar_today_outlined,
+                title: "Today's Schedule",
+                value: '4',
+                subtitle: 'items today',
+                iconBackground: Color(0xFFF0EBFF),
+                iconColor: Color(0xFF7C4DFF),
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _StatCard(
+                icon: Icons.priority_high_rounded,
+                title: "Today's Focus",
+                value: _loadingTasks
+                    ? '—'
+                    : _todayAndOverdueTaskCount.toString(),
+                subtitle: taskSubtitle,
+                iconBackground: const Color(0xFFE8F8FC),
+                iconColor: const Color(0xFF08738A),
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: const _StatCard(
+                icon: Icons.check_circle_outline_rounded,
+                title: 'Active Tasks',
+                value: '7',
+                subtitle: 'open tasks',
+                iconBackground: Color(0xFFF3F4F6),
+                iconColor: Color(0xFF475467),
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: const _StatCard(
+                icon: Icons.event_outlined,
+                title: 'Upcoming Events',
+                value: '3',
+                subtitle: 'this week',
+                iconBackground: Color(0xFFFFF4E8),
+                iconColor: Color(0xFFB76E00),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -125,7 +145,8 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      constraints: const BoxConstraints(minHeight: 108),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -142,9 +163,10 @@ class _StatCard extends StatelessWidget {
             ),
             child: Icon(icon, size: 22, color: iconColor),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(

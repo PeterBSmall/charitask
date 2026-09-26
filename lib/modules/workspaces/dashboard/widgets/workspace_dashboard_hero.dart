@@ -63,11 +63,12 @@ class WorkspaceDashboardHero extends StatelessWidget {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [
-            Colors.white.withValues(alpha: 0.96),
-            Colors.white.withValues(alpha: 0.78),
+            Colors.white.withValues(alpha: 0.58),
+            Colors.white.withValues(alpha: 0.30),
+            Colors.white.withValues(alpha: 0.08),
             Colors.transparent,
           ],
-          stops: const [0.0, 0.42, 0.78],
+          stops: const [0.0, 0.42, 0.72, 1.0],
         ),
       ),
     );

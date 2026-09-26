@@ -14,17 +14,11 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-
   http: ^1.5.0
-
   supabase_flutter: ^2.17.2
-
   app_links: 6.4.1
-
   win32_registry: 3.0.2
-
   intl: ^0.20.2
-
   shared_preferences: ^2.5.5
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
@@ -39,6 +33,15 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/onboarding/
-    - assets/images/workspaces/
+    # Hero Library
     - assets/images/hero_library/abstract/
+    - assets/images/hero_library/Celebration_Achievement/
+    - assets/images/hero_library/community/
+    - assets/images/hero_library/impact/
+    - assets/images/hero_library/nature/
+
+    # Onboarding
+    - assets/images/onboarding/
+
+    # Personal Workspaces
+    - assets/images/workspaces/

@@ -41,6 +41,7 @@ class GroupService {
     required String name,
     required String slug,
     String? description,
+    String color = '#5B4BC4',
   }) async {
     final row = await _supabase
         .from('groups')
@@ -49,6 +50,7 @@ class GroupService {
           'name': name,
           'slug': slug,
           'description': description,
+          'color': color,
         })
         .select()
         .single();
@@ -93,6 +95,7 @@ class GroupService {
       organizationId: row['organization_id'] as String,
       name: row['name'] as String,
       description: row['description'] as String?,
+      color: row['color'] as String? ?? '#5B4BC4',
       isActive: row['status'] == 'active' && row['archived_at'] == null,
     );
   }

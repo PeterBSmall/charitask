@@ -102,7 +102,7 @@ class CTTopNavigation extends StatelessWidget {
               // ----------------------------------------------------------
               SizedBox(
                 width: veryCompact
-                    ? 140
+                    ? 136
                     : compact
                     ? 180
                     : 320,

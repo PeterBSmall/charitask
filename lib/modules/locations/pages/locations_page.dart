@@ -11,6 +11,7 @@ import 'package:charitask/modules/people/data/services/people_service.dart';
 import 'package:charitask/modules/locations/widgets/locations_hero.dart';
 import 'package:charitask/modules/locations/widgets/locations_kpi_row.dart';
 import 'package:charitask/modules/locations/widgets/locations_section.dart';
+import 'package:charitask/modules/locations/widgets/location_filters.dart';
 
 class LocationsPage extends StatefulWidget {
   final String organizationId;
@@ -34,6 +35,10 @@ class _LocationsPageState extends State<LocationsPage> {
   String? _errorMessage;
   List<Location> _locations = [];
   Map<String, int> _peopleCounts = {};
+  String _searchQuery = '';
+  String? _selectedType;
+  String? _selectedStatus;
+  String? _selectedState;
 
   @override
   void initState() {
@@ -91,6 +96,46 @@ class _LocationsPageState extends State<LocationsPage> {
         _isLoading = false;
       });
     }
+  }
+
+  List<Location> get _filteredLocations {
+    final query = _searchQuery.trim().toLowerCase();
+
+    return _locations.where((location) {
+      final searchable = [
+        location.name,
+        location.addressLine1,
+        location.addressLine2,
+        location.city,
+        location.state,
+        location.postalCode,
+      ].whereType<String>().join(' ').toLowerCase();
+
+      final matchesSearch = query.isEmpty || searchable.contains(query);
+
+      final matchesType =
+          _selectedType == null || location.locationType == _selectedType;
+
+      final matchesStatus =
+          _selectedStatus == null ||
+          (_selectedStatus == 'Active'
+              ? location.isActive
+              : !location.isActive);
+
+      final matchesState =
+          _selectedState == null || location.state == _selectedState;
+
+      return matchesSearch && matchesType && matchesStatus && matchesState;
+    }).toList();
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _searchQuery = '';
+      _selectedType = null;
+      _selectedStatus = null;
+      _selectedState = null;
+    });
   }
 
   void _openAddLocation() {
@@ -151,6 +196,8 @@ class _LocationsPageState extends State<LocationsPage> {
   }
 
   Widget _buildLocationsDashboard() {
+    final filteredLocations = _filteredLocations;
+
     return ListView(
       padding: EdgeInsets.zero,
       children: [
@@ -165,8 +212,32 @@ class _LocationsPageState extends State<LocationsPage> {
         const SizedBox(height: AppSpacing.lg),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: LocationsSection(
+          child: LocationFilters(
             locations: _locations,
+            searchQuery: _searchQuery,
+            selectedType: _selectedType,
+            selectedStatus: _selectedStatus,
+            selectedState: _selectedState,
+            onSearchChanged: (value) {
+              setState(() => _searchQuery = value);
+            },
+            onTypeChanged: (value) {
+              setState(() => _selectedType = value);
+            },
+            onStatusChanged: (value) {
+              setState(() => _selectedStatus = value);
+            },
+            onStateChanged: (value) {
+              setState(() => _selectedState = value);
+            },
+            onClear: _clearFilters,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: LocationsSection(
+            locations: filteredLocations,
             peopleCounts: _peopleCounts,
             onLocationTap: _openLocation,
           ),
