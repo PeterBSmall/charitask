@@ -22,47 +22,58 @@ class GroupsKpiRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 950;
+        final width = constraints.maxWidth;
 
-        if (compact) {
-          return _buildCompact();
-        }
+        final columns = width >= 950
+            ? 5
+            : width >= 700
+            ? 3
+            : width >= 460
+            ? 2
+            : 1;
 
-        return Row(
+        const spacing = 12.0;
+        final totalSpacing = spacing * (columns - 1);
+        final cardWidth = (width - totalSpacing) / columns;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
           children: [
-            Expanded(
+            SizedBox(
+              width: cardWidth,
               child: GroupsKpiCard(
                 label: 'Active Groups',
                 value: activeGroups.toString(),
                 icon: Icons.groups_outlined,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
+            SizedBox(
+              width: cardWidth,
               child: GroupsKpiCard(
                 label: 'Staff Groups',
                 value: staffGroups.toString(),
                 icon: Icons.badge_outlined,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
+            SizedBox(
+              width: cardWidth,
               child: GroupsKpiCard(
                 label: 'Volunteer Groups',
                 value: volunteerGroups.toString(),
                 icon: Icons.volunteer_activism_outlined,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
+            SizedBox(
+              width: cardWidth,
               child: GroupsKpiCard(
                 label: 'Program Groups',
                 value: programGroups.toString(),
                 icon: Icons.account_tree_outlined,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
+            SizedBox(
+              width: cardWidth,
               child: GroupsKpiCard(
                 label: 'Average Members',
                 value: averageMembers.toStringAsFixed(1),
@@ -72,55 +83,6 @@ class GroupsKpiRow extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildCompact() {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        SizedBox(
-          width: 210,
-          child: GroupsKpiCard(
-            label: 'Active Groups',
-            value: activeGroups.toString(),
-            icon: Icons.groups_outlined,
-          ),
-        ),
-        SizedBox(
-          width: 210,
-          child: GroupsKpiCard(
-            label: 'Staff Groups',
-            value: staffGroups.toString(),
-            icon: Icons.badge_outlined,
-          ),
-        ),
-        SizedBox(
-          width: 210,
-          child: GroupsKpiCard(
-            label: 'Volunteer Groups',
-            value: volunteerGroups.toString(),
-            icon: Icons.volunteer_activism_outlined,
-          ),
-        ),
-        SizedBox(
-          width: 210,
-          child: GroupsKpiCard(
-            label: 'Program Groups',
-            value: programGroups.toString(),
-            icon: Icons.account_tree_outlined,
-          ),
-        ),
-        SizedBox(
-          width: 210,
-          child: GroupsKpiCard(
-            label: 'Average Members',
-            value: averageMembers.toStringAsFixed(1),
-            icon: Icons.people_outline,
-          ),
-        ),
-      ],
     );
   }
 }

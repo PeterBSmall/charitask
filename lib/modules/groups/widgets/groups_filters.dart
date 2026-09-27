@@ -46,13 +46,18 @@ class GroupsFilters extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 900;
+        final width = constraints.maxWidth;
 
-        if (compact) {
-          return _buildCompact();
+        // The wide layout needs enough room for the search field plus
+        // all fixed-width controls. Switch to the wrapped layout early
+        // so the search field never becomes unreasonably narrow.
+        final wide = width >= 1100;
+
+        if (wide) {
+          return _buildWide();
         }
 
-        return _buildWide();
+        return _buildCompact(width);
       },
     );
   }
@@ -125,66 +130,74 @@ class GroupsFilters extends StatelessWidget {
     );
   }
 
-  Widget _buildCompact() {
+  Widget _buildCompact(double width) {
+    final horizontalPadding = width < 500 ? 10.0 : 16.0;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
+      padding: EdgeInsets.fromLTRB(horizontalPadding, 4, horizontalPadding, 18),
       child: Column(
         children: [
-          _SearchField(
-            controller: searchController,
-            onChanged: onSearchChanged,
+          SizedBox(
+            width: double.infinity,
+            child: _SearchField(
+              controller: searchController,
+              onChanged: onSearchChanged,
+            ),
           ),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _GroupTypeDropdown(
-                value: selectedGroupType,
-                onChanged: onGroupTypeChanged,
-              ),
-              _FilterDropdown(
-                value: selectedOwner,
-                hint: 'Owner',
-                items: const [
-                  'Organization',
-                  'Program',
-                  'Location',
-                  'Event',
-                  'Project',
-                ],
-                onChanged: onOwnerChanged,
-              ),
-              _FilterDropdown(
-                value: selectedStatus,
-                hint: 'Status',
-                items: const ['Active', 'Inactive'],
-                onChanged: onStatusChanged,
-              ),
-              _FilterDropdown(
-                value: selectedLocation,
-                hint: 'Location',
-                items: const [],
-                onChanged: onLocationChanged,
-              ),
-              _FilterDropdown(
-                value: selectedSort,
-                hint: 'Sort',
-                items: const [
-                  'Name',
-                  'Newest',
-                  'Oldest',
-                  'Most Members',
-                  'Fewest Members',
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    onSortChanged(value);
-                  }
-                },
-              ),
-              _ViewToggle(isGridView: isGridView, onChanged: onViewChanged),
-            ],
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _GroupTypeDropdown(
+                  value: selectedGroupType,
+                  onChanged: onGroupTypeChanged,
+                ),
+                _FilterDropdown(
+                  value: selectedOwner,
+                  hint: 'Owner',
+                  items: const [
+                    'Organization',
+                    'Program',
+                    'Location',
+                    'Event',
+                    'Project',
+                  ],
+                  onChanged: onOwnerChanged,
+                ),
+                _FilterDropdown(
+                  value: selectedStatus,
+                  hint: 'Status',
+                  items: const ['Active', 'Inactive'],
+                  onChanged: onStatusChanged,
+                ),
+                _FilterDropdown(
+                  value: selectedLocation,
+                  hint: 'Location',
+                  items: const [],
+                  onChanged: onLocationChanged,
+                ),
+                _FilterDropdown(
+                  value: selectedSort,
+                  hint: 'Sort',
+                  items: const [
+                    'Name',
+                    'Newest',
+                    'Oldest',
+                    'Most Members',
+                    'Fewest Members',
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      onSortChanged(value);
+                    }
+                  },
+                ),
+                _ViewToggle(isGridView: isGridView, onChanged: onViewChanged),
+              ],
+            ),
           ),
         ],
       ),
@@ -270,7 +283,7 @@ class _GroupTypeDropdown extends StatelessWidget {
             ...GroupType.values.map(
               (type) => DropdownMenuItem<GroupType?>(
                 value: type,
-                child: Text(type.label),
+                child: Text(type.label, overflow: TextOverflow.ellipsis),
               ),
             ),
           ],
@@ -310,10 +323,15 @@ class _FilterDropdown extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           items: [
-            DropdownMenuItem<String>(value: null, child: Text('All $hint')),
+            DropdownMenuItem<String>(
+              value: null,
+              child: Text('All $hint', overflow: TextOverflow.ellipsis),
+            ),
             ...items.map(
-              (item) =>
-                  DropdownMenuItem<String>(value: item, child: Text(item)),
+              (item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(item, overflow: TextOverflow.ellipsis),
+              ),
             ),
           ],
           onChanged: onChanged,

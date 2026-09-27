@@ -26,11 +26,11 @@ class CTTopNavigation extends StatelessWidget {
           return _buildUltraCompactNavigation();
         }
 
-        if (width < 800) {
+        if (width < 900) {
           return _buildCompactNavigation();
         }
 
-        if (width < 1100) {
+        if (width < 1200) {
           return _buildMediumNavigation();
         }
 
@@ -179,7 +179,6 @@ class CTTopNavigation extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: List.generate(
           _items.length,
           (index) => _buildNavItem(
@@ -206,7 +205,7 @@ class CTTopNavigation extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         height: height,
-        padding: EdgeInsets.symmetric(horizontal: compact ? 11 : 16),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 14 : 18),
         alignment: Alignment.center,
         child: Stack(
           alignment: Alignment.center,
@@ -214,7 +213,7 @@ class CTTopNavigation extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: compact ? 14 : 15,
+                fontSize: compact ? 13 : 15,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: selected
                     ? const Color(0xFF5B4BC4)
@@ -225,7 +224,7 @@ class CTTopNavigation extends StatelessWidget {
               Positioned(
                 bottom: 0,
                 child: Container(
-                  width: compact ? 48 : 58,
+                  width: compact ? 44 : 58,
                   height: 3,
                   decoration: BoxDecoration(
                     color: const Color(0xFF5B4BC4),

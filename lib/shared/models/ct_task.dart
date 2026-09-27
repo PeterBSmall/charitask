@@ -56,8 +56,7 @@ class CTTask {
     );
   }
 
-  bool get isOpen =>
-      status == 'open' || status == 'in_progress';
+  bool get isOpen => status == 'open' || status == 'in_progress';
 
   bool get isCompleted => status == 'completed';
 

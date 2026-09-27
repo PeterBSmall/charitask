@@ -12,15 +12,18 @@ import 'package:charitask/modules/locations/widgets/add_location_preview.dart';
 import 'package:charitask/modules/locations/widgets/add_location_hero.dart';
 import 'package:charitask/modules/locations/data/services/location_operating_hours_service.dart';
 import 'package:charitask/shared/widgets/operating_hours/ct_operating_hours_card.dart';
+import 'package:charitask/modules/foundation/domain/models/location.dart';
 
 class AddLocationPage extends StatefulWidget {
   final String organizationId;
   final VoidCallback? onCancel;
+  final ValueChanged<Location>? onCreated;
 
   const AddLocationPage({
     super.key,
     required this.organizationId,
     this.onCancel,
+    this.onCreated,
   });
 
   @override
@@ -242,6 +245,11 @@ class _AddLocationPageState extends State<AddLocationPage> {
         );
       }
       if (!mounted) return;
+
+      if (widget.onCreated != null) {
+        widget.onCreated!(location);
+        return;
+      }
 
       widget.onCancel?.call();
     } catch (e) {

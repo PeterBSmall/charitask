@@ -9,6 +9,7 @@ import 'package:charitask/modules/groups/widgets/groups_filters.dart';
 import 'package:charitask/modules/groups/widgets/groups_hero.dart';
 import 'package:charitask/modules/groups/widgets/groups_kpi_row.dart';
 import 'package:charitask/modules/groups/widgets/groups_view_toggle.dart';
+import 'package:charitask/modules/groups/pages/create_group_page.dart';
 
 class GroupsPage extends StatefulWidget {
   final String organizationId;
@@ -351,10 +352,7 @@ class _GroupsPageState extends State<GroupsPage> {
     final groups = _filteredGroups;
 
     if (groups.isEmpty) {
-      return GroupsEmptyState(
-        isFiltered: _hasActiveFilters,
-        onAddGroup: _handleAddGroup,
-      );
+      return GroupsEmptyState(isFiltered: _hasActiveFilters);
     }
 
     if (_isGridView) {
@@ -500,8 +498,10 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   void _handleAddGroup() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Group will be connected next.')),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CreateGroupPage(organizationId: widget.organizationId),
+      ),
     );
   }
 

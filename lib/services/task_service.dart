@@ -18,9 +18,7 @@ class TaskService {
         .isFilter('archived_at', null)
         .order('due_at', ascending: true);
 
-    return (response as List)
-        .map((row) => CTTask.fromMap(row))
-        .toList();
+    return (response as List).map((row) => CTTask.fromMap(row)).toList();
   }
 
   Future<List<CTTask>> getTasksAssignedToPerson({
@@ -34,9 +32,7 @@ class TaskService {
         .inFilter('status', ['open', 'in_progress'])
         .order('due_at', ascending: true);
 
-    return (response as List)
-        .map((row) => CTTask.fromMap(row))
-        .toList();
+    return (response as List).map((row) => CTTask.fromMap(row)).toList();
   }
 
   Future<List<CTTask>> getTodayAndOverdueTasks({
@@ -55,9 +51,7 @@ class TaskService {
         .lt('due_at', startOfTomorrow.toIso8601String())
         .order('due_at', ascending: true);
 
-    return (response as List)
-        .map((row) => CTTask.fromMap(row))
-        .toList();
+    return (response as List).map((row) => CTTask.fromMap(row)).toList();
   }
 
   Future<List<CTTask>> getCurrentPersonTodayAndOverdueTasks() async {

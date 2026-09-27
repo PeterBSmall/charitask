@@ -29,7 +29,7 @@ class GroupsHero extends StatelessWidget {
                   top: -35,
                   child: _HeroPeopleDecoration(),
                 ),
-              _buildContent(narrow: narrow),
+              _buildContent(narrow: narrow, width: constraints.maxWidth),
             ],
           );
         },
@@ -37,7 +37,9 @@ class GroupsHero extends StatelessWidget {
     );
   }
 
-  Widget _buildContent({required bool narrow}) {
+  Widget _buildContent({required bool narrow, required double width}) {
+    final veryNarrow = width < 400;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -55,10 +57,14 @@ class GroupsHero extends StatelessWidget {
         Text(
           'Groups',
           maxLines: 1,
-          softWrap: false,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white,
-            fontSize: narrow ? 34 : 42,
+            fontSize: veryNarrow
+                ? 30
+                : narrow
+                ? 34
+                : 42,
             height: 1,
             fontWeight: FontWeight.w800,
           ),
@@ -66,13 +72,19 @@ class GroupsHero extends StatelessWidget {
 
         const SizedBox(height: 10),
 
+        // Allow the supporting headline to grow vertically on narrow
+        // layouts instead of truncating it with an ellipsis.
         Text(
           'Connect people around shared purpose.',
-          maxLines: narrow ? 2 : 1,
-          overflow: TextOverflow.ellipsis,
+          softWrap: true,
           style: TextStyle(
             color: Colors.white,
-            fontSize: narrow ? 17 : 20,
+            fontSize: veryNarrow
+                ? 16
+                : narrow
+                ? 17
+                : 20,
+            height: 1.25,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -83,8 +95,7 @@ class GroupsHero extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: narrow ? 430 : 560),
           child: Text(
             'Groups help you organize people, assign roles, and bring teams together around programs, locations, and initiatives. Build stronger connections and greater impact.',
-            maxLines: narrow ? 4 : null,
-            overflow: narrow ? TextOverflow.ellipsis : null,
+            softWrap: true,
             style: TextStyle(
               color: Colors.white,
               fontSize: narrow ? 13 : 14,
