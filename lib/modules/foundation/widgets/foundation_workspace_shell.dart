@@ -22,6 +22,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
   final Widget security;
   final Widget analytics;
   final Widget notes;
+  final Widget invitations;
 
   const FoundationWorkspaceShell({
     super.key,
@@ -36,6 +37,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
     required this.security,
     required this.analytics,
     required this.notes,
+    required this.invitations,
   });
 
   @override
@@ -213,6 +215,9 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
 
       case 8:
         return const SizedBox.shrink();
+
+      case 9:
+        return widget.invitations;
 
       default:
         return widget.dashboardBuilder(_navigateTo);

@@ -6,6 +6,7 @@ import 'package:charitask/modules/groups/widgets/create_group/create_group_heade
 import 'package:charitask/modules/groups/widgets/create_group/create_group_sidebar.dart';
 import 'package:charitask/modules/groups/widgets/create_group/create_group_stepper.dart';
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_definition_step.dart';
+import 'package:charitask/modules/groups/widgets/create_group/steps/group_membership_step.dart';
 
 class CreateGroupPage extends StatefulWidget {
   final String organizationId;
@@ -64,7 +65,17 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         return GroupDefinitionStep(
           draft: _draft,
           organizationId: widget.organizationId,
+          onChanged: () {
+            setState(() {});
+          },
         );
+
+      case 1:
+        return GroupMembershipStep(
+          draft: _draft,
+          organizationId: widget.organizationId,
+        );
+
       default:
         return _buildComingSoonStep(_steps[_currentStep]);
     }

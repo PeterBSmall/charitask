@@ -8,11 +8,13 @@ import 'package:charitask/modules/locations/pages/add_location_page.dart';
 class GroupDefinitionStep extends StatefulWidget {
   final CreateGroupDraft draft;
   final String organizationId;
+  final VoidCallback? onChanged;
 
   const GroupDefinitionStep({
     super.key,
     required this.draft,
     required this.organizationId,
+    this.onChanged,
   });
 
   @override
@@ -130,6 +132,8 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
         setState(() {
           widget.draft.setGroupType(option);
         });
+
+        widget.onChanged?.call();
       },
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
@@ -213,6 +217,7 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
             controller: _nameController,
             onChanged: (_) {
               setState(_updateDraft);
+              widget.onChanged?.call();
             },
             decoration: _inputDecoration(
               label: 'Group Name',
@@ -225,6 +230,7 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
             controller: _descriptionController,
             onChanged: (_) {
               setState(_updateDraft);
+              widget.onChanged?.call();
             },
             minLines: 3,
             maxLines: 5,

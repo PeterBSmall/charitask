@@ -141,6 +141,12 @@ class FoundationSidebar extends StatelessWidget {
               selected: selectedIndex == 8,
               onTap: () => onSelected(8),
             ),
+            CTTile(
+              icon: Icons.mail_outline_rounded,
+              label: 'Invitations',
+              selected: selectedIndex == 9,
+              onTap: () => onSelected(9),
+            ),
 
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -332,6 +338,12 @@ class FoundationSidebar extends StatelessWidget {
                       tooltip: 'Settings',
                       selected: selectedIndex == 8,
                       onTap: () => onSelected(8),
+                    ),
+                    _buildCollapsedIcon(
+                      icon: Icons.mail_outline_rounded,
+                      tooltip: 'Invitations',
+                      selected: selectedIndex == 9,
+                      onTap: () => onSelected(9),
                     ),
                   ],
                 ),

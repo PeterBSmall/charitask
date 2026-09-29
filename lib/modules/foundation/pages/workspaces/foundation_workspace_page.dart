@@ -12,7 +12,7 @@ import 'package:charitask/modules/groups/pages/groups_page.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
 import 'package:charitask/shared/models/ct_metric.dart';
-
+import 'package:charitask/modules/invitations/pages/invitations_page.dart';
 import 'package:charitask/shared/widgets/workspace/ct_workspace_metrics.dart';
 import 'package:charitask/app/app_router.dart';
 
@@ -61,6 +61,11 @@ class FoundationWorkspacePage extends StatelessWidget {
         title: 'Notes',
         subtitle: 'Capture important information for your organization.',
         icon: Icons.sticky_note_2_outlined,
+      ),
+
+      invitations: InvitationsPage(
+        organizationId: organizationId,
+        onCreateInvitation: () => AppRouter.goToCreateInvitation(context),
       ),
     );
   }

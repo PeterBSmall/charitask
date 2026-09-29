@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/people/pages/people_page.dart';
+import 'package:charitask/modules/invitations/widgets/create_invitation/create_invitation_page.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:charitask/domain/organization/current_organization_context.dart';
@@ -66,6 +67,27 @@ class AppRouter {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => PeoplePage(organizationId: organizationId),
+      ),
+    );
+  }
+
+  static Future<void> goToCreateInvitation(BuildContext context) async {
+    final organizationId = await CurrentOrganizationContext(
+      Supabase.instance.client,
+    ).getOrganizationId();
+
+    if (!context.mounted) return;
+
+    if (organizationId == null || organizationId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to load your organization.')),
+      );
+      return;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CreateInvitationPage(organizationId: organizationId),
       ),
     );
   }
