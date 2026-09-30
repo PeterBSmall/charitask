@@ -22,9 +22,12 @@ class PeoplePage extends StatefulWidget {
 class _PeoplePageState extends State<PeoplePage> {
   late final PeopleRepository _repository;
 
+  final TextEditingController _searchController = TextEditingController();
+
   List<Map<String, dynamic>> _people = [];
   bool _isLoading = true;
   String? _errorMessage;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -33,6 +36,12 @@ class _PeoplePageState extends State<PeoplePage> {
     _repository = PeopleRepositoryImpl(PeopleService(Supabase.instance.client));
 
     _loadPeople();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadPeople() async {
@@ -62,6 +71,57 @@ class _PeoplePageState extends State<PeoplePage> {
     }
   }
 
+  List<Map<String, dynamic>> get _filteredPeople {
+    final query = _searchQuery.trim().toLowerCase();
+
+    final filtered = _people.where((person) {
+      if (query.isEmpty) {
+        return true;
+      }
+
+      final searchableValues = [
+        person['first_name'],
+        person['last_name'],
+        person['preferred_name'],
+        person['email'],
+        person['phone'],
+        person['role'],
+        person['groups'],
+        person['locations'],
+      ];
+
+      return searchableValues.any(
+        (value) =>
+            value != null && value.toString().toLowerCase().contains(query),
+      );
+    }).toList();
+
+    filtered.sort((a, b) {
+      final aPreferred = a['preferred_name']?.toString().trim();
+      final aFirst = a['first_name']?.toString().trim() ?? '';
+      final aLast = a['last_name']?.toString().trim() ?? '';
+
+      final bPreferred = b['preferred_name']?.toString().trim();
+      final bFirst = b['first_name']?.toString().trim() ?? '';
+      final bLast = b['last_name']?.toString().trim() ?? '';
+
+      final aFirstName = aPreferred != null && aPreferred.isNotEmpty
+          ? aPreferred
+          : aFirst;
+
+      final bFirstName = bPreferred != null && bPreferred.isNotEmpty
+          ? bPreferred
+          : bFirst;
+
+      final aName = '$aFirstName $aLast'.trim().toLowerCase();
+      final bName = '$bFirstName $bLast'.trim().toLowerCase();
+
+      return aName.compareTo(bName);
+    });
+
+    return filtered;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -85,17 +145,18 @@ class _PeoplePageState extends State<PeoplePage> {
                 }
               },
             ),
-
             const SizedBox(height: 24),
-
-            const PeopleToolbar(),
-
+            PeopleToolbar(
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
             const SizedBox(height: 24),
-
             PeopleMetrics(people: _people),
-
             const SizedBox(height: 24),
-
             if (_isLoading)
               const SizedBox(
                 height: 420,
@@ -125,8 +186,7 @@ class _PeoplePageState extends State<PeoplePage> {
                 ),
               )
             else
-              PeopleTable(people: _people),
-
+              PeopleTable(people: _filteredPeople),
             const SizedBox(height: 32),
           ],
         ),
