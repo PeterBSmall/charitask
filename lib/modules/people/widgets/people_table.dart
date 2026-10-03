@@ -80,8 +80,9 @@ class _PeopleTableState extends State<PeopleTable> {
                   const Divider(height: 1),
 
                   if (widget.people.isEmpty)
-                    const Expanded(
-                      child: Center(
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 80),
                         child: Text(
                           'No people found.',
                           style: TextStyle(

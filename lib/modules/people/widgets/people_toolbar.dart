@@ -29,15 +29,16 @@ class PeopleToolbar extends StatelessWidget {
                 onChanged: onSearchChanged,
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  const _ToolbarButton(
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: const [
+                  _ToolbarButton(
                     icon: Icons.filter_list,
                     label: 'Filters',
                     showChevron: true,
                   ),
-                  const SizedBox(width: 12),
-                  const _ToolbarButton(
+                  _ToolbarButton(
                     icon: Icons.view_column_outlined,
                     label: 'Columns',
                     showChevron: true,
@@ -92,7 +93,7 @@ class _ToolbarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),

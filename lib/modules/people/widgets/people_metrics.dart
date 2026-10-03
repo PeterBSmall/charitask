@@ -53,12 +53,17 @@ class PeopleMetrics extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < 900;
-        final columns = isNarrow ? 2 : 4;
         const spacing = 16.0;
 
-        final cardWidth =
-            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+        final columns = constraints.maxWidth >= 900
+            ? 4
+            : constraints.maxWidth >= 600
+            ? 2
+            : 1;
+
+        final cardWidth = columns == 1
+            ? constraints.maxWidth
+            : (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
         return Wrap(
           spacing: spacing,

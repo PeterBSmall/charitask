@@ -140,11 +140,12 @@ class AddPersonStoryPanel extends StatelessWidget {
   }
 
   Widget _buildCompactContent() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 500;
+
+        if (isNarrow) {
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -156,9 +157,7 @@ class AddPersonStoryPanel extends StatelessWidget {
                   color: Color(0xFF2F3A4A),
                 ),
               ),
-
               const SizedBox(height: 2),
-
               Text(
                 highlightedText,
                 style: const TextStyle(
@@ -168,12 +167,10 @@ class AddPersonStoryPanel extends StatelessWidget {
                   color: Color(0xFF5B3FC4),
                 ),
               ),
-
               const SizedBox(height: 10),
-
               Text(
                 description,
-                maxLines: 3,
+                maxLines: 4,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 14,
@@ -181,14 +178,63 @@ class AddPersonStoryPanel extends StatelessWidget {
                   color: Color(0xFF5F6B7A),
                 ),
               ),
+              const SizedBox(height: 20),
+              Center(
+                child: SizedBox(
+                  width: 150,
+                  height: 130,
+                  child: _buildCompactGraphic(),
+                ),
+              ),
             ],
-          ),
-        ),
+          );
+        }
 
-        const SizedBox(width: 24),
-
-        SizedBox(width: 150, height: 130, child: _buildCompactGraphic()),
-      ],
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                      color: Color(0xFF2F3A4A),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    highlightedText,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                      color: Color(0xFF5B3FC4),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.35,
+                      color: Color(0xFF5F6B7A),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 24),
+            SizedBox(width: 150, height: 130, child: _buildCompactGraphic()),
+          ],
+        );
+      },
     );
   }
 

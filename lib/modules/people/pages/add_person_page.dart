@@ -7,7 +7,6 @@ import 'package:charitask/modules/people/widgets/add_person/add_person_stepper.d
 import 'package:charitask/modules/people/widgets/add_person/add_person_validation.dart';
 import 'package:charitask/modules/people/widgets/add_person/assignments_step.dart';
 import 'package:charitask/modules/people/widgets/add_person/basic_information_step.dart';
-
 import 'package:charitask/modules/people/widgets/add_person/review_create_step.dart';
 import 'package:charitask/modules/people/widgets/add_person/add_person_navigation.dart';
 
@@ -16,6 +15,10 @@ import 'package:charitask/shared/widgets/workspace_canvas.dart';
 import 'package:charitask/modules/people/data/repositories/people_repository_impl.dart';
 import 'package:charitask/modules/people/data/services/people_service.dart';
 import 'package:charitask/modules/people/domain/repositories/people_repository.dart';
+
+import 'package:charitask/modules/foundation/data/services/functional_role_service.dart';
+import 'package:charitask/modules/foundation/domain/models/functional_role.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddPersonPage extends StatefulWidget {
@@ -29,6 +32,7 @@ class AddPersonPage extends StatefulWidget {
 
 class _AddPersonPageState extends State<AddPersonPage> {
   late final PeopleRepository _repository;
+  late final FunctionalRoleService _functionalRoleService;
 
   int _currentStep = 0;
 
@@ -51,6 +55,8 @@ class _AddPersonPageState extends State<AddPersonPage> {
   final _jobTitleController = TextEditingController();
   String? _preferredContactMethod;
 
+  List<FunctionalRole> _selectedFunctionalRoles = [];
+
   static const List<String> _steps = [
     'Organizational Role',
     'Personal Details',
@@ -64,6 +70,8 @@ class _AddPersonPageState extends State<AddPersonPage> {
     super.initState();
 
     _repository = PeopleRepositoryImpl(PeopleService(Supabase.instance.client));
+
+    _functionalRoleService = FunctionalRoleService();
 
     _firstNameController.addListener(_onFormChanged);
     _lastNameController.addListener(_onFormChanged);
@@ -197,27 +205,39 @@ class _AddPersonPageState extends State<AddPersonPage> {
                 ),
               ],
             ),
-            child: Column(
-              children: [
-                AddPersonHeader(
-                  onCancel: () {
-                    Navigator.of(context).maybePop();
-                  },
-                  onSaveDraft: () {
-                    // Save draft functionality will be added later.
-                  },
-                ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isShort = constraints.maxHeight < 600;
 
-                const Divider(height: 1),
+                final children = [
+                  AddPersonHeader(
+                    onCancel: () {
+                      Navigator.of(context).maybePop();
+                    },
+                    onSaveDraft: () {
+                      // Save draft functionality will be added later.
+                    },
+                  ),
+                  const Divider(height: 1),
+                  AddPersonStepper(currentStep: _currentStep, steps: _steps),
+                  if (!isShort) Expanded(child: _buildStepContent()),
+                  if (isShort)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: _buildStepContent(),
+                    ),
+                  const Divider(height: 1),
+                  _buildNavigation(),
+                ];
 
-                AddPersonStepper(currentStep: _currentStep, steps: _steps),
+                if (isShort) {
+                  return SingleChildScrollView(
+                    child: Column(children: children),
+                  );
+                }
 
-                Expanded(child: _buildStepContent()),
-
-                const Divider(height: 1),
-
-                _buildNavigation(),
-              ],
+                return Column(children: children);
+              },
             ),
           ),
         ),
@@ -265,7 +285,15 @@ class _AddPersonPageState extends State<AddPersonPage> {
         );
 
       case 2:
-        return const AssignmentsStep();
+        return AssignmentsStep(
+          organizationId: widget.organizationId,
+          selectedFunctionalRoles: _selectedFunctionalRoles,
+          onFunctionalRolesChanged: (roles) {
+            setState(() {
+              _selectedFunctionalRoles = roles;
+            });
+          },
+        );
 
       case 3:
         return AccessStep(
@@ -311,6 +339,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
     _preferredNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
+
     _jobTitleController.dispose();
 
     _dateOfBirthController.dispose();
@@ -353,6 +382,14 @@ class _AddPersonPageState extends State<AddPersonPage> {
         personId: personId,
         status: membershipStatus,
       );
+
+      for (final role in _selectedFunctionalRoles) {
+        await _functionalRoleService.createAssignment(
+          organizationId: widget.organizationId,
+          personId: personId,
+          functionalRoleId: role.id,
+        );
+      }
 
       if (!mounted) return;
 
