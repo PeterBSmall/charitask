@@ -9,6 +9,7 @@ import 'package:charitask/shared/workspaces/models/ct_workspace.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:charitask/modules/workspaces/dashboard/pages/workspace_dashboard_page.dart';
+import 'package:charitask/modules/foundation/pages/functional_roles_page.dart';
 
 class FoundationWorkspaceShell extends StatefulWidget {
   final Widget Function(ValueChanged<int> onNavigate) dashboardBuilder;
@@ -205,18 +206,21 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
         return widget.groups;
 
       case 5:
-        return widget.security;
+        return FunctionalRolesPage(organizationId: widget.organizationId);
 
       case 6:
-        return widget.analytics;
+        return widget.security;
 
       case 7:
-        return widget.notes;
+        return widget.analytics;
 
       case 8:
-        return const SizedBox.shrink();
+        return widget.notes;
 
       case 9:
+        return const SizedBox.shrink();
+
+      case 10:
         return widget.invitations;
 
       default:

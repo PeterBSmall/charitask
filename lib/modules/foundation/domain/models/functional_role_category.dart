@@ -21,6 +21,11 @@ class FunctionalRoleCategory {
   /// Whether the category is active.
   final bool isActive;
 
+  /// Optional link to the master functional role catalog.
+  ///
+  /// Null means this is a custom organization category.
+  final String? catalogCategoryId;
+
   const FunctionalRoleCategory({
     required this.id,
     required this.organizationId,
@@ -29,6 +34,7 @@ class FunctionalRoleCategory {
     this.description,
     this.sortOrder = 0,
     this.isActive = true,
+    this.catalogCategoryId,
   });
 
   factory FunctionalRoleCategory.fromMap(Map<String, dynamic> map) {
@@ -40,8 +46,12 @@ class FunctionalRoleCategory {
       description: map['description'] as String?,
       sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
       isActive: map['status'] == 'active',
+      catalogCategoryId: map['catalog_category_id'] as String?,
     );
   }
+
+  /// Whether this category originated from the master catalog.
+  bool get isImported => catalogCategoryId != null;
 
   FunctionalRoleCategory copyWith({
     String? id,
@@ -51,6 +61,7 @@ class FunctionalRoleCategory {
     String? description,
     int? sortOrder,
     bool? isActive,
+    String? catalogCategoryId,
   }) {
     return FunctionalRoleCategory(
       id: id ?? this.id,
@@ -60,6 +71,7 @@ class FunctionalRoleCategory {
       description: description ?? this.description,
       sortOrder: sortOrder ?? this.sortOrder,
       isActive: isActive ?? this.isActive,
+      catalogCategoryId: catalogCategoryId ?? this.catalogCategoryId,
     );
   }
 }

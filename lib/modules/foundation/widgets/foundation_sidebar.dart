@@ -6,6 +6,7 @@ import 'package:charitask/shared/widgets/navigation/ct_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'foundation_workspace_switcher.dart';
 import 'foundation_sidebar_search.dart';
+import 'package:flutter/gestures.dart';
 
 class FoundationSidebar extends StatelessWidget {
   final int selectedIndex;
@@ -38,132 +39,151 @@ class FoundationSidebar extends StatelessWidget {
 
     return CTSidebar(
       header: _buildHeader(),
-      child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const SizedBox(height: 12),
-            const SizedBox(height: 12),
+      child: Scrollbar(
+        thumbVisibility: true,
+        interactive: true,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            dragDevices: {
+              PointerDeviceKind.touch,
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.trackpad,
+              PointerDeviceKind.stylus,
+            },
+          ),
+          child: ListView(
+            primary: true,
+            padding: EdgeInsets.zero,
+            children: [
+              const SizedBox(height: 12),
 
-            FoundationWorkspaceSwitcher(
-              organizationId: organizationId,
-              onPersonalHome: onPersonalHome,
-              onWorkspaceSelected: onWorkspaceSelected,
-            ),
+              FoundationWorkspaceSwitcher(
+                organizationId: organizationId,
+                onPersonalHome: onPersonalHome,
+                onWorkspaceSelected: onWorkspaceSelected,
+              ),
 
-            const SizedBox(height: 6),
+              const SizedBox(height: 6),
 
-            _buildCreateWorkspaceButton(),
+              _buildCreateWorkspaceButton(),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            const FoundationSidebarSearch(),
+              const FoundationSidebarSearch(),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            _buildSectionLabel('Main'),
+              _buildSectionLabel('Main'),
 
-            CTTile(
-              icon: Icons.grid_view_rounded,
-              label: 'Dashboard',
-              selected: selectedIndex == 0,
-              onTap: () => onSelected(0),
-            ),
+              CTTile(
+                icon: Icons.grid_view_rounded,
+                label: 'Dashboard',
+                selected: selectedIndex == 0,
+                onTap: () => onSelected(0),
+              ),
 
-            CTTile(
-              icon: Icons.account_balance_outlined,
-              label: 'Organization',
-              selected: selectedIndex == 1,
-              onTap: () => onSelected(1),
-            ),
+              CTTile(
+                icon: Icons.account_balance_outlined,
+                label: 'Organization',
+                selected: selectedIndex == 1,
+                onTap: () => onSelected(1),
+              ),
 
-            CTTile(
-              icon: Icons.people_outline_rounded,
-              label: 'People',
-              selected: selectedIndex == 2,
-              onTap: () => onSelected(2),
-            ),
+              CTTile(
+                icon: Icons.people_outline_rounded,
+                label: 'People',
+                selected: selectedIndex == 2,
+                onTap: () => onSelected(2),
+              ),
 
-            CTTile(
-              icon: Icons.location_on_outlined,
-              label: 'Locations',
-              selected: selectedIndex == 3,
-              onTap: () => onSelected(3),
-            ),
+              CTTile(
+                icon: Icons.location_on_outlined,
+                label: 'Locations',
+                selected: selectedIndex == 3,
+                onTap: () => onSelected(3),
+              ),
 
-            CTTile(
-              icon: Icons.group_outlined,
-              label: 'Groups',
-              selected: selectedIndex == 4,
-              onTap: () => onSelected(4),
-            ),
+              CTTile(
+                icon: Icons.group_outlined,
+                label: 'Groups',
+                selected: selectedIndex == 4,
+                onTap: () => onSelected(4),
+              ),
 
-            CTTile(
-              icon: Icons.shield_outlined,
-              label: 'Security',
-              selected: selectedIndex == 5,
-              onTap: () => onSelected(5),
-            ),
+              CTTile(
+                icon: Icons.build_outlined,
+                label: 'Functional Roles',
+                selected: selectedIndex == 5,
+                onTap: () => onSelected(5),
+              ),
 
-            CTTile(
-              icon: Icons.bar_chart_outlined,
-              label: 'Analytics',
-              selected: selectedIndex == 6,
-              onTap: () => onSelected(6),
-            ),
+              CTTile(
+                icon: Icons.shield_outlined,
+                label: 'Security',
+                selected: selectedIndex == 6,
+                onTap: () => onSelected(6),
+              ),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Divider(),
-            ),
+              CTTile(
+                icon: Icons.bar_chart_outlined,
+                label: 'Analytics',
+                selected: selectedIndex == 7,
+                onTap: () => onSelected(7),
+              ),
 
-            _buildSectionLabel('Tools'),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Divider(),
+              ),
 
-            CTTile(
-              icon: Icons.sticky_note_2_outlined,
-              label: 'Notes',
-              selected: selectedIndex == 7,
-              onTap: () => onSelected(7),
-              trailing: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF5B4BC4),
-                  shape: BoxShape.circle,
+              _buildSectionLabel('Tools'),
+
+              CTTile(
+                icon: Icons.sticky_note_2_outlined,
+                label: 'Notes',
+                selected: selectedIndex == 8,
+                onTap: () => onSelected(8),
+                trailing: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF5B4BC4),
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-            ),
 
-            CTTile(
-              icon: Icons.settings_outlined,
-              label: 'Settings',
-              selected: selectedIndex == 8,
-              onTap: () => onSelected(8),
-            ),
-            CTTile(
-              icon: Icons.mail_outline_rounded,
-              label: 'Invitations',
-              selected: selectedIndex == 9,
-              onTap: () => onSelected(9),
-            ),
+              CTTile(
+                icon: Icons.settings_outlined,
+                label: 'Settings',
+                selected: selectedIndex == 9,
+                onTap: () => onSelected(9),
+              ),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Divider(),
-            ),
+              CTTile(
+                icon: Icons.mail_outline_rounded,
+                label: 'Invitations',
+                selected: selectedIndex == 10,
+                onTap: () => onSelected(10),
+              ),
 
-            _buildSectionLabel('Support'),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Divider(),
+              ),
 
-            CTTile(
-              icon: Icons.help_outline_rounded,
-              label: 'Help',
-              selected: false,
-              onTap: () {},
-            ),
+              _buildSectionLabel('Support'),
 
-            const SizedBox(height: 8),
-          ],
+              CTTile(
+                icon: Icons.help_outline_rounded,
+                label: 'Help',
+                selected: false,
+                onTap: () {},
+              ),
+
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
       footer: Column(
@@ -308,19 +328,25 @@ class FoundationSidebar extends StatelessWidget {
                       selected: selectedIndex == 4,
                       onTap: () => onSelected(4),
                     ),
-
                     _buildCollapsedIcon(
-                      icon: Icons.shield_outlined,
-                      tooltip: 'Security',
+                      icon: Icons.build_outlined,
+                      tooltip: 'Functional Roles',
                       selected: selectedIndex == 5,
                       onTap: () => onSelected(5),
                     ),
 
                     _buildCollapsedIcon(
-                      icon: Icons.bar_chart_outlined,
-                      tooltip: 'Analytics',
+                      icon: Icons.shield_outlined,
+                      tooltip: 'Security',
                       selected: selectedIndex == 6,
                       onTap: () => onSelected(6),
+                    ),
+
+                    _buildCollapsedIcon(
+                      icon: Icons.bar_chart_outlined,
+                      tooltip: 'Analytics',
+                      selected: selectedIndex == 7,
+                      onTap: () => onSelected(7),
                     ),
 
                     const SizedBox(height: 8),
@@ -328,22 +354,23 @@ class FoundationSidebar extends StatelessWidget {
                     _buildCollapsedIcon(
                       icon: Icons.sticky_note_2_outlined,
                       tooltip: 'Notes',
-                      selected: selectedIndex == 7,
-                      onTap: () => onSelected(7),
+                      selected: selectedIndex == 8,
+                      onTap: () => onSelected(8),
                       showDot: true,
                     ),
 
                     _buildCollapsedIcon(
                       icon: Icons.settings_outlined,
                       tooltip: 'Settings',
-                      selected: selectedIndex == 8,
-                      onTap: () => onSelected(8),
+                      selected: selectedIndex == 9,
+                      onTap: () => onSelected(9),
                     ),
+
                     _buildCollapsedIcon(
                       icon: Icons.mail_outline_rounded,
                       tooltip: 'Invitations',
-                      selected: selectedIndex == 9,
-                      onTap: () => onSelected(9),
+                      selected: selectedIndex == 10,
+                      onTap: () => onSelected(10),
                     ),
                   ],
                 ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:charitask/modules/foundation/domain/models/functional_role.dart';
@@ -17,14 +18,15 @@ class FunctionalRoleService {
   Future<List<FunctionalRoleCategory>> getCategories({
     required String organizationId,
   }) async {
+    debugPrint('>>> GET CATEGORIES USING CURRENT FUNCTIONAL ROLE SERVICE');
+
     final rows = await _supabase
         .from('functional_role_categories')
         .select()
         .eq('organization_id', organizationId)
         .eq('status', 'active')
         .isFilter('archived_at', null)
-        .order('sort_order')
-        .order('name');
+        .order('name', ascending: true);
 
     return rows
         .map(

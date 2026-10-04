@@ -111,7 +111,79 @@ class CTTopNavigation extends StatelessWidget {
       horizontalPadding: 12,
       child: Row(
         children: [
-          Expanded(child: _buildScrollableNav(compact: true)),
+          Expanded(
+            child: PopupMenuButton<int>(
+              tooltip: 'Navigate',
+              onSelected: onSelected,
+              offset: const Offset(0, 48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              itemBuilder: (context) {
+                return List.generate(
+                  _items.length,
+                  (index) => PopupMenuItem<int>(
+                    value: index,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _items[index],
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: selectedIndex == index
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: selectedIndex == index
+                                  ? const Color(0xFF5B4BC4)
+                                  : const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ),
+                        if (selectedIndex == index)
+                          const Icon(
+                            Icons.check_rounded,
+                            size: 18,
+                            color: Color(0xFF5B4BC4),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.menu_rounded,
+                      size: 22,
+                      color: Color(0xFF3D4756),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _items[selectedIndex],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF5B4BC4),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 20,
+                      color: Color(0xFF687385),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(width: 4),
           _buildCustomizeIconButton(),
         ],

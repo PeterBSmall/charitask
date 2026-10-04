@@ -12,6 +12,7 @@ class FunctionalRole {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? archivedAt;
+  final String? catalogRoleId;
 
   const FunctionalRole({
     required this.id,
@@ -27,6 +28,7 @@ class FunctionalRole {
     this.createdAt,
     this.updatedAt,
     this.archivedAt,
+    this.catalogRoleId,
   });
 
   factory FunctionalRole.fromMap(Map<String, dynamic> map) {
@@ -50,8 +52,11 @@ class FunctionalRole {
       createdAt: _parseDateTime(map['created_at']),
       updatedAt: _parseDateTime(map['updated_at']),
       archivedAt: _parseDateTime(map['archived_at']),
+      catalogRoleId: map['catalog_role_id'] as String?,
     );
   }
+
+  bool get isImported => catalogRoleId != null;
 
   FunctionalRole copyWith({
     String? id,
@@ -67,6 +72,7 @@ class FunctionalRole {
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? archivedAt,
+    String? catalogRoleId,
   }) {
     return FunctionalRole(
       id: id ?? this.id,
@@ -82,6 +88,7 @@ class FunctionalRole {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt ?? this.archivedAt,
+      catalogRoleId: catalogRoleId ?? this.catalogRoleId,
     );
   }
 
