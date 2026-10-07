@@ -49,16 +49,17 @@ class _AddPersonPageState extends State<AddPersonPage> {
   final _joinDateController = TextEditingController();
   final _notesController = TextEditingController();
 
-  String _membershipStatus = 'Active';
-  String _organizationalRole = '';
-  String _primaryDepartment = '';
+  final String _membershipStatus = 'Active';
+  String _personType = '';
+  String _primaryAreaOfResponsibility = '';
+  String _boardPosition = '';
   final _jobTitleController = TextEditingController();
   String? _preferredContactMethod;
 
   List<FunctionalRole> _selectedFunctionalRoles = [];
 
   static const List<String> _steps = [
-    'Organizational Role',
+    'Person Type',
     'Personal Details',
     'Assignments',
     'Access',
@@ -80,29 +81,44 @@ class _AddPersonPageState extends State<AddPersonPage> {
     _phoneController.addListener(_onFormChanged);
   }
 
-  static const List<String> _organizationalRoleOptions = [
+  static const List<String> _personTypeOptions = [
     'Founder / Owner',
     'Executive Leadership',
-    'Director',
-    'Manager',
-    'Team Lead',
     'Staff Member',
     'Volunteer',
     'Board Member',
+    'Donor',
+    'Contractor',
+    'Partner Contact',
+    'Vendor Contact',
+    'Community Member',
   ];
 
-  final List<String> _departmentOptions = [
-    'Administration',
-    'Finance',
-    'Fundraising',
-    'Human Resources',
-    'Information Technology',
-    'Marketing & Communications',
-    'Operations',
+  static const List<String> _boardPositionOptions = [
+    'Chair',
+    'Vice Chair',
+    'Secretary',
+    'Treasurer',
+    'Board Member',
     'Other',
-    'Programs',
-    'ReStore / Retail',
-    'Volunteer Services',
+  ];
+  final List<String> _areaOfResponsibilityOptions = [
+    'Leadership & Governance',
+    'Administration & Support',
+    'Human Resources & People Operations',
+    'Finance',
+    'Fundraising & Development',
+    'Marketing & Communications',
+    'Volunteer Engagement',
+    'Community Engagement & Outreach',
+    'Programs & Services',
+    'Events & Activities',
+    'Retail & ReStore Operations',
+    'Donations & Receiving',
+    'Construction & Homebuilding',
+    'Facilities & Property',
+    'Transportation & Logistics',
+    'Information Technology & Systems',
   ];
 
   void _onFormChanged() {
@@ -112,7 +128,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
   bool get _isCurrentStepValid {
     switch (_currentStep) {
       case 0:
-        return _organizationalRole.isNotEmpty;
+        return _personType.isNotEmpty;
 
       case 1:
         return AddPersonValidation.isBasicInformationValid(
@@ -135,8 +151,8 @@ class _AddPersonPageState extends State<AddPersonPage> {
 
     switch (_currentStep) {
       case 0:
-        if (_organizationalRole.isEmpty) {
-          errorMessage = 'Please select an organizational role.';
+        if (_personType.isEmpty) {
+          errorMessage = 'Please select a person type.';
         }
         break;
 
@@ -249,19 +265,51 @@ class _AddPersonPageState extends State<AddPersonPage> {
     switch (_currentStep) {
       case 0:
         return OrganizationalRoleStep(
-          organizationalRole: _organizationalRole,
-          primaryDepartment: _primaryDepartment,
+          personType: _personType,
+          primaryAreaOfResponsibility: _primaryAreaOfResponsibility,
+          boardPosition: _boardPosition,
           jobTitleController: _jobTitleController,
-          organizationalRoleOptions: _organizationalRoleOptions,
-          departmentOptions: _departmentOptions,
-          onOrganizationalRoleChanged: (value) {
+          personTypeOptions: _personTypeOptions,
+          areaOfResponsibilityOptions: _areaOfResponsibilityOptions,
+          boardPositionOptions: _boardPositionOptions,
+          onPersonTypeChanged: (value) {
             setState(() {
-              _organizationalRole = value;
+              _personType = value;
+
+              final showsAreaOfResponsibility =
+                  value == 'Founder / Owner' ||
+                  value == 'Executive Leadership' ||
+                  value == 'Staff Member' ||
+                  value == 'Volunteer' ||
+                  value == 'Contractor';
+
+              final showsJobTitle =
+                  value == 'Founder / Owner' ||
+                  value == 'Executive Leadership' ||
+                  value == 'Staff Member' ||
+                  value == 'Volunteer';
+
+              if (!showsAreaOfResponsibility) {
+                _primaryAreaOfResponsibility = '';
+              }
+
+              if (!showsJobTitle) {
+                _jobTitleController.clear();
+              }
+              if (value != 'Board Member') {
+                _boardPosition = '';
+              }
             });
           },
-          onPrimaryDepartmentChanged: (value) {
+          onPrimaryAreaOfResponsibilityChanged: (value) {
             setState(() {
-              _primaryDepartment = value;
+              _primaryAreaOfResponsibility = value;
+            });
+          },
+
+          onBoardPositionChanged: (value) {
+            setState(() {
+              _boardPosition = value;
             });
           },
         );

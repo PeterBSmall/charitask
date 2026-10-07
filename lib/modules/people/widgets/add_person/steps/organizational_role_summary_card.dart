@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'organizational_role_definition.dart';
 
 class OrganizationalRoleSummaryCard extends StatelessWidget {
   const OrganizationalRoleSummaryCard({
@@ -7,21 +6,50 @@ class OrganizationalRoleSummaryCard extends StatelessWidget {
     required this.organizationalRole,
   });
 
+  // Kept as organizationalRole for compatibility with the existing
+  // OrganizationalRoleStep API. This value now represents Person Type.
   final String organizationalRole;
 
-  OrganizationalRoleDefinition? get _definition {
-    for (final definition in organizationalRoleDefinitions) {
-      if (definition.name == organizationalRole) {
-        return definition;
-      }
-    }
+  String _description(String personType) {
+    switch (personType) {
+      case 'Founder / Owner':
+        return 'Leads or owns the organization and is responsible for its overall direction.';
 
-    return null;
+      case 'Executive Leadership':
+        return 'Provides senior leadership and helps guide organization-wide strategy and decisions.';
+
+      case 'Staff Member':
+        return 'Performs ongoing work for the organization as a staff member.';
+
+      case 'Volunteer':
+        return 'Contributes time and skills to support the organization’s mission without being a regular staff employee.';
+
+      case 'Board Member':
+        return 'Provides governance, oversight, and strategic guidance as a member of the organization’s board.';
+
+      case 'Donor':
+        return 'Supports the organization through financial or in-kind contributions.';
+
+      case 'Contractor':
+        return 'Provides specialized services or expertise to the organization as an independent contractor.';
+
+      case 'Partner Contact':
+        return 'Represents a partner organization or community partner in an organizational relationship.';
+
+      case 'Vendor Contact':
+        return 'Represents a vendor or supplier that works with the organization.';
+
+      case 'Community Member':
+        return 'Participates in or connects with the organization as a member of the community.';
+
+      default:
+        return '';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final definition = _definition;
+    final description = _description(organizationalRole);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -30,17 +58,24 @@ class OrganizationalRoleSummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE5E0EC)),
       ),
-      child: definition == null
+      child: organizationalRole.isEmpty || description.isEmpty
           ? const _EmptySummary()
-          : _RoleSummary(definition: definition),
+          : _PersonTypeSummary(
+              personType: organizationalRole,
+              description: description,
+            ),
     );
   }
 }
 
-class _RoleSummary extends StatelessWidget {
-  const _RoleSummary({required this.definition});
+class _PersonTypeSummary extends StatelessWidget {
+  const _PersonTypeSummary({
+    required this.personType,
+    required this.description,
+  });
 
-  final OrganizationalRoleDefinition definition;
+  final String personType;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +83,7 @@ class _RoleSummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'ROLE SUMMARY',
+          'PERSON TYPE',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w800,
@@ -58,60 +93,20 @@ class _RoleSummary extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          definition.name,
+          personType,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: Color(0xFF292333),
           ),
         ),
-        const SizedBox(height: 6),
-        const Text(
-          'Organizational level',
-          style: TextStyle(fontSize: 12, color: Color(0xFF8A8295)),
-        ),
         const SizedBox(height: 18),
         Text(
-          definition.description,
+          description,
           style: const TextStyle(
             fontSize: 13,
             height: 1.5,
             color: Color(0xFF6F687A),
-          ),
-        ),
-        const SizedBox(height: 22),
-        const Text(
-          'Typical focus',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF40394D),
-          ),
-        ),
-        const SizedBox(height: 10),
-        ...definition.focus.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 6),
-                  child: Icon(Icons.circle, size: 5, color: Color(0xFF7C4DFF)),
-                ),
-                const SizedBox(width: 9),
-                Expanded(
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      height: 1.4,
-                      color: Color(0xFF6F687A),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ],
@@ -128,7 +123,7 @@ class _EmptySummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'ROLE SUMMARY',
+          'PERSON TYPE',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w800,
@@ -138,7 +133,7 @@ class _EmptySummary extends StatelessWidget {
         ),
         SizedBox(height: 18),
         Text(
-          'Select a role',
+          'Select a person type',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -147,7 +142,7 @@ class _EmptySummary extends StatelessWidget {
         ),
         SizedBox(height: 8),
         Text(
-          'Choose an organizational role to see a brief summary of what that level typically represents.',
+          'Choose a person type to see a brief explanation of what it represents.',
           style: TextStyle(fontSize: 13, height: 1.5, color: Color(0xFF6F687A)),
         ),
       ],

@@ -1,47 +1,83 @@
 import 'package:flutter/material.dart';
+
 import 'organizational_role_summary_card.dart';
 
 class OrganizationalRoleStep extends StatelessWidget {
   const OrganizationalRoleStep({
     super.key,
-    required this.organizationalRole,
-    required this.primaryDepartment,
+    required this.personType,
+    required this.primaryAreaOfResponsibility,
+    required this.boardPosition,
     required this.jobTitleController,
-    required this.organizationalRoleOptions,
-    required this.departmentOptions,
-    required this.onOrganizationalRoleChanged,
-    required this.onPrimaryDepartmentChanged,
+    required this.personTypeOptions,
+    required this.areaOfResponsibilityOptions,
+    required this.boardPositionOptions,
+    required this.onPersonTypeChanged,
+    required this.onPrimaryAreaOfResponsibilityChanged,
+    required this.onBoardPositionChanged,
   });
 
-  final String organizationalRole;
-  final String primaryDepartment;
+  final String personType;
+  final String primaryAreaOfResponsibility;
+  final String boardPosition;
   final TextEditingController jobTitleController;
-  final List<String> organizationalRoleOptions;
-  final List<String> departmentOptions;
-  final ValueChanged<String> onOrganizationalRoleChanged;
-  final ValueChanged<String> onPrimaryDepartmentChanged;
 
-  String _roleDescription(String role) {
-    switch (role) {
+  final List<String> personTypeOptions;
+  final List<String> areaOfResponsibilityOptions;
+  final List<String> boardPositionOptions;
+
+  final ValueChanged<String> onPersonTypeChanged;
+  final ValueChanged<String> onPrimaryAreaOfResponsibilityChanged;
+  final ValueChanged<String> onBoardPositionChanged;
+
+  String _personTypeDescription(String type) {
+    switch (type) {
       case 'Founder / Owner':
         return 'Leads or owns the organization and is responsible for its overall direction.';
       case 'Executive Leadership':
         return 'Provides senior leadership and helps guide organization-wide strategy and decisions.';
-      case 'Director':
-        return 'Leads a major area of the organization and is responsible for its programs, people, or operations.';
-      case 'Manager':
-        return 'Oversees day-to-day work, people, or operations within a team or area.';
-      case 'Team Lead':
-        return 'Guides a team’s day-to-day work and helps coordinate people and priorities.';
       case 'Staff Member':
-        return 'Performs day-to-day operational work and typically reports to a manager or team lead.';
+        return 'Performs ongoing work for the organization as a staff member.';
       case 'Volunteer':
         return 'Contributes time and skills to support the organization’s mission without being a regular staff employee.';
       case 'Board Member':
         return 'Provides governance, oversight, and strategic guidance as a member of the organization’s board.';
+      case 'Donor':
+        return 'Supports the organization through financial or in-kind contributions.';
+      case 'Contractor':
+        return 'Provides specialized services or expertise to the organization as an independent contractor.';
+      case 'Partner Contact':
+        return 'Represents a partner organization or community partner in an organizational relationship.';
+      case 'Vendor Contact':
+        return 'Represents a vendor or supplier that works with the organization.';
+      case 'Community Member':
+        return 'Participates in or connects with the organization as a member of the community.';
       default:
         return '';
     }
+  }
+
+  bool get _showAreaOfResponsibility {
+    return personType == 'Founder / Owner' ||
+        personType == 'Executive Leadership' ||
+        personType == 'Staff Member' ||
+        personType == 'Volunteer' ||
+        personType == 'Contractor';
+  }
+
+  bool get _areaOfResponsibilityRequired {
+    return personType == 'Executive Leadership' || personType == 'Staff Member';
+  }
+
+  bool get _showJobTitle {
+    return personType == 'Founder / Owner' ||
+        personType == 'Executive Leadership' ||
+        personType == 'Staff Member' ||
+        personType == 'Volunteer';
+  }
+
+  bool get _jobTitleRequired {
+    return personType == 'Executive Leadership' || personType == 'Staff Member';
   }
 
   @override
@@ -59,7 +95,7 @@ class OrganizationalRoleStep extends StatelessWidget {
                     SizedBox(
                       width: 280,
                       child: OrganizationalRoleSummaryCard(
-                        organizationalRole: organizationalRole,
+                        organizationalRole: personType,
                       ),
                     ),
                     const SizedBox(width: 48),
@@ -79,7 +115,7 @@ class OrganizationalRoleStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Which best describes this person\'s role in the organization?',
+            'What kind of person is this?',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -88,28 +124,28 @@ class OrganizationalRoleStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'This helps standardize how people are organized across ChariTask.',
+            'Select the type of person and provide the information that applies to them.',
             style: TextStyle(fontSize: 14, color: Color(0xFF6F687A)),
           ),
           const SizedBox(height: 28),
 
-          _SectionLabel(title: 'Organizational Role', required: true),
+          const _SectionLabel(title: 'Person Type', required: true),
           const SizedBox(height: 10),
           _ChoiceDropdown(
-            value: organizationalRole.isEmpty ? null : organizationalRole,
-            hint: 'Select organizational role',
-            items: organizationalRoleOptions,
+            value: personType.isEmpty ? null : personType,
+            hint: 'Select person type',
+            items: personTypeOptions,
             onChanged: (value) {
               if (value != null) {
-                onOrganizationalRoleChanged(value);
+                onPersonTypeChanged(value);
               }
             },
           ),
 
-          if (organizationalRole.isNotEmpty) ...[
+          if (personType.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
-              _roleDescription(organizationalRole),
+              _personTypeDescription(personType),
               style: const TextStyle(
                 fontSize: 13,
                 height: 1.4,
@@ -118,52 +154,77 @@ class OrganizationalRoleStep extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: 24),
+          if (personType == 'Board Member') ...[
+            const SizedBox(height: 24),
+            const _SectionLabel(title: 'Board Position', required: false),
+            const SizedBox(height: 10),
+            _ChoiceDropdown(
+              value: boardPosition.isEmpty ? null : boardPosition,
+              hint: 'Select board position',
+              items: boardPositionOptions,
+              onChanged: (value) {
+                if (value != null) {
+                  onBoardPositionChanged(value);
+                }
+              },
+            ),
+          ],
 
-          _SectionLabel(title: 'Primary Department', required: false),
-          const SizedBox(height: 10),
-          _ChoiceDropdown(
-            value: primaryDepartment.isEmpty ? null : primaryDepartment,
-            hint: 'Select primary department',
-            items: departmentOptions,
-            onChanged: (value) {
-              if (value != null) {
-                onPrimaryDepartmentChanged(value);
-              }
-            },
-          ),
+          if (_showAreaOfResponsibility) ...[
+            const SizedBox(height: 24),
+            _SectionLabel(
+              title: 'Primary Area of Responsibility',
+              required: _areaOfResponsibilityRequired,
+            ),
+            const SizedBox(height: 10),
+            _ChoiceDropdown(
+              value: primaryAreaOfResponsibility.isEmpty
+                  ? null
+                  : primaryAreaOfResponsibility,
+              hint: 'Select area of responsibility',
+              items: areaOfResponsibilityOptions,
+              onChanged: (value) {
+                if (value != null) {
+                  onPrimaryAreaOfResponsibilityChanged(value);
+                }
+              },
+            ),
+          ],
 
-          const SizedBox(height: 24),
-
-          _SectionLabel(title: 'Job Title', required: false),
-          const SizedBox(height: 10),
-          TextField(
-            controller: jobTitleController,
-            decoration: InputDecoration(
-              hintText: 'Enter job title (optional)',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE2DDEB)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE2DDEB)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFF7C4DFF),
-                  width: 2,
+          if (_showJobTitle) ...[
+            const SizedBox(height: 24),
+            _SectionLabel(title: 'Job Title', required: _jobTitleRequired),
+            const SizedBox(height: 10),
+            TextField(
+              controller: jobTitleController,
+              decoration: InputDecoration(
+                hintText: _jobTitleRequired
+                    ? 'Enter job title'
+                    : 'Enter job title (optional)',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE2DDEB)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE2DDEB)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF7C4DFF),
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 15,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 15,
-              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -282,7 +343,6 @@ class _ChoiceDropdown extends StatelessWidget {
             ),
           )
           .toList(),
-
       selectedItemBuilder: (context) {
         return items.map((item) {
           return Align(
@@ -297,7 +357,6 @@ class _ChoiceDropdown extends StatelessWidget {
           );
         }).toList();
       },
-
       onChanged: onChanged,
     );
   }
