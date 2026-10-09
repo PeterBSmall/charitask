@@ -19,7 +19,7 @@ class RoleCategoryTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = ['Overview', 'Roles ($roleCount)', 'Settings'];
+    final labels = ['Roles ($roleCount)', 'Overview', 'Settings'];
 
     return LayoutBuilder(
       builder: (context, constraints) {

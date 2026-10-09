@@ -6,12 +6,14 @@ import 'package:charitask/modules/foundation/domain/models/functional_role_categ
 import 'role_category_roles.dart';
 import 'role_category_settings.dart';
 import 'role_category_tabs.dart';
+import 'functional_role_category_icon.dart';
 
 class RoleCategoryDetail extends StatefulWidget {
   final FunctionalRoleCategory? category;
   final List<FunctionalRole> roles;
   final int roleCount;
   final int assignmentCount;
+  final ValueChanged<FunctionalRole>? onRoleSelected;
 
   const RoleCategoryDetail({
     super.key,
@@ -19,6 +21,7 @@ class RoleCategoryDetail extends StatefulWidget {
     required this.roles,
     required this.roleCount,
     required this.assignmentCount,
+    this.onRoleSelected,
   });
 
   @override
@@ -27,6 +30,7 @@ class RoleCategoryDetail extends StatefulWidget {
 
 class _RoleCategoryDetailState extends State<RoleCategoryDetail> {
   int _selectedTab = 0;
+  String? _selectedRoleId;
 
   static const _text = Color(0xFF1E293B);
   static const _muted = Color(0xFF64748B);
@@ -94,7 +98,11 @@ class _RoleCategoryDetailState extends State<RoleCategoryDetail> {
             color: const Color(0xFFF0EBFF),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.folder_outlined, color: _purple, size: 24),
+          child: Icon(
+            FunctionalRoleCategoryIcon.forSlug(category.slug),
+            color: _purple,
+            size: 24,
+          ),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -129,9 +137,23 @@ class _RoleCategoryDetailState extends State<RoleCategoryDetail> {
 
   Widget _buildTabContent(FunctionalRoleCategory category) {
     switch (_selectedTab) {
-      case 1:
-        return RoleCategoryRoles(roles: widget.roles);
+      case 0:
+        return RoleCategoryRoles(
+          roles: widget.roles,
+          selectedRoleId: _selectedRoleId,
+          onRoleSelected: (roleId) {
+            setState(() {
+              _selectedRoleId = roleId;
+            });
 
+            for (final role in widget.roles) {
+              if (role.id == roleId) {
+                widget.onRoleSelected?.call(role);
+                break;
+              }
+            }
+          },
+        );
       case 2:
         return RoleCategorySettings(category: category);
 

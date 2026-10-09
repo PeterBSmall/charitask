@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/foundation/domain/models/functional_role_category.dart';
+import 'functional_role_category_icon.dart';
 
 class RoleCategoriesList extends StatelessWidget {
   final List<FunctionalRoleCategory> categories;
@@ -114,7 +115,7 @@ class _CategoryRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  Icons.folder_outlined,
+                  FunctionalRoleCategoryIcon.forSlug(category.slug),
                   size: 19,
                   color: selected ? _purple : _muted,
                 ),

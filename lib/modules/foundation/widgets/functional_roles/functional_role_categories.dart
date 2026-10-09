@@ -30,7 +30,7 @@ class FunctionalRoleCategories extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.fromLTRB(20, 18, 20, 4),
             child: Text(
-              'Role Categories',
+              'Select a Department',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,

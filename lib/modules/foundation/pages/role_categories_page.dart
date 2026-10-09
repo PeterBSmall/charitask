@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:charitask/modules/foundation/data/services/functional_role_service.dart';
 import 'package:charitask/modules/foundation/domain/models/functional_role.dart';
 import 'package:charitask/modules/foundation/domain/models/functional_role_category.dart';
+
 import '../widgets/functional_roles/role_category_detail.dart';
 import '../widgets/functional_roles/role_categories_header.dart';
 import '../widgets/functional_roles/role_categories_list.dart';
@@ -11,7 +12,14 @@ import '../widgets/functional_roles/role_categories_toolbar.dart';
 class RoleCategoriesPage extends StatefulWidget {
   final String organizationId;
 
-  const RoleCategoriesPage({super.key, required this.organizationId});
+  final void Function(FunctionalRoleCategory category, FunctionalRole role)?
+  onRoleSelected;
+
+  const RoleCategoriesPage({
+    super.key,
+    required this.organizationId,
+    this.onRoleSelected,
+  });
 
   @override
   State<RoleCategoriesPage> createState() => _RoleCategoriesPageState();
@@ -190,6 +198,12 @@ class _RoleCategoriesPageState extends State<RoleCategoriesPage> {
                     .toList(),
                 roleCount: _roleCounts[_selectedCategoryId] ?? 0,
                 assignmentCount: _assignmentCounts[_selectedCategoryId] ?? 0,
+                onRoleSelected: (role) {
+                  final category = _selectedCategory;
+                  if (category != null) {
+                    widget.onRoleSelected?.call(category, role);
+                  }
+                },
               ),
             ],
           )
@@ -216,6 +230,12 @@ class _RoleCategoriesPageState extends State<RoleCategoriesPage> {
                       .toList(),
                   roleCount: _roleCounts[_selectedCategoryId] ?? 0,
                   assignmentCount: _assignmentCounts[_selectedCategoryId] ?? 0,
+                  onRoleSelected: (role) {
+                    final category = _selectedCategory;
+                    if (category != null) {
+                      widget.onRoleSelected?.call(category, role);
+                    }
+                  },
                 ),
               ),
             ],

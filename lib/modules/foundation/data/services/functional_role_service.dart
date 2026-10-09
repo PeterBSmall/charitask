@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:charitask/modules/foundation/domain/models/functional_role.dart';
 import 'package:charitask/modules/foundation/domain/models/functional_role_assignment.dart';
 import 'package:charitask/modules/foundation/domain/models/functional_role_category.dart';
+import 'package:charitask/modules/foundation/domain/models/permission.dart';
 
 class FunctionalRoleService {
   final SupabaseClient _supabase;
@@ -197,6 +198,55 @@ class FunctionalRoleService {
   }
 
   // ---------------------------------------------------------------------------
+  // Permissions
+  // ---------------------------------------------------------------------------
+
+  Future<List<Permission>> getPermissions() async {
+    final rows = await _supabase
+        .from('permissions')
+        .select()
+        .order('module')
+        .order('name');
+
+    return rows
+        .map((row) => Permission.fromMap(Map<String, dynamic>.from(row)))
+        .toList();
+  }
+
+  Future<List<Permission>> getRolePermissions({
+    required String organizationId,
+    required String roleId,
+  }) async {
+    final rows = await _supabase
+        .from('functional_role_permissions')
+        .select('''
+        permission_id,
+        permissions (
+          id,
+          key,
+          name,
+          description,
+          module
+        )
+      ''')
+        .eq('organization_id', organizationId)
+        .eq('functional_role_id', roleId);
+
+    return rows
+        .map((row) {
+          final permission = row['permissions'];
+
+          if (permission == null) {
+            return null;
+          }
+
+          return Permission.fromMap(Map<String, dynamic>.from(permission));
+        })
+        .whereType<Permission>()
+        .toList();
+  }
+
+  // ---------------------------------------------------------------------------
   // Assignments
   // ---------------------------------------------------------------------------
 
@@ -247,6 +297,63 @@ class FunctionalRoleService {
     if (row == null) return null;
 
     return FunctionalRoleAssignment.fromMap(Map<String, dynamic>.from(row));
+  }
+
+  /// Returns active functional role assignments with their associated people.
+  ///
+  /// This is intended for role workspace displays where assignment data
+  /// and person identity information are needed together.
+  Future<List<Map<String, dynamic>>> getAssignmentsWithPeople({
+    required String organizationId,
+    required String roleId,
+    bool activeOnly = true,
+  }) async {
+    final assignments = await getAssignments(
+      organizationId: organizationId,
+      roleId: roleId,
+      activeOnly: activeOnly,
+    );
+
+    if (assignments.isEmpty) {
+      return [];
+    }
+
+    final personIds = assignments
+        .map((assignment) => assignment.personId)
+        .toSet()
+        .toList();
+
+    final peopleRows = await _supabase
+        .from('persons')
+        .select('''
+          id,
+          first_name,
+          last_name,
+          preferred_name,
+          email,
+          phone,
+          status
+        ''')
+        .eq('organization_id', organizationId)
+        .inFilter('id', personIds);
+
+    final peopleById = <String, Map<String, dynamic>>{};
+
+    for (final row in peopleRows) {
+      final person = Map<String, dynamic>.from(row);
+      final personId = person['id']?.toString();
+
+      if (personId != null) {
+        peopleById[personId] = person;
+      }
+    }
+
+    return assignments.map((assignment) {
+      return {
+        'assignment': assignment,
+        'person': peopleById[assignment.personId],
+      };
+    }).toList();
   }
 
   Future<FunctionalRoleAssignment> createAssignment({

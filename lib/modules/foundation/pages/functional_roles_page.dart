@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'role_categories_page.dart';
+
+import '../data/services/functional_role_service.dart';
+import '../domain/models/functional_role.dart';
+import '../domain/models/functional_role_category.dart';
+import '../widgets/functional_roles/functional_roles_layout.dart';
 
 class FunctionalRolesPage extends StatefulWidget {
   final String organizationId;
@@ -11,193 +15,355 @@ class FunctionalRolesPage extends StatefulWidget {
 }
 
 class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
-  int _selectedSection = 0;
+  late final FunctionalRoleService _service;
 
-  static const _sections = [
-    'Role Categories',
-    'Roles',
-    'Permissions',
-    'Role Assignments',
-  ];
+  final _categorySearchController = TextEditingController();
+  final _roleSearchController = TextEditingController();
 
-  static const _sectionIcons = [
-    Icons.category_outlined,
-    Icons.badge_outlined,
-    Icons.lock_outline,
-    Icons.assignment_ind_outlined,
-  ];
+  List<FunctionalRoleCategory> _categories = [];
+  List<FunctionalRole> _roles = [];
+
+  FunctionalRoleCategory? _selectedCategory;
+  FunctionalRole? _selectedRole;
+
+  String _roleFilter = 'all';
+
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _service = FunctionalRoleService();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final results = await Future.wait([
+        _service.getCategories(organizationId: widget.organizationId),
+        _service.getRoles(organizationId: widget.organizationId),
+      ]);
+
+      if (!mounted) return;
+
+      final categories = List<FunctionalRoleCategory>.from(results[0] as List);
+
+      final roles = List<FunctionalRole>.from(results[1] as List);
+
+      categories.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
+
+      roles.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
+
+      setState(() {
+        _categories = categories;
+        _roles = roles;
+        _isLoading = false;
+
+        if (categories.isNotEmpty) {
+          _selectedCategory = categories.first;
+        }
+
+        _selectedRole = _firstRoleForCategory(
+          categories.isNotEmpty ? categories.first : null,
+          roles,
+        );
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Unable to load functional roles.';
+      });
+    }
+  }
+
+  FunctionalRole? _firstRoleForCategory(
+    FunctionalRoleCategory? category,
+    List<FunctionalRole> roles,
+  ) {
+    if (category == null) return null;
+
+    for (final role in roles) {
+      if (role.categoryId == category.id) {
+        return role;
+      }
+    }
+
+    return null;
+  }
+
+  void _selectCategory(FunctionalRoleCategory? category) {
+    setState(() {
+      _selectedCategory = category;
+      _selectedRole = _firstRoleForCategory(category, _roles);
+    });
+  }
+
+  void _selectRole(FunctionalRole? role) {
+    setState(() {
+      _selectedRole = role;
+    });
+  }
+
+  void _changeRoleFilter(String filter) {
+    setState(() {
+      _roleFilter = filter;
+
+      if (_selectedRole != null && !_matchesRoleFilter(_selectedRole!)) {
+        _selectedRole = null;
+      }
+    });
+  }
+
+  bool _matchesRoleFilter(FunctionalRole role) {
+    switch (_roleFilter) {
+      case 'system':
+        return role.isImported;
+
+      case 'custom':
+        return !role.isImported;
+
+      case 'inactive':
+        return !role.isActive;
+
+      default:
+        return true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _categorySearchController.dispose();
+    _roleSearchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(constraints),
-              const SizedBox(height: 24),
-              _buildNavigation(constraints),
-              const SizedBox(height: 24),
-              _buildContent(),
+              const Icon(
+                Icons.error_outline,
+                size: 40,
+                color: Color(0xFF64748B),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _loadData,
+                icon: const Icon(Icons.refresh_outlined),
+                label: const Text('Try Again'),
+              ),
             ],
           ),
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compactHeight = constraints.maxHeight < 650;
+
+        if (compactHeight) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildPageHeader(),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 600,
+                  child: FunctionalRolesLayout(
+                    organizationId: widget.organizationId,
+                    categories: _categories,
+                    roles: _roles,
+                    selectedCategory: _selectedCategory,
+                    selectedRole: _selectedRole,
+                    roleFilter: _roleFilter,
+                    categorySearchController: _categorySearchController,
+                    roleSearchController: _roleSearchController,
+                    onCategorySelected: _selectCategory,
+                    onRoleSelected: _selectRole,
+                    onRoleFilterChanged: _changeRoleFilter,
+                    roleFilterMatcher: _matchesRoleFilter,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildPageHeader(),
+            const SizedBox(height: 16),
+            Expanded(
+              child: FunctionalRolesLayout(
+                organizationId: widget.organizationId,
+                categories: _categories,
+                roles: _roles,
+                selectedCategory: _selectedCategory,
+                selectedRole: _selectedRole,
+                roleFilter: _roleFilter,
+                categorySearchController: _categorySearchController,
+                roleSearchController: _roleSearchController,
+                onCategorySelected: _selectCategory,
+                onRoleSelected: _selectRole,
+                onRoleFilterChanged: _changeRoleFilter,
+                roleFilterMatcher: _matchesRoleFilter,
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildHeader(BoxConstraints constraints) {
-    final compact = constraints.maxWidth < 700;
-
+  Widget _buildPageHeader() {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(compact ? 20 : 28),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
-      child: compact
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_buildTitle()],
-            )
-          : Row(children: [Expanded(child: _buildTitle())]),
-    );
-  }
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 800;
 
-  Widget _buildTitle() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Functional Roles',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1E293B),
-          ),
-        ),
-        SizedBox(height: 6),
-        Text(
-          'Manage the functional roles that define responsibilities across your organization.',
-          style: TextStyle(fontSize: 15, color: Color(0xFF64748B)),
-        ),
-      ],
-    );
-  }
+          if (compact) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0EBFF),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: const Icon(
+                    Icons.people_alt_outlined,
+                    color: Color(0xFF5B3FD3),
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Functional Roles',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Manage the functional roles that define responsibilities across your organization.',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  onPressed: null,
+                  tooltip: 'New Role',
+                  icon: const Icon(Icons.add),
+                ),
+              ],
+            );
+          }
 
-  Widget _buildNavigation(BoxConstraints constraints) {
-    final compact = constraints.maxWidth < 800;
-
-    if (compact) {
-      return _buildCompactNavigation();
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Row(
-        children: List.generate(
-          _sections.length,
-          (index) => Expanded(child: _buildNavigationItem(index)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactNavigation() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 6,
-        children: List.generate(
-          _sections.length,
-          (index) => _buildNavigationItem(index, compact: true),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavigationItem(int index, {bool compact = false}) {
-    final selected = _selectedSection == index;
-
-    return Material(
-      color: selected ? const Color(0xFF5B3FD3) : Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: () {
-          setState(() {
-            _selectedSection = index;
-          });
-        },
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 14 : 16,
-            vertical: 12,
-          ),
-          child: Row(
-            mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
+          return Row(
             children: [
-              Icon(
-                _sectionIcons[index],
-                size: 18,
-                color: selected ? Colors.white : const Color(0xFF64748B),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _sections[index],
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: selected ? Colors.white : const Color(0xFF475569),
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0EBFF),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.people_alt_outlined,
+                  color: Color(0xFF5B3FD3),
+                  size: 28,
                 ),
               ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Functional Roles',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Manage the functional roles that define responsibilities across your organization.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              FilledButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.add),
+                label: const Text('New Role'),
+              ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
-  }
-
-  Widget _buildContent() {
-    switch (_selectedSection) {
-      case 0:
-        return RoleCategoriesPage(organizationId: widget.organizationId);
-
-      default:
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: Text(
-            _sections[_selectedSection],
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1E293B),
-            ),
-          ),
-        );
-    }
   }
 }

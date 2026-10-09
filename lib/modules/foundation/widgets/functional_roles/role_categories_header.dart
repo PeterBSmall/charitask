@@ -33,7 +33,7 @@ class RoleCategoriesHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Role Categories',
+          'Select a Department',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
@@ -42,7 +42,7 @@ class RoleCategoriesHeader extends StatelessWidget {
         ),
         SizedBox(height: 6),
         Text(
-          'Organize functional roles into clear areas of responsibility.',
+          'Select a department to view and manage its functional roles.',
           style: TextStyle(fontSize: 15, color: Color(0xFF64748B)),
         ),
       ],
