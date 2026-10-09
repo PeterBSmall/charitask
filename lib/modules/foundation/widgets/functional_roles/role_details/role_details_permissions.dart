@@ -19,6 +19,14 @@ class RoleDetailsPermissions extends StatefulWidget {
 }
 
 class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
+  static const _moduleOrder = [
+    'people',
+    'locations',
+    'groups',
+    'tasks',
+    'functionalrole',
+  ];
+
   final _service = FunctionalRoleService();
 
   bool _isLoading = true;
@@ -108,6 +116,21 @@ class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
       grouped.putIfAbsent(permission.module, () => []).add(permission);
     }
 
+    final modules = grouped.keys.toList()
+      ..sort((a, b) {
+        final aIndex = _moduleOrder.indexOf(a);
+        final bIndex = _moduleOrder.indexOf(b);
+
+        if (aIndex == -1 && bIndex == -1) {
+          return a.compareTo(b);
+        }
+
+        if (aIndex == -1) return 1;
+        if (bIndex == -1) return -1;
+
+        return aIndex.compareTo(bIndex);
+      });
+
     final assignedCount = _assignedPermissionIds.length;
 
     return Column(
@@ -115,8 +138,8 @@ class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
       children: [
         _buildSummary(assignedCount),
         const SizedBox(height: 20),
-        ...grouped.entries.map(
-          (entry) => _buildModule(_moduleName(entry.key), entry.value),
+        ...modules.map(
+          (module) => _buildModule(_moduleName(module), grouped[module]!),
         ),
       ],
     );
@@ -130,10 +153,12 @@ class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
-      child: Row(
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           const Icon(Icons.lock_outline, size: 20, color: Color(0xFF5B3FD3)),
-          const SizedBox(width: 10),
           Text(
             '$assignedCount assigned',
             style: const TextStyle(
@@ -142,9 +167,12 @@ class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
               color: Color(0xFF1E293B),
             ),
           ),
-          const SizedBox(width: 8),
+          const Text(
+            '·',
+            style: TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
+          ),
           Text(
-            'of ${_permissions.length} available',
+            '${_permissions.length} available',
             style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
           ),
         ],
@@ -153,6 +181,10 @@ class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
   }
 
   Widget _buildModule(String name, List<Permission> permissions) {
+    final assignedCount = permissions
+        .where((permission) => _assignedPermissionIds.contains(permission.id))
+        .length;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
@@ -169,13 +201,27 @@ class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
                 color: Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(11)),
               ),
-              child: Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1E293B),
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '$assignedCount / ${permissions.length}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
               ),
             ),
             ...permissions.map(_buildPermission),
@@ -191,6 +237,7 @@ class _RoleDetailsPermissionsState extends State<RoleDetailsPermissions> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             assigned ? Icons.check_circle : Icons.radio_button_unchecked,
