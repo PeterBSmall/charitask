@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../platform/authorization/authorization.dart'
+    hide FunctionalRole, Permission;
 import '../data/services/functional_role_service.dart';
 import '../domain/models/functional_role.dart';
 import '../domain/models/functional_role_category.dart';
+import '../widgets/functional_roles/create_functional_role_dialog.dart';
 import '../widgets/functional_roles/functional_roles_layout.dart';
 
 class FunctionalRolesPage extends StatefulWidget {
@@ -28,6 +32,7 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
 
   String _roleFilter = 'all';
 
+  bool _canCreateRole = false;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -46,9 +51,18 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
     });
 
     try {
+      final authorization = AuthorizationService(Supabase.instance.client);
+
       final results = await Future.wait([
         _service.getCategories(organizationId: widget.organizationId),
-        _service.getRoles(organizationId: widget.organizationId),
+        _service.getRoles(
+          organizationId: widget.organizationId,
+          activeOnly: false,
+        ),
+        authorization.hasPermission(
+          organizationId: widget.organizationId,
+          permissionKey: 'functionalrole.create',
+        ),
       ]);
 
       if (!mounted) return;
@@ -56,6 +70,8 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
       final categories = List<FunctionalRoleCategory>.from(results[0] as List);
 
       final roles = List<FunctionalRole>.from(results[1] as List);
+
+      final canCreateRole = results[2] as bool;
 
       categories.sort((a, b) {
         int priority(String name) {
@@ -85,16 +101,36 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
       setState(() {
         _categories = categories;
         _roles = roles;
+        _canCreateRole = canCreateRole;
         _isLoading = false;
 
         if (categories.isNotEmpty) {
-          _selectedCategory = categories.first;
+          final previousCategoryId = _selectedCategory?.id;
+
+          _selectedCategory = categories.firstWhere(
+            (category) => category.id == previousCategoryId,
+            orElse: () => categories.first,
+          );
+        } else {
+          _selectedCategory = null;
         }
 
-        _selectedRole = _firstRoleForCategory(
-          categories.isNotEmpty ? categories.first : null,
-          roles,
-        );
+        final previousRoleId = _selectedRole?.id;
+
+        FunctionalRole? selectedRole;
+
+        if (previousRoleId != null) {
+          for (final role in roles) {
+            if (role.id == previousRoleId && _matchesRoleFilter(role)) {
+              selectedRole = role;
+              break;
+            }
+          }
+        }
+
+        selectedRole ??= _firstRoleForCategory(_selectedCategory, roles);
+
+        _selectedRole = selectedRole;
       });
     } catch (error) {
       if (!mounted) return;
@@ -113,7 +149,7 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
     if (category == null) return null;
 
     for (final role in roles) {
-      if (role.categoryId == category.id) {
+      if (role.categoryId == category.id && _matchesRoleFilter(role)) {
         return role;
       }
     }
@@ -139,7 +175,7 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
       _roleFilter = filter;
 
       if (_selectedRole != null && !_matchesRoleFilter(_selectedRole!)) {
-        _selectedRole = null;
+        _selectedRole = _firstRoleForCategory(_selectedCategory, _roles);
       }
     });
   }
@@ -147,17 +183,92 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
   bool _matchesRoleFilter(FunctionalRole role) {
     switch (_roleFilter) {
       case 'system':
-        return role.isImported;
+        return role.isActive && role.isImported;
 
       case 'custom':
-        return !role.isImported;
+        return role.isActive && !role.isImported;
 
       case 'inactive':
         return !role.isActive;
 
       default:
-        return true;
+        return role.isActive;
     }
+  }
+
+  Future<void> _createRole() async {
+    if (!_canCreateRole) return;
+
+    final createdRole = await showDialog<FunctionalRole>(
+      context: context,
+      builder: (context) {
+        return CreateFunctionalRoleDialog(
+          organizationId: widget.organizationId,
+          categories: _categories,
+        );
+      },
+    );
+
+    if (!mounted || createdRole == null) {
+      return;
+    }
+
+    await _loadData();
+
+    if (!mounted) return;
+
+    final createdCategory = _categories
+        .cast<FunctionalRoleCategory?>()
+        .firstWhere(
+          (category) => category?.id == createdRole.categoryId,
+          orElse: () => null,
+        );
+
+    setState(() {
+      if (createdCategory != null) {
+        _selectedCategory = createdCategory;
+      }
+
+      final refreshedRole = _roles.cast<FunctionalRole?>().firstWhere(
+        (role) => role?.id == createdRole.id,
+        orElse: () => null,
+      );
+
+      if (refreshedRole != null && _matchesRoleFilter(refreshedRole)) {
+        _selectedRole = refreshedRole;
+      }
+    });
+  }
+
+  Future<void> _handleRoleArchived() async {
+    if (!mounted) return;
+
+    setState(() {
+      _selectedRole = null;
+    });
+
+    await _loadData();
+  }
+
+  Future<void> _handleRoleRestored() async {
+    if (!mounted) return;
+
+    setState(() {
+      _selectedRole = null;
+      _roleFilter = 'all';
+    });
+
+    await _loadData();
+  }
+
+  Future<void> _handleRoleDeleted() async {
+    if (!mounted) return;
+
+    setState(() {
+      _selectedRole = null;
+    });
+
+    await _loadData();
   }
 
   @override
@@ -230,6 +341,9 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
                     onRoleSelected: _selectRole,
                     onRoleFilterChanged: _changeRoleFilter,
                     roleFilterMatcher: _matchesRoleFilter,
+                    onRoleArchived: _handleRoleArchived,
+                    onRoleRestored: _handleRoleRestored,
+                    onRoleDeleted: _handleRoleDeleted,
                   ),
                 ),
               ],
@@ -256,6 +370,9 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
                 onRoleSelected: _selectRole,
                 onRoleFilterChanged: _changeRoleFilter,
                 roleFilterMatcher: _matchesRoleFilter,
+                onRoleArchived: _handleRoleArchived,
+                onRoleRestored: _handleRoleRestored,
+                onRoleDeleted: _handleRoleDeleted,
               ),
             ),
           ],
@@ -322,11 +439,12 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                IconButton(
-                  onPressed: null,
-                  tooltip: 'New Role',
-                  icon: const Icon(Icons.add),
-                ),
+                if (_canCreateRole)
+                  IconButton(
+                    onPressed: _createRole,
+                    tooltip: 'New Role',
+                    icon: const Icon(Icons.add),
+                  ),
               ],
             );
           }
@@ -372,11 +490,12 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              FilledButton.icon(
-                onPressed: null,
-                icon: const Icon(Icons.add),
-                label: const Text('New Role'),
-              ),
+              if (_canCreateRole)
+                FilledButton.icon(
+                  onPressed: _createRole,
+                  icon: const Icon(Icons.add),
+                  label: const Text('New Role'),
+                ),
             ],
           );
         },

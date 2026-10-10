@@ -14,11 +14,18 @@ class RoleDetailsPanel extends StatefulWidget {
   final FunctionalRoleCategory category;
   final FunctionalRole role;
 
+  final VoidCallback? onRoleArchived;
+  final VoidCallback? onRoleRestored;
+  final VoidCallback? onRoleDeleted;
+
   const RoleDetailsPanel({
     super.key,
     required this.organizationId,
     required this.category,
     required this.role,
+    this.onRoleArchived,
+    this.onRoleRestored,
+    this.onRoleDeleted,
   });
 
   @override
@@ -146,7 +153,13 @@ class _RoleDetailsPanelState extends State<RoleDetailsPanel> {
         );
 
       case 4:
-        return RoleDetailsSettings(role: widget.role);
+        return RoleDetailsSettings(
+          organizationId: widget.organizationId,
+          role: widget.role,
+          onRoleArchived: widget.onRoleArchived,
+          onRoleRestored: widget.onRoleRestored,
+          onRoleDeleted: widget.onRoleDeleted,
+        );
 
       default:
         return RoleDetailsOverview(

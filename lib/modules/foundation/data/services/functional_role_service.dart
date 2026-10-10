@@ -135,30 +135,86 @@ class FunctionalRoleService {
   Future<FunctionalRole> createRole({
     required String organizationId,
     required String name,
-    required String slug,
     String? description,
     String? categoryId,
   }) async {
-    final row = await _supabase
-        .from('functional_roles')
-        .insert({
-          'organization_id': organizationId,
-          'name': name,
-          'slug': slug,
-          'description': description,
-          'category_id': categoryId,
-        })
-        .select('''
-          *,
-          functional_role_categories(
-            id,
-            name,
-            slug
-          )
-        ''')
-        .single();
+    for (var attempt = 0; attempt < 3; attempt++) {
+      final slug = await _generateUniqueRoleSlug(
+        organizationId: organizationId,
+        name: name,
+      );
 
-    return FunctionalRole.fromMap(Map<String, dynamic>.from(row));
+      try {
+        final row = await _supabase
+            .from('functional_roles')
+            .insert({
+              'organization_id': organizationId,
+              'name': name,
+              'slug': slug,
+              'description': description,
+              'category_id': categoryId,
+              'status': 'active',
+            })
+            .select('''
+              *,
+              functional_role_categories(
+                id,
+                name,
+                slug
+              )
+            ''')
+            .single();
+
+        return FunctionalRole.fromMap(Map<String, dynamic>.from(row));
+      } on PostgrestException catch (error) {
+        // A concurrent role creation may have claimed the generated slug.
+        // Retry so the next attempt can generate a new unique slug.
+        if (error.code != '23505' || attempt == 2) {
+          rethrow;
+        }
+      }
+    }
+
+    throw StateError('Unable to generate a unique role identifier.');
+  }
+
+  String _slugify(String value) {
+    final slug = value
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
+        .replaceAll(RegExp(r'^-|-$'), '');
+
+    return slug.isEmpty ? 'role' : slug;
+  }
+
+  Future<String> _generateUniqueRoleSlug({
+    required String organizationId,
+    required String name,
+  }) async {
+    final baseSlug = _slugify(name);
+
+    final rows = await _supabase
+        .from('functional_roles')
+        .select('slug')
+        .eq('organization_id', organizationId);
+
+    final existingSlugs = <String>{
+      for (final row in rows) (row['slug'] as String).toLowerCase(),
+    };
+
+    if (!existingSlugs.contains(baseSlug)) {
+      return baseSlug;
+    }
+
+    var suffix = 2;
+
+    while (existingSlugs.contains('$baseSlug-$suffix')) {
+      suffix++;
+    }
+
+    return '$baseSlug-$suffix';
   }
 
   Future<FunctionalRole> updateRole({
@@ -197,6 +253,31 @@ class FunctionalRoleService {
         .eq('id', roleId);
   }
 
+  Future<void> restoreRole({
+    required String organizationId,
+    required String roleId,
+  }) async {
+    await _supabase
+        .from('functional_roles')
+        .update({
+          'status': 'active',
+          'archived_at': null,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('organization_id', organizationId)
+        .eq('id', roleId);
+  }
+
+  Future<void> deleteRole({
+    required String organizationId,
+    required String roleId,
+  }) async {
+    await _supabase
+        .from('functional_roles')
+        .delete()
+        .eq('organization_id', organizationId)
+        .eq('id', roleId);
+  }
   // ---------------------------------------------------------------------------
   // Permissions
   // ---------------------------------------------------------------------------

@@ -73,7 +73,10 @@ class _FunctionalRoleAssignmentWorkspaceState
     try {
       final results = await Future.wait([
         _service.getCategories(organizationId: widget.organizationId),
-        _service.getRoles(organizationId: widget.organizationId),
+        _service.getRoles(
+          organizationId: widget.organizationId,
+          activeOnly: false,
+        ),
       ]);
 
       if (!mounted) return;

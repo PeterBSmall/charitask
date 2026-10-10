@@ -23,6 +23,10 @@ class FunctionalRolesLayout extends StatelessWidget {
 
   final bool Function(FunctionalRole role) roleFilterMatcher;
 
+  final VoidCallback? onRoleArchived;
+  final VoidCallback? onRoleRestored;
+  final VoidCallback? onRoleDeleted;
+
   const FunctionalRolesLayout({
     super.key,
     required this.organizationId,
@@ -37,6 +41,9 @@ class FunctionalRolesLayout extends StatelessWidget {
     required this.onRoleSelected,
     required this.onRoleFilterChanged,
     required this.roleFilterMatcher,
+    this.onRoleArchived,
+    this.onRoleRestored,
+    this.onRoleDeleted,
   });
 
   @override
@@ -91,6 +98,9 @@ class FunctionalRolesLayout extends StatelessWidget {
       organizationId: organizationId,
       category: selectedCategory!,
       role: selectedRole!,
+      onRoleArchived: onRoleArchived,
+      onRoleRestored: onRoleRestored,
+      onRoleDeleted: onRoleDeleted,
     );
   }
 
