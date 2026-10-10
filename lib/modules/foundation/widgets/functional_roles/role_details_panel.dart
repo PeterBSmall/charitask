@@ -140,7 +140,10 @@ class _RoleDetailsPanelState extends State<RoleDetailsPanel> {
         );
 
       case 3:
-        return RoleDetailsAssignments(role: widget.role);
+        return RoleDetailsAssignments(
+          organizationId: widget.organizationId,
+          role: widget.role,
+        );
 
       case 4:
         return RoleDetailsSettings(role: widget.role);
