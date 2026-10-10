@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../data/services/functional_role_service.dart';
 import '../../../domain/models/functional_role.dart';
+import '../../../../../platform/authorization/authorization.dart'
+    hide FunctionalRole, Permission;
+import '../role_details/assign_person_dialog.dart';
 
 class RoleDetailsPeople extends StatefulWidget {
   final String organizationId;
@@ -20,7 +24,12 @@ class RoleDetailsPeople extends StatefulWidget {
 class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
   final _service = FunctionalRoleService();
 
+  late final AuthorizationService _authorizationService = AuthorizationService(
+    Supabase.instance.client,
+  );
+
   bool _loading = true;
+  bool _canManage = false;
   String? _error;
   List<Map<String, dynamic>> _people = [];
 
@@ -47,15 +56,22 @@ class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
     });
 
     try {
-      final results = await _service.getAssignmentsWithPeople(
-        organizationId: widget.organizationId,
-        roleId: widget.role.id,
-      );
+      final results = await Future.wait([
+        _service.getAssignmentsWithPeople(
+          organizationId: widget.organizationId,
+          roleId: widget.role.id,
+        ),
+        _authorizationService.hasPermission(
+          organizationId: widget.organizationId,
+          permissionKey: 'functionalrole.manage',
+        ),
+      ]);
 
       if (!mounted) return;
 
       setState(() {
-        _people = results;
+        _people = results[0] as List<Map<String, dynamic>>;
+        _canManage = results[1] as bool;
         _loading = false;
       });
     } catch (_) {
@@ -68,17 +84,57 @@ class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
     }
   }
 
+  Future<void> _assignPerson() async {
+    final assignedPersonIds = _people
+        .map((item) {
+          final person = item['person'];
+
+          if (person is Map<String, dynamic>) {
+            return person['id']?.toString();
+          }
+
+          return null;
+        })
+        .whereType<String>()
+        .toSet();
+
+    final assigned = await showDialog<bool>(
+      context: context,
+      builder: (_) => AssignPersonDialog(
+        organizationId: widget.organizationId,
+        role: widget.role,
+        assignedPersonIds: assignedPersonIds,
+      ),
+    );
+
+    if (assigned == true && mounted) {
+      await _loadPeople();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return _Card(
       title: 'Assigned People',
-      trailing: Text(
-        '${_people.length}',
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF64748B),
-        ),
+      trailing: Wrap(
+        spacing: 10,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            '${_people.length}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          if (_canManage)
+            OutlinedButton.icon(
+              onPressed: _loading ? null : _assignPerson,
+              icon: const Icon(Icons.person_add_outlined, size: 17),
+              label: const Text('Assign Person'),
+            ),
+        ],
       ),
       child: _buildContent(),
     );
@@ -86,51 +142,42 @@ class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
 
   Widget _buildContent() {
     if (_loading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: CircularProgressIndicator(),
-        ),
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _error!,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
-          ),
-          const SizedBox(height: 12),
-          TextButton.icon(
-            onPressed: _loadPeople,
-            icon: const Icon(Icons.refresh_outlined, size: 17),
-            label: const Text('Try Again'),
-          ),
-        ],
-      );
+      return _buildError();
     }
 
     if (_people.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'No people are currently assigned to this role.',
-            style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
-          ),
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            onPressed: null,
-            icon: const Icon(Icons.person_add_outlined, size: 17),
-            label: const Text('Assign Person'),
-          ),
-        ],
+      return const Text(
+        'No people are currently assigned to this role.',
+        style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
       );
     }
 
     return Column(children: _people.map(_buildPerson).toList());
+  }
+
+  Widget _buildError() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _error!,
+          style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+        ),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: _loadPeople,
+          icon: const Icon(Icons.refresh_outlined, size: 17),
+          label: const Text('Try Again'),
+        ),
+      ],
+    );
   }
 
   Widget _buildPerson(Map<String, dynamic> item) {
@@ -150,6 +197,7 @@ class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
 
     final email = person?['email']?.toString().trim() ?? '';
     final active = assignment?.isActive == true;
+    final assignedAt = assignment?.assignedAt;
 
     return Container(
       width: double.infinity,
@@ -161,6 +209,7 @@ class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const CircleAvatar(
             radius: 20,
@@ -182,7 +231,8 @@ class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
                     color: Color(0xFF1E293B),
                   ),
                 ),
-                if (email.isNotEmpty)
+                if (email.isNotEmpty) ...[
+                  const SizedBox(height: 3),
                   Text(
                     email,
                     maxLines: 1,
@@ -192,14 +242,34 @@ class _RoleDetailsPeopleState extends State<RoleDetailsPeople> {
                       color: Color(0xFF64748B),
                     ),
                   ),
+                ],
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 5,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    _StatusBadge(active: active),
+                    if (assignedAt is DateTime)
+                      Text(
+                        'Assigned ${_formatDate(assignedAt)}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          _StatusBadge(active: active),
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.month}/${date.day}/${date.year}';
   }
 }
 
