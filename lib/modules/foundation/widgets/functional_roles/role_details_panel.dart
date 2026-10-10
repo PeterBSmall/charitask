@@ -29,7 +29,7 @@ class _RoleDetailsPanelState extends State<RoleDetailsPanel> {
   static const _tabs = [
     'Overview',
     'Permissions',
-    'People',
+    'Members',
     'Assignments',
     'Settings',
   ];
@@ -93,6 +93,10 @@ class _RoleDetailsPanelState extends State<RoleDetailsPanel> {
   Widget _buildTabButton(int index) {
     final selected = _selectedTab == index;
 
+    final label = index == 3
+        ? 'Assignments (${widget.role.assignmentCount})'
+        : _tabs[index];
+
     return Material(
       color: selected ? Colors.white : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
@@ -106,7 +110,7 @@ class _RoleDetailsPanelState extends State<RoleDetailsPanel> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
           child: Text(
-            _tabs[index],
+            label,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,

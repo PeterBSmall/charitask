@@ -57,9 +57,26 @@ class _FunctionalRolesPageState extends State<FunctionalRolesPage> {
 
       final roles = List<FunctionalRole>.from(results[1] as List);
 
-      categories.sort(
-        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-      );
+      categories.sort((a, b) {
+        int priority(String name) {
+          switch (name.trim().toLowerCase()) {
+            case 'administration':
+              return 0;
+            case 'leadership':
+              return 1;
+            default:
+              return 2;
+          }
+        }
+
+        final priorityComparison = priority(a.name).compareTo(priority(b.name));
+
+        if (priorityComparison != 0) {
+          return priorityComparison;
+        }
+
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
 
       roles.sort(
         (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
