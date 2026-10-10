@@ -246,6 +246,51 @@ class FunctionalRoleService {
         .toList();
   }
 
+  Future<void> updateRolePermissions({
+    required String organizationId,
+    required String roleId,
+    required Set<String> permissionIds,
+  }) async {
+    final currentRows = await _supabase
+        .from('functional_role_permissions')
+        .select('permission_id')
+        .eq('organization_id', organizationId)
+        .eq('functional_role_id', roleId);
+
+    final currentPermissionIds = currentRows
+        .map((row) => row['permission_id'] as String)
+        .toSet();
+
+    final permissionsToAdd = permissionIds.difference(currentPermissionIds);
+
+    final permissionsToRemove = currentPermissionIds.difference(permissionIds);
+
+    if (permissionsToRemove.isNotEmpty) {
+      await _supabase
+          .from('functional_role_permissions')
+          .delete()
+          .eq('organization_id', organizationId)
+          .eq('functional_role_id', roleId)
+          .inFilter('permission_id', permissionsToRemove.toList());
+    }
+
+    if (permissionsToAdd.isNotEmpty) {
+      await _supabase
+          .from('functional_role_permissions')
+          .insert(
+            permissionsToAdd
+                .map(
+                  (permissionId) => {
+                    'organization_id': organizationId,
+                    'functional_role_id': roleId,
+                    'permission_id': permissionId,
+                  },
+                )
+                .toList(),
+          );
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Assignments
   // ---------------------------------------------------------------------------
