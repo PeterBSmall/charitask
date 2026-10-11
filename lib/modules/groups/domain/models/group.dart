@@ -1,10 +1,15 @@
 enum GroupType {
   team,
   committee,
+  department,
   cohort,
   participantGroup,
   leadershipTeam,
-  staffGroup;
+  staffGroup,
+  volunteerGroup,
+  board,
+  donorCircle,
+  ministry;
 
   String get value {
     switch (this) {
@@ -12,6 +17,8 @@ enum GroupType {
         return 'team';
       case GroupType.committee:
         return 'committee';
+      case GroupType.department:
+        return 'department';
       case GroupType.cohort:
         return 'cohort';
       case GroupType.participantGroup:
@@ -20,6 +27,14 @@ enum GroupType {
         return 'leadership_team';
       case GroupType.staffGroup:
         return 'staff_group';
+      case GroupType.volunteerGroup:
+        return 'volunteer_group';
+      case GroupType.board:
+        return 'board';
+      case GroupType.donorCircle:
+        return 'donor_circle';
+      case GroupType.ministry:
+        return 'ministry';
     }
   }
 
@@ -29,6 +44,8 @@ enum GroupType {
         return 'Team';
       case GroupType.committee:
         return 'Committee';
+      case GroupType.department:
+        return 'Department';
       case GroupType.cohort:
         return 'Cohort';
       case GroupType.participantGroup:
@@ -37,6 +54,14 @@ enum GroupType {
         return 'Leadership Team';
       case GroupType.staffGroup:
         return 'Staff Group';
+      case GroupType.volunteerGroup:
+        return 'Volunteer Group';
+      case GroupType.board:
+        return 'Board';
+      case GroupType.donorCircle:
+        return 'Donor Circle';
+      case GroupType.ministry:
+        return 'Ministry';
     }
   }
 
@@ -46,6 +71,8 @@ enum GroupType {
         return GroupType.team;
       case 'committee':
         return GroupType.committee;
+      case 'department':
+        return GroupType.department;
       case 'cohort':
         return GroupType.cohort;
       case 'participant_group':
@@ -54,6 +81,14 @@ enum GroupType {
         return GroupType.leadershipTeam;
       case 'staff_group':
         return GroupType.staffGroup;
+      case 'volunteer_group':
+        return GroupType.volunteerGroup;
+      case 'board':
+        return GroupType.board;
+      case 'donor_circle':
+        return GroupType.donorCircle;
+      case 'ministry':
+        return GroupType.ministry;
       default:
         return null;
     }
@@ -115,6 +150,46 @@ enum GroupOwnerType {
   }
 }
 
+enum GroupVisibility {
+  public,
+  private,
+  hidden;
+
+  String get value {
+    switch (this) {
+      case GroupVisibility.public:
+        return 'public';
+      case GroupVisibility.private:
+        return 'private';
+      case GroupVisibility.hidden:
+        return 'hidden';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case GroupVisibility.public:
+        return 'Public';
+      case GroupVisibility.private:
+        return 'Private';
+      case GroupVisibility.hidden:
+        return 'Hidden';
+    }
+  }
+
+  static GroupVisibility fromValue(String? value) {
+    switch (value) {
+      case 'public':
+        return GroupVisibility.public;
+      case 'hidden':
+        return GroupVisibility.hidden;
+      case 'private':
+      default:
+        return GroupVisibility.private;
+    }
+  }
+}
+
 enum GroupMembershipType {
   volunteers,
   staff,
@@ -167,6 +242,7 @@ class Group {
   final List<GroupMembershipType> membershipComposition;
   final String? locationId;
   final String status;
+  final GroupVisibility visibility;
   final int memberCount;
   final String? createdByPersonId;
   final DateTime? createdAt;
@@ -186,6 +262,7 @@ class Group {
     this.membershipComposition = const [],
     this.locationId,
     this.status = 'active',
+    this.visibility = GroupVisibility.private,
     this.memberCount = 0,
     this.createdByPersonId,
     this.createdAt,
@@ -206,6 +283,7 @@ class Group {
     List<GroupMembershipType>? membershipComposition,
     String? locationId,
     String? status,
+    GroupVisibility? visibility,
     int? memberCount,
     String? createdByPersonId,
     DateTime? createdAt,
@@ -226,6 +304,7 @@ class Group {
           membershipComposition ?? this.membershipComposition,
       locationId: locationId ?? this.locationId,
       status: status ?? this.status,
+      visibility: visibility ?? this.visibility,
       memberCount: memberCount ?? this.memberCount,
       createdByPersonId: createdByPersonId ?? this.createdByPersonId,
       createdAt: createdAt ?? this.createdAt,

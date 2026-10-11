@@ -21,6 +21,8 @@ class GroupMembershipStep extends StatefulWidget {
 class _GroupMembershipStepState extends State<GroupMembershipStep> {
   bool _addMembersNow = false;
 
+  final List<PeopleAccessPerson> _selectedPeopleCache = [];
+
   @override
   void initState() {
     super.initState();
@@ -264,11 +266,17 @@ class _GroupMembershipStepState extends State<GroupMembershipStep> {
   }
 
   List<PeopleAccessPerson> _selectedPeople() {
-    return const [];
+    return _selectedPeopleCache
+        .where((person) => widget.draft.memberIds.contains(person.id))
+        .toList();
   }
 
   void _handlePeopleChanged(List<PeopleAccessPerson> people) {
     setState(() {
+      _selectedPeopleCache
+        ..clear()
+        ..addAll(people);
+
       widget.draft.memberIds
         ..clear()
         ..addAll(people.map((person) => person.id));
@@ -292,6 +300,8 @@ class _GroupMembershipStepState extends State<GroupMembershipStep> {
   }
 
   Widget _buildSelectedMembers() {
+    final selectedPeople = _selectedPeople();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -309,16 +319,17 @@ class _GroupMembershipStepState extends State<GroupMembershipStep> {
                 ),
               ),
             ),
-            _countBadge(widget.draft.memberIds.length),
+            _countBadge(selectedPeople.length),
           ],
         ),
         const SizedBox(height: 12),
-        ...widget.draft.memberIds.map(_buildMemberRow),
+        ...selectedPeople.map((person) => _buildMemberRow(person)),
       ],
     );
   }
 
-  Widget _buildMemberRow(String personId) {
+  Widget _buildMemberRow(PeopleAccessPerson person) {
+    final personId = person.id;
     final role = widget.draft.memberRoles[personId] ?? 'member';
 
     return Container(
@@ -342,10 +353,28 @@ class _GroupMembershipStepState extends State<GroupMembershipStep> {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              personId,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF334155)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  person.displayName,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF334155),
+                  ),
+                ),
+                if (person.email != null && person.email!.isNotEmpty)
+                  Text(
+                    person.email!,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 8),

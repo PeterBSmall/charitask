@@ -4,6 +4,8 @@ import 'package:charitask/modules/groups/domain/models/create_group_draft.dart';
 import 'package:charitask/modules/groups/domain/models/group.dart';
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_owner_location_field.dart';
 import 'package:charitask/modules/locations/pages/add_location_page.dart';
+import 'package:charitask/modules/groups/widgets/create_group/group_type_selector.dart';
+import 'package:charitask/modules/groups/widgets/create_group/group_visibility_selector.dart';
 
 class GroupDefinitionStep extends StatefulWidget {
   final CreateGroupDraft draft;
@@ -77,134 +79,46 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
           style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
         ),
         const SizedBox(height: 28),
-        _buildGroupType(),
+
+        _section(
+          title: 'Group Type',
+          subtitle: 'Choose the type that best describes this group.',
+          child: GroupTypeSelector(
+            draft: widget.draft,
+            onChanged: () {
+              setState(() {});
+              widget.onChanged?.call();
+            },
+          ),
+        ),
+
         const SizedBox(height: 26),
+
         _buildBasicInformation(),
+
         const SizedBox(height: 26),
+
+        _section(
+          title: 'Visibility',
+          subtitle: 'Choose who can see this group.',
+          child: GroupVisibilitySelector(
+            draft: widget.draft,
+            onChanged: () {
+              setState(() {});
+              widget.onChanged?.call();
+            },
+          ),
+        ),
+
+        const SizedBox(height: 26),
+
         _buildAttributes(),
+
         const SizedBox(height: 26),
+
         _buildOwner(),
       ],
     );
-  }
-
-  Widget _buildGroupType() {
-    return _section(
-      title: 'Group Type',
-      subtitle: 'Choose the type that best describes this group.',
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final columns = constraints.maxWidth >= 760
-              ? 4
-              : constraints.maxWidth >= 500
-              ? 2
-              : 1;
-
-          final spacing = 12.0;
-          final width = columns == 1
-              ? constraints.maxWidth
-              : (constraints.maxWidth - spacing * (columns - 1)) / columns;
-
-          const options = [
-            CreateGroupTypeOption.team,
-            CreateGroupTypeOption.committee,
-            CreateGroupTypeOption.cohort,
-            CreateGroupTypeOption.other,
-          ];
-
-          return Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
-            children: options.map((option) {
-              return SizedBox(width: width, child: _typeCard(option));
-            }).toList(),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _typeCard(CreateGroupTypeOption option) {
-    final selected = widget.draft.groupTypeOption == option;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          widget.draft.setGroupType(option);
-        });
-
-        widget.onChanged?.call();
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFFECFEFF) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? const Color(0xFF06B6D4) : const Color(0xFFE2E8F0),
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              _typeIcon(option),
-              color: selected
-                  ? const Color(0xFF0891B2)
-                  : const Color(0xFF64748B),
-              size: 22,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                _typeLabel(option),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  color: const Color(0xFF1E293B),
-                ),
-              ),
-            ),
-            if (selected)
-              const Icon(
-                Icons.check_circle_rounded,
-                size: 18,
-                color: Color(0xFF06B6D4),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  IconData _typeIcon(CreateGroupTypeOption option) {
-    switch (option) {
-      case CreateGroupTypeOption.team:
-        return Icons.groups_rounded;
-      case CreateGroupTypeOption.committee:
-        return Icons.account_balance_rounded;
-      case CreateGroupTypeOption.cohort:
-        return Icons.diversity_3_rounded;
-      case CreateGroupTypeOption.other:
-        return Icons.more_horiz_rounded;
-    }
-  }
-
-  String _typeLabel(CreateGroupTypeOption option) {
-    switch (option) {
-      case CreateGroupTypeOption.team:
-        return 'Team';
-      case CreateGroupTypeOption.committee:
-        return 'Committee';
-      case CreateGroupTypeOption.cohort:
-        return 'Cohort';
-      case CreateGroupTypeOption.other:
-        return 'Other';
-    }
   }
 
   Widget _buildBasicInformation() {
@@ -283,15 +197,16 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
     final ownerType = widget.draft.ownerType;
 
     return _section(
-      title: 'Primary Owner',
-      subtitle: 'Choose who this group mainly belongs to or is managed by.',
+      title: 'Primary Association',
+      subtitle:
+          'Choose the organization, program, or location this group primarily belongs to.',
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 560;
 
           final ownerTypeField = DropdownButtonFormField<GroupOwnerType>(
             initialValue: ownerType,
-            decoration: _inputDecoration(label: 'Primary Owner Type'),
+            decoration: _inputDecoration(label: 'Type'),
             items: GroupOwnerType.values
                 .where(
                   (type) =>
@@ -402,26 +317,29 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
     switch (ownerType) {
       case GroupOwnerType.organization:
         title = 'When to use Organization';
-        message = 'Use this when the group belongs to the whole organization.';
+        message =
+            'Use this when the group primarily belongs to the whole organization.';
         example = 'Example: Board of Directors';
         break;
 
       case GroupOwnerType.location:
         title = 'When to use Location';
         message =
-            'Use this when the group is mainly connected to one location.';
+            'Use this when the group is primarily connected to one location.';
         example = 'Example: Falmouth ReStore Volunteer Team';
         break;
 
       case GroupOwnerType.program:
         title = 'When to use Program';
-        message = 'Use this when the group is mainly connected to a program.';
+        message =
+            'Use this when the group is primarily connected to a program.';
         example = 'Example: Home Repair Volunteers';
         break;
 
       case null:
-        title = 'What is Primary Owner?';
-        message = 'Choose who this group mainly belongs to or is managed by.';
+        title = 'What is Primary Association?';
+        message =
+            'Choose the organization, program, or location this group primarily belongs to.';
         example =
             'You can connect this group to other locations or programs later.';
         break;

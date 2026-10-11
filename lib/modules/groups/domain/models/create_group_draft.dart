@@ -1,6 +1,18 @@
 import 'group.dart';
 
-enum CreateGroupTypeOption { team, committee, cohort, other }
+enum CreateGroupTypeOption {
+  team,
+  committee,
+  department,
+  cohort,
+  participantGroup,
+  leadershipTeam,
+  staffGroup,
+  volunteerGroup,
+  board,
+  donorCircle,
+  ministry,
+}
 
 class CreateGroupDraft {
   CreateGroupTypeOption? groupTypeOption;
@@ -13,6 +25,8 @@ class CreateGroupDraft {
 
   GroupOwnerType? ownerType;
   String? ownerId;
+
+  GroupVisibility visibility = GroupVisibility.private;
 
   final Set<String> memberIds = {};
   final Map<String, String> memberRoles = {};
@@ -29,8 +43,15 @@ class CreateGroupDraft {
     groupType = switch (option) {
       CreateGroupTypeOption.team => GroupType.team,
       CreateGroupTypeOption.committee => GroupType.committee,
+      CreateGroupTypeOption.department => GroupType.department,
       CreateGroupTypeOption.cohort => GroupType.cohort,
-      CreateGroupTypeOption.other => null,
+      CreateGroupTypeOption.participantGroup => GroupType.participantGroup,
+      CreateGroupTypeOption.leadershipTeam => GroupType.leadershipTeam,
+      CreateGroupTypeOption.staffGroup => GroupType.staffGroup,
+      CreateGroupTypeOption.volunteerGroup => GroupType.volunteerGroup,
+      CreateGroupTypeOption.board => GroupType.board,
+      CreateGroupTypeOption.donorCircle => GroupType.donorCircle,
+      CreateGroupTypeOption.ministry => GroupType.ministry,
     };
   }
 
@@ -42,6 +63,7 @@ class CreateGroupDraft {
     attributes.clear();
     ownerType = null;
     ownerId = null;
+    visibility = GroupVisibility.private;
     memberIds.clear();
     memberRoles.clear();
     locationIds.clear();

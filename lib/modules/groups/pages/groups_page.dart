@@ -165,12 +165,8 @@ class _GroupsPageState extends State<GroupsPage> {
       .where((group) => group.ownerType == GroupOwnerType.program)
       .length;
 
-  double get _averageMembers {
-    if (_groups.isEmpty) return 0;
-
-    final total = _groups.fold<int>(0, (sum, group) => sum + group.memberCount);
-
-    return total / _groups.length;
+  int get _totalMembers {
+    return _groups.fold<int>(0, (sum, group) => sum + group.memberCount);
   }
 
   bool get _hasActiveFilters {
@@ -254,10 +250,10 @@ class _GroupsPageState extends State<GroupsPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GroupsKpiRow(
             activeGroups: _activeGroups,
+            totalMembers: _totalMembers,
             staffGroups: _staffGroups,
             volunteerGroups: _volunteerGroups,
             programGroups: _programGroups,
-            averageMembers: _averageMembers,
           ),
         ),
         const SizedBox(height: 18),

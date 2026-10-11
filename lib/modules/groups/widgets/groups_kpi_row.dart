@@ -4,18 +4,18 @@ import 'groups_kpi_card.dart';
 
 class GroupsKpiRow extends StatelessWidget {
   final int activeGroups;
+  final int totalMembers;
   final int staffGroups;
   final int volunteerGroups;
   final int programGroups;
-  final double averageMembers;
 
   const GroupsKpiRow({
     super.key,
     required this.activeGroups,
+    required this.totalMembers,
     required this.staffGroups,
     required this.volunteerGroups,
     required this.programGroups,
-    required this.averageMembers,
   });
 
   @override
@@ -51,6 +51,14 @@ class GroupsKpiRow extends StatelessWidget {
             SizedBox(
               width: cardWidth,
               child: GroupsKpiCard(
+                label: 'Total Members',
+                value: totalMembers.toString(),
+                icon: Icons.people_outline,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: GroupsKpiCard(
                 label: 'Staff Groups',
                 value: staffGroups.toString(),
                 icon: Icons.badge_outlined,
@@ -70,14 +78,6 @@ class GroupsKpiRow extends StatelessWidget {
                 label: 'Program Groups',
                 value: programGroups.toString(),
                 icon: Icons.account_tree_outlined,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: GroupsKpiCard(
-                label: 'Average Members',
-                value: averageMembers.toStringAsFixed(1),
-                icon: Icons.people_outline,
               ),
             ),
           ],

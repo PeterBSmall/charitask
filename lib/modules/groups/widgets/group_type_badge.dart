@@ -67,6 +67,8 @@ class GroupTypeBadge extends StatelessWidget {
         return Icons.groups_outlined;
       case GroupType.committee:
         return Icons.account_balance_outlined;
+      case GroupType.department:
+        return Icons.business_center_outlined;
       case GroupType.cohort:
         return Icons.diversity_3_outlined;
       case GroupType.participantGroup:
@@ -75,6 +77,14 @@ class GroupTypeBadge extends StatelessWidget {
         return Icons.workspace_premium_outlined;
       case GroupType.staffGroup:
         return Icons.badge_outlined;
+      case GroupType.volunteerGroup:
+        return Icons.volunteer_activism_outlined;
+      case GroupType.board:
+        return Icons.account_balance_outlined;
+      case GroupType.donorCircle:
+        return Icons.favorite_border_outlined;
+      case GroupType.ministry:
+        return Icons.church_outlined;
     }
   }
 }

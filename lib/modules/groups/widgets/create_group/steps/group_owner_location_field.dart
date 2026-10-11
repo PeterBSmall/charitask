@@ -135,7 +135,7 @@ class _GroupOwnerLocationFieldState extends State<GroupOwnerLocationField> {
     return DropdownButtonFormField<String>(
       initialValue: widget.selectedLocationId,
       decoration: _inputDecoration(
-        label: 'Owner',
+        label: 'Location',
         hint: 'Search locations...',
         required: true,
       ),
@@ -240,7 +240,7 @@ class _GroupOwnerLocationFieldState extends State<GroupOwnerLocationField> {
 
   Widget _buildField({required Widget child}) {
     return InputDecorator(
-      decoration: _inputDecoration(label: 'Owner', required: true),
+      decoration: _inputDecoration(label: 'Location', required: true),
       child: child,
     );
   }
