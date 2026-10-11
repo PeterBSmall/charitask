@@ -63,6 +63,7 @@ class GroupService {
     required String name,
     required String slug,
     required GroupType groupType,
+    required GroupVisibility visibility,
     required GroupOwnerType ownerType,
     required String ownerId,
     required List<GroupMembershipType> membershipComposition,
@@ -79,6 +80,7 @@ class GroupService {
           'slug': slug,
           'description': description,
           'group_type': groupType.value,
+          'visibility': visibility.value,
           'owner_type': ownerType.value,
           'owner_id': ownerId,
           'membership_composition': membershipComposition
@@ -171,6 +173,7 @@ class GroupService {
       name: row['name'] as String,
       description: row['description'] as String?,
       groupType: GroupType.fromValue(row['group_type'] as String?),
+      visibility: GroupVisibility.fromValue(row['visibility'] as String?),
       ownerType: GroupOwnerType.fromValue(row['owner_type'] as String?),
       ownerId: row['owner_id'] as String?,
       membershipComposition: composition,

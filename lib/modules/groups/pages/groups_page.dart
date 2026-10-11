@@ -493,12 +493,16 @@ class _GroupsPageState extends State<GroupsPage> {
     );
   }
 
-  void _handleAddGroup() {
-    Navigator.of(context).push(
+  Future<void> _handleAddGroup() async {
+    final created = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => CreateGroupPage(organizationId: widget.organizationId),
       ),
     );
+
+    if (!mounted || created != true) return;
+
+    await _loadGroups();
   }
 
   void _openGroup(Group group) {

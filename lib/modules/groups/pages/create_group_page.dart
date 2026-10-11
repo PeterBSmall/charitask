@@ -7,6 +7,7 @@ import 'package:charitask/modules/groups/widgets/create_group/create_group_sideb
 import 'package:charitask/modules/groups/widgets/create_group/create_group_stepper.dart';
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_definition_step.dart';
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_membership_step.dart';
+import 'package:charitask/modules/groups/data/services/group_service.dart';
 
 class CreateGroupPage extends StatefulWidget {
   final String organizationId;
@@ -19,6 +20,10 @@ class CreateGroupPage extends StatefulWidget {
 
 class _CreateGroupPageState extends State<CreateGroupPage> {
   final CreateGroupDraft _draft = CreateGroupDraft();
+
+  final GroupService _groupService = GroupService();
+
+  bool _saving = false;
 
   int _currentStep = 0;
 
@@ -38,14 +43,91 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     return true;
   }
 
-  void _nextStep() {
-    if (!_canContinue) return;
+  Future<void> _nextStep() async {
+    if (!_canContinue || _saving) return;
 
     if (_currentStep < _steps.length - 1) {
       setState(() {
         _currentStep++;
       });
+      return;
     }
+
+    await _createGroup();
+  }
+
+  Future<void> _createGroup() async {
+    if (!_draft.isDefinitionComplete) return;
+
+    final groupType = _draft.groupType;
+    final ownerType = _draft.ownerType;
+    final ownerId = _draft.ownerId;
+
+    if (groupType == null || ownerType == null || ownerId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please complete the group definition before creating the group.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _saving = true;
+    });
+
+    try {
+      final slug = _buildSlug(_draft.name);
+
+      await _groupService.createGroup(
+        organizationId: widget.organizationId,
+        name: _draft.name.trim(),
+        slug: slug,
+        groupType: groupType,
+        visibility: _draft.visibility,
+        ownerType: ownerType,
+        ownerId: ownerId,
+        membershipComposition: const [],
+        description: _draft.description.trim().isEmpty
+            ? null
+            : _draft.description.trim(),
+        locationId: _draft.locationIds.isEmpty
+            ? null
+            : _draft.locationIds.first,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Group created successfully.')),
+      );
+
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unable to create group: $error')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+        });
+      }
+    }
+  }
+
+  String _buildSlug(String value) {
+    final slug = value
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+
+    return slug.isEmpty ? 'group' : slug;
   }
 
   void _previousStep() {
