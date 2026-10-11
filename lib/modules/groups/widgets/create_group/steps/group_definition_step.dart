@@ -277,8 +277,20 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
           selectedLocationId: widget.draft.ownerId,
           onChanged: (location) {
             setState(() {
+              widget.draft.ownerType = location == null
+                  ? null
+                  : GroupOwnerType.location;
+
               widget.draft.ownerId = location?.id;
+
+              widget.draft.locationIds
+                ..clear()
+                ..addAll(
+                  location == null ? const <String>[] : <String>[location.id],
+                );
             });
+
+            widget.onChanged?.call();
           },
           onCreateLocation: _createLocation,
         );

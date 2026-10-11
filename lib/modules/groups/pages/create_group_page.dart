@@ -8,6 +8,7 @@ import 'package:charitask/modules/groups/widgets/create_group/create_group_stepp
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_definition_step.dart';
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_membership_step.dart';
 import 'package:charitask/modules/groups/data/services/group_service.dart';
+import 'package:charitask/modules/groups/data/services/group_membership_service.dart';
 
 class CreateGroupPage extends StatefulWidget {
   final String organizationId;
@@ -22,7 +23,8 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   final CreateGroupDraft _draft = CreateGroupDraft();
 
   final GroupService _groupService = GroupService();
-
+  final GroupMembershipService _groupMembershipService =
+      GroupMembershipService();
   bool _saving = false;
 
   int _currentStep = 0;
@@ -37,7 +39,9 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
 
   bool get _canContinue {
     if (_currentStep == 0) {
-      return _draft.isDefinitionComplete;
+      return _draft.isDefinitionComplete &&
+          _draft.ownerType != null &&
+          _draft.ownerId != null;
     }
 
     return true;
@@ -67,7 +71,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Please complete the group definition before creating the group.',
+            'Please select a group type, name, and owner before creating the group.',
           ),
         ),
       );
@@ -81,7 +85,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     try {
       final slug = _buildSlug(_draft.name);
 
-      await _groupService.createGroup(
+      final createdGroup = await _groupService.createGroup(
         organizationId: widget.organizationId,
         name: _draft.name.trim(),
         slug: slug,
@@ -97,6 +101,13 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
             ? null
             : _draft.locationIds.first,
       );
+      if (_draft.memberRoles.isNotEmpty) {
+        await _groupMembershipService.addMembers(
+          organizationId: widget.organizationId,
+          groupId: createdGroup.id,
+          memberRoles: Map<String, String>.from(_draft.memberRoles),
+        );
+      }
 
       if (!mounted) return;
 

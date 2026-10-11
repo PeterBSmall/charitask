@@ -75,7 +75,12 @@ class FunctionalRoleCatalog extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: TextField(
         onChanged: onSearchChanged,
-        controller: TextEditingController(text: searchQuery),
+        controller: TextEditingController.fromValue(
+          TextEditingValue(
+            text: searchQuery,
+            selection: TextSelection.collapsed(offset: searchQuery.length),
+          ),
+        ),
         decoration: InputDecoration(
           hintText: 'Search functional roles...',
           prefixIcon: const Icon(Icons.search, size: 20),
