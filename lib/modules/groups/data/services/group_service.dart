@@ -35,6 +35,35 @@ class GroupService {
         .toList();
   }
 
+  Future<List<Group>> getArchivedGroups({
+    required String organizationId,
+  }) async {
+    final rows = await _supabase
+        .from('groups')
+        .select()
+        .eq('organization_id', organizationId)
+        .eq('status', 'inactive')
+        .not('archived_at', 'is', null)
+        .order('archived_at', ascending: false);
+
+    final groups = rows
+        .map((row) => _fromMap(Map<String, dynamic>.from(row)))
+        .toList();
+
+    if (groups.isEmpty) {
+      return groups;
+    }
+
+    final counts = await _getMemberCounts(
+      organizationId: organizationId,
+      groupIds: groups.map((group) => group.id).toList(),
+    );
+
+    return groups
+        .map((group) => group.copyWith(memberCount: counts[group.id] ?? 0))
+        .toList();
+  }
+
   Future<Group?> getGroup({
     required String groupId,
     required String organizationId,
@@ -96,6 +125,76 @@ class GroupService {
     return _fromMap(Map<String, dynamic>.from(row));
   }
 
+  /// Creates a new group based on an existing group.
+  ///
+  /// Preserves the group's configuration but deliberately does not copy
+  /// membership records. Generates a unique slug within the organization.
+  Future<Group> duplicateGroup({
+    required String organizationId,
+    required Group sourceGroup,
+    required String name,
+    required String? description,
+  }) async {
+    final groupType = sourceGroup.groupType;
+    final ownerType = sourceGroup.ownerType;
+    final ownerId = sourceGroup.ownerId;
+
+    // Preserve the original ownership instead of silently changing it.
+    if (groupType == null || ownerType == null || ownerId == null) {
+      throw StateError(
+        'This group is missing its type or ownership information '
+        'and cannot be duplicated safely.',
+      );
+    }
+
+    // Include archived groups because slug uniqueness applies to all
+    // groups in the organization, not only active groups.
+    final rows = await _supabase
+        .from('groups')
+        .select('slug')
+        .eq('organization_id', organizationId);
+
+    final existingSlugs = rows
+        .map((row) => (row['slug'] as String?)?.toLowerCase())
+        .whereType<String>()
+        .toSet();
+
+    final normalizedName = name.trim();
+
+    final baseSlug = normalizedName
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+
+    final rootSlug = baseSlug.isEmpty ? 'group' : baseSlug;
+
+    var slug = rootSlug;
+    var suffix = 2;
+
+    while (existingSlugs.contains(slug.toLowerCase())) {
+      slug = '$rootSlug-$suffix';
+      suffix++;
+    }
+
+    final cleanDescription = description?.trim();
+
+    return createGroup(
+      organizationId: organizationId,
+      name: normalizedName,
+      slug: slug,
+      groupType: groupType,
+      visibility: sourceGroup.visibility,
+      ownerType: ownerType,
+      ownerId: ownerId,
+      membershipComposition: sourceGroup.membershipComposition,
+      description: cleanDescription == null || cleanDescription.isEmpty
+          ? null
+          : cleanDescription,
+      locationId: sourceGroup.locationId,
+      color: sourceGroup.color,
+    );
+  }
+
   Future<Group> updateGroup({
     required String groupId,
     required String organizationId,
@@ -132,6 +231,23 @@ class GroupService {
         })
         .eq('id', groupId)
         .eq('organization_id', organizationId);
+  }
+
+  Future<void> restoreGroup({
+    required String groupId,
+    required String organizationId,
+  }) async {
+    await _supabase
+        .from('groups')
+        .update({
+          'status': 'active',
+          'archived_at': null,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', groupId)
+        .eq('organization_id', organizationId)
+        .select('id')
+        .single();
   }
 
   Future<Map<String, int>> _getMemberCounts({

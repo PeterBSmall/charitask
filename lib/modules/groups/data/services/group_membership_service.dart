@@ -94,6 +94,33 @@ ended_at,
     }
   }
 
+  Future<void> updateMemberRole({
+    required String organizationId,
+    required String groupId,
+    required String personId,
+    required String membershipRole,
+  }) async {
+    const allowedRoles = {'leader', 'co_leader', 'coordinator', 'member'};
+
+    if (!allowedRoles.contains(membershipRole)) {
+      throw ArgumentError.value(
+        membershipRole,
+        'membershipRole',
+        'Unsupported group membership role.',
+      );
+    }
+
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _supabase
+        .from('group_memberships')
+        .update({'membership_role': membershipRole, 'updated_at': now})
+        .eq('organization_id', organizationId)
+        .eq('group_id', groupId)
+        .eq('person_id', personId)
+        .eq('status', 'active');
+  }
+
   Future<void> removeMember({
     required String organizationId,
     required String groupId,

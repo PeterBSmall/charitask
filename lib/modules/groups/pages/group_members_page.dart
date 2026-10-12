@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:charitask/modules/groups/domain/models/group.dart';
 import 'package:charitask/modules/groups/data/services/group_membership_service.dart';
 import 'package:charitask/modules/groups/widgets/group_members/group_member_table.dart';
+import 'package:charitask/modules/groups/widgets/group_members/add_group_members_dialog.dart';
 
 class GroupMembersPage extends StatefulWidget {
   final String organizationId;
@@ -112,6 +113,130 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Unable to remove member: $error')),
       );
+    }
+  }
+
+  Future<void> _changeMemberRole(Map<String, dynamic> member) async {
+    final personId = member['person_id']?.toString();
+
+    if (personId == null || personId.isEmpty) return;
+
+    const roles = <String, String>{
+      'leader': 'Leader',
+      'co_leader': 'Co-Leader',
+      'coordinator': 'Coordinator',
+      'member': 'Member',
+    };
+
+    final currentRole = member['membership_role']?.toString() ?? 'member';
+
+    final selectedRole = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Change Group Role'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: roles.entries.map((entry) {
+              final isSelected = entry.key == currentRole;
+
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: isSelected ? _cyan : _mutedText,
+                ),
+                title: Text(entry.value),
+                onTap: () {
+                  Navigator.of(dialogContext).pop(entry.key);
+                },
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+
+    if (selectedRole == null || selectedRole == currentRole || !mounted) {
+      return;
+    }
+
+    try {
+      await _membershipService.updateMemberRole(
+        organizationId: widget.organizationId,
+        groupId: widget.group.id,
+        personId: personId,
+        membershipRole: selectedRole,
+      );
+
+      await _loadMembers();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Group role updated to ${roles[selectedRole]}.'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to update group role: $error')),
+      );
+    }
+  }
+
+  Future<void> _addMembers() async {
+    final activePersonIds = _members
+        .map((member) => member['person_id']?.toString())
+        .whereType<String>()
+        .toSet();
+
+    final result = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => AddGroupMembersDialog(
+        organizationId: widget.organizationId,
+        excludedPersonIds: activePersonIds,
+      ),
+    );
+
+    if (result == null || result.isEmpty || !mounted) return;
+
+    try {
+      await _membershipService.addMembers(
+        organizationId: widget.organizationId,
+        groupId: widget.group.id,
+        memberRoles: result,
+      );
+
+      await _loadMembers();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Added ${result.length} '
+            '${result.length == 1 ? 'member' : 'members'} '
+            'to ${widget.group.name}.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unable to add members: $error')));
     }
   }
 
@@ -254,6 +379,8 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
   }
 
   Widget _buildMemberCount() {
+    final memberCount = _members.length;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -261,19 +388,19 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '2',
-            style: TextStyle(
+            '$memberCount',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: 2),
-          Text(
+          const SizedBox(height: 2),
+          const Text(
             'Members',
             style: TextStyle(
               color: Colors.white70,
@@ -435,7 +562,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
             const SizedBox(width: 12),
             Flexible(
               child: FilledButton.icon(
-                onPressed: () {},
+                onPressed: _addMembers,
                 icon: const Icon(Icons.person_add_alt_1, size: 18),
                 label: const Text('Add Members'),
                 style: FilledButton.styleFrom(
@@ -455,6 +582,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
           members: _members,
           isCompact: isCompact,
           onRemoveMember: _removeMember,
+          onChangeRole: _changeMemberRole,
         ),
         const SizedBox(height: 16),
         _buildRoleInfoCard(),

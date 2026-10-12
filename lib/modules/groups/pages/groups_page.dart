@@ -11,6 +11,9 @@ import 'package:charitask/modules/groups/widgets/groups_kpi_row.dart';
 import 'package:charitask/modules/groups/widgets/groups_view_toggle.dart';
 import 'package:charitask/modules/groups/pages/create_group_page.dart';
 import 'package:charitask/modules/groups/pages/group_members_page.dart';
+import 'package:charitask/modules/groups/widgets/edit_group_dialog.dart';
+import 'package:charitask/modules/groups/pages/archived_groups_page.dart';
+import 'package:charitask/modules/groups/widgets/duplicate_group_dialog.dart';
 
 class GroupsPage extends StatefulWidget {
   final String organizationId;
@@ -226,7 +229,15 @@ class _GroupsPageState extends State<GroupsPage> {
                         const SizedBox(height: 8),
                         Align(
                           alignment: Alignment.centerRight,
-                          child: _buildAddGroupButton(compact: true),
+                          child: Wrap(
+                            alignment: WrapAlignment.end,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _buildArchivedGroupsButton(),
+                              _buildAddGroupButton(compact: true),
+                            ],
+                          ),
                         ),
                       ],
                     )
@@ -241,7 +252,15 @@ class _GroupsPageState extends State<GroupsPage> {
                           },
                         ),
                         const Spacer(),
-                        _buildAddGroupButton(),
+                        Wrap(
+                          alignment: WrapAlignment.end,
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            _buildArchivedGroupsButton(),
+                            _buildAddGroupButton(),
+                          ],
+                        ),
                       ],
                     ),
             );
@@ -302,6 +321,19 @@ class _GroupsPageState extends State<GroupsPage> {
         ),
         _buildGroupsContent(),
       ],
+    );
+  }
+
+  Widget _buildArchivedGroupsButton() {
+    return OutlinedButton.icon(
+      onPressed: _openArchivedGroups,
+      icon: const Icon(Icons.archive_outlined, size: 18),
+      label: const Text('Archived Groups'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF7C3AED),
+        side: const BorderSide(color: Color(0xFF7C3AED)),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      ),
     );
   }
 
@@ -506,27 +538,89 @@ class _GroupsPageState extends State<GroupsPage> {
     await _loadGroups();
   }
 
+  Future<void> _openArchivedGroups() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            ArchivedGroupsPage(organizationId: widget.organizationId),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await _loadGroups();
+  }
+
   void _openGroup(Group group) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Open ${group.name}')));
   }
 
-  void _editGroup(Group group) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Edit ${group.name}')));
+  Future<void> _editGroup(Group group) async {
+    final changes = await showDialog<GroupEditData>(
+      context: context,
+      builder: (_) => EditGroupDialog(group: group),
+    );
+
+    if (changes == null || !mounted) return;
+
+    try {
+      await _groupService.updateGroup(
+        groupId: group.id,
+        organizationId: widget.organizationId,
+        changes: {
+          'name': changes.name,
+          'slug': _buildGroupSlug(changes.name),
+          'description': changes.description.trim().isEmpty
+              ? null
+              : changes.description.trim(),
+          'group_type': changes.groupType.value,
+          'visibility': changes.visibility.value,
+        },
+      );
+
+      if (!mounted) return;
+
+      await _loadGroups();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${changes.name} updated successfully.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unable to update group: $error')));
+    }
   }
 
-  void _manageMembers(Group group) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
+  String _buildGroupSlug(String value) {
+    final slug = value
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+
+    return slug.isEmpty ? 'group' : slug;
+  }
+
+  Future<void> _manageMembers(Group group) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
         builder: (_) => GroupMembersPage(
           organizationId: widget.organizationId,
           group: group,
         ),
       ),
     );
+
+    if (!mounted) return;
+
+    await _loadGroups();
   }
 
   void _viewActivity(Group group) {
@@ -535,15 +629,94 @@ class _GroupsPageState extends State<GroupsPage> {
     ).showSnackBar(SnackBar(content: Text('View activity for ${group.name}')));
   }
 
-  void _duplicateGroup(Group group) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Duplicate ${group.name}')));
+  Future<void> _duplicateGroup(Group group) async {
+    final result = await showDialog<DuplicateGroupData>(
+      context: context,
+      builder: (dialogContext) => DuplicateGroupDialog(group: group),
+    );
+
+    if (result == null || !mounted) return;
+
+    try {
+      await _groupService.duplicateGroup(
+        organizationId: widget.organizationId,
+        sourceGroup: group,
+        name: result.name,
+        description: result.description,
+      );
+
+      if (!mounted) return;
+
+      await _loadGroups();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('"${result.name}" was created successfully.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not duplicate group: $error'),
+          backgroundColor: Colors.red.shade700,
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    }
   }
 
   Future<void> _archiveGroup(Group group) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Archive ${group.name} will be connected next.')),
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Archive Group?'),
+        content: Text(
+          'Are you sure you want to archive "${group.name}"? '
+          'The group will be removed from active Groups, '
+          'but its records will be preserved.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Archive Group'),
+          ),
+        ],
+      ),
     );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await _groupService.archiveGroup(
+        groupId: group.id,
+        organizationId: widget.organizationId,
+      );
+
+      if (!mounted) return;
+
+      await _loadGroups();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${group.name} was archived.')));
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to archive group: $error')),
+      );
+    }
   }
 }

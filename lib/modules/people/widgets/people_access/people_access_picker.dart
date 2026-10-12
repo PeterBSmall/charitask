@@ -15,6 +15,7 @@ class PeopleAccessPicker extends StatefulWidget {
     this.title = 'Add People',
     this.subtitle =
         'Search for people in your organization or add someone new.',
+    this.excludedPersonIds = const {},
   });
 
   final String organizationId;
@@ -23,6 +24,7 @@ class PeopleAccessPicker extends StatefulWidget {
   final VoidCallback? onAddNewPerson;
   final String title;
   final String subtitle;
+  final Set<String> excludedPersonIds;
 
   @override
   State<PeopleAccessPicker> createState() => _PeopleAccessPickerState();
@@ -88,11 +90,15 @@ class _PeopleAccessPickerState extends State<PeopleAccessPicker> {
   List<PeopleAccessPerson> get _filteredPeople {
     final query = _searchController.text.trim().toLowerCase();
 
+    final eligiblePeople = _people.where(
+      (person) => !widget.excludedPersonIds.contains(person.id),
+    );
+
     if (query.isEmpty) {
-      return _people;
+      return eligiblePeople.toList();
     }
 
-    return _people.where((person) {
+    return eligiblePeople.where((person) {
       return person.displayName.toLowerCase().contains(query) ||
           person.firstName.toLowerCase().contains(query) ||
           person.lastName.toLowerCase().contains(query) ||

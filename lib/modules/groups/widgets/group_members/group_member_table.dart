@@ -4,12 +4,14 @@ class GroupMemberTable extends StatelessWidget {
   final List<Map<String, dynamic>> members;
   final bool isCompact;
   final void Function(Map<String, dynamic> member)? onRemoveMember;
+  final void Function(Map<String, dynamic> member)? onChangeRole;
 
   const GroupMemberTable({
     super.key,
     required this.members,
     required this.isCompact,
     this.onRemoveMember,
+    this.onChangeRole,
   });
 
   @override
@@ -41,7 +43,7 @@ class GroupMemberTable extends StatelessWidget {
         children: [
           Expanded(flex: 3, child: _HeaderText('Name')),
           Expanded(flex: 3, child: _HeaderText('Email')),
-          Expanded(flex: 2, child: _HeaderText('Role')),
+          Expanded(flex: 2, child: _HeaderText('Group Membership Role')),
           Expanded(flex: 2, child: _HeaderText('Status')),
           Expanded(flex: 2, child: _HeaderText('Joined')),
           SizedBox(width: 48, child: _HeaderText('')),
@@ -110,26 +112,13 @@ class GroupMemberTable extends StatelessWidget {
                 color: Color(0xFF64748B),
               ),
               onSelected: (value) {
-                if (value == 'remove') {
+                if (value == 'change_role') {
+                  onChangeRole?.call(member);
+                } else if (value == 'remove') {
                   onRemoveMember?.call(member);
                 }
               },
-              itemBuilder: (context) => const [
-                PopupMenuItem<String>(
-                  value: 'remove',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.person_remove_outlined,
-                        size: 18,
-                        color: Colors.red,
-                      ),
-                      SizedBox(width: 10),
-                      Text('Remove Member'),
-                    ],
-                  ),
-                ),
-              ],
+              itemBuilder: (context) => _buildMemberActions(),
             ),
           ),
         ],
@@ -187,6 +176,7 @@ class GroupMemberTable extends StatelessWidget {
         border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
             radius: 20,
@@ -207,6 +197,8 @@ class GroupMemberTable extends StatelessWidget {
               children: [
                 Text(
                   name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Color(0xFF1E293B),
                     fontSize: 14,
@@ -217,7 +209,7 @@ class GroupMemberTable extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     email,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Color(0xFF64748B),
@@ -236,9 +228,55 @@ class GroupMemberTable extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 4),
+          PopupMenuButton<String>(
+            tooltip: 'Member actions',
+            icon: const Icon(
+              Icons.more_vert,
+              size: 20,
+              color: Color(0xFF64748B),
+            ),
+            onSelected: (value) {
+              if (value == 'change_role') {
+                onChangeRole?.call(member);
+              } else if (value == 'remove') {
+                onRemoveMember?.call(member);
+              }
+            },
+            itemBuilder: (context) => _buildMemberActions(),
+          ),
         ],
       ),
     );
+  }
+
+  List<PopupMenuEntry<String>> _buildMemberActions() {
+    return const [
+      PopupMenuItem<String>(
+        value: 'change_role',
+        child: Row(
+          children: [
+            Icon(
+              Icons.manage_accounts_outlined,
+              size: 18,
+              color: Color(0xFF0891B2),
+            ),
+            SizedBox(width: 10),
+            Text('Change Role'),
+          ],
+        ),
+      ),
+      PopupMenuItem<String>(
+        value: 'remove',
+        child: Row(
+          children: [
+            Icon(Icons.person_remove_outlined, size: 18, color: Colors.red),
+            SizedBox(width: 10),
+            Text('Remove Member'),
+          ],
+        ),
+      ),
+    ];
   }
 
   Map<String, dynamic> _personFromMember(Map<String, dynamic> member) {
