@@ -44,7 +44,7 @@ ended_at,
     required String personId,
     String membershipRole = 'member',
   }) async {
-    final now = DateTime.now().toIso8601String();
+    final now = DateTime.now().toUtc().toIso8601String();
 
     final existing = await _supabase
         .from('group_memberships')
@@ -99,13 +99,11 @@ ended_at,
     required String groupId,
     required String personId,
   }) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+
     await _supabase
         .from('group_memberships')
-        .update({
-          'status': 'inactive',
-          'ended_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        })
+        .update({'status': 'inactive', 'ended_at': now, 'updated_at': now})
         .eq('organization_id', organizationId)
         .eq('group_id', groupId)
         .eq('person_id', personId)

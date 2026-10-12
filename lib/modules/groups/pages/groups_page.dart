@@ -10,6 +10,7 @@ import 'package:charitask/modules/groups/widgets/groups_hero.dart';
 import 'package:charitask/modules/groups/widgets/groups_kpi_row.dart';
 import 'package:charitask/modules/groups/widgets/groups_view_toggle.dart';
 import 'package:charitask/modules/groups/pages/create_group_page.dart';
+import 'package:charitask/modules/groups/pages/group_members_page.dart';
 
 class GroupsPage extends StatefulWidget {
   final String organizationId;
@@ -518,9 +519,14 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   void _manageMembers(Group group) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Manage members for ${group.name}')));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GroupMembersPage(
+          organizationId: widget.organizationId,
+          group: group,
+        ),
+      ),
+    );
   }
 
   void _viewActivity(Group group) {
