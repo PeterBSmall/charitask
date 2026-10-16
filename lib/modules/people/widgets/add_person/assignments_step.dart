@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:charitask/modules/people/domain/models/person_credential.dart';
+import 'package:charitask/modules/people/widgets/add_person/credentials_compliance_card.dart';
+
 import '../../../foundation/domain/models/functional_role.dart';
 import '../../../foundation/widgets/functional_roles/functional_role_assignment_workspace.dart';
 
@@ -8,11 +11,18 @@ class AssignmentsStep extends StatefulWidget {
   final List<FunctionalRole> selectedFunctionalRoles;
   final ValueChanged<List<FunctionalRole>> onFunctionalRolesChanged;
 
+  final bool isVolunteer;
+  final List<PersonCredentialDraft> credentials;
+  final ValueChanged<List<PersonCredentialDraft>> onCredentialsChanged;
+
   const AssignmentsStep({
     super.key,
     required this.organizationId,
     required this.selectedFunctionalRoles,
     required this.onFunctionalRolesChanged,
+    required this.isVolunteer,
+    required this.credentials,
+    required this.onCredentialsChanged,
   });
 
   @override
@@ -63,44 +73,115 @@ class _AssignmentsStepState extends State<AssignmentsStep> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Center(
+              Center(
                 child: Column(
                   children: [
-                    Text(
-                      'Assignments',
+                    const Text(
+                      'Organizational Assignments',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF2F3A4A),
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Connect this person to the parts of your organization where they belong.',
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Connect this person to the parts of your '
+                      'organization where they belong.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16, color: Color(0xFF6B7280)),
                     ),
+
+                    // Volunteer qualification summary.
+                    if (widget.isVolunteer) ...[
+                      const SizedBox(height: 18),
+                      Container(
+                        width: double.infinity,
+                        constraints: const BoxConstraints(maxWidth: 760),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFECFEFF),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFA5F3FC)),
+                        ),
+                        child: Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.school_outlined,
+                                  size: 22,
+                                  color: Color(0xFF0891B2),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Volunteer Qualifications',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF164E63),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFCFFAFE),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '${widget.credentials.length} '
+                                '${widget.credentials.length == 1 ? 'Credential' : 'Credentials'} '
+                                'Added',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF0E7490),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(height: 40),
+
+              // Organizational assignments: responsive card layout.
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth < 700) {
                     return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _AssignmentCard(
                           icon: Icons.groups_outlined,
                           title: 'Groups',
                           description:
-                              'Assign this person to one or more groups or teams.',
+                              'Assign this person to one or more '
+                              'groups or teams.',
                         ),
                         const SizedBox(height: 16),
                         _AssignmentCard(
                           icon: Icons.location_on_outlined,
                           title: 'Locations',
                           description:
-                              'Connect this person to one or more locations.',
+                              'Connect this person to one or more '
+                              'locations.',
                         ),
                         const SizedBox(height: 16),
                         _AssignmentCard(
@@ -123,7 +204,8 @@ class _AssignmentsStepState extends State<AssignmentsStep> {
                           icon: Icons.groups_outlined,
                           title: 'Groups',
                           description:
-                              'Assign this person to one or more groups or teams.',
+                              'Assign this person to one or more '
+                              'groups or teams.',
                         ),
                       ),
                       const SizedBox(width: 20),
@@ -132,7 +214,8 @@ class _AssignmentsStepState extends State<AssignmentsStep> {
                           icon: Icons.location_on_outlined,
                           title: 'Locations',
                           description:
-                              'Connect this person to one or more locations.',
+                              'Connect this person to one or more '
+                              'locations.',
                         ),
                       ),
                       const SizedBox(width: 20),
@@ -150,6 +233,48 @@ class _AssignmentsStepState extends State<AssignmentsStep> {
                   );
                 },
               ),
+
+              // Volunteer qualifications are separate from
+              // organizational assignments.
+              if (widget.isVolunteer) ...[
+                const SizedBox(height: 32),
+                const Divider(color: Color(0xFFE2E8F0)),
+                const SizedBox(height: 24),
+                const Row(
+                  children: [
+                    Icon(
+                      Icons.school_outlined,
+                      size: 26,
+                      color: Color(0xFF0891B2),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Volunteer Qualifications',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Track what this volunteer is qualified or cleared to do.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                CredentialsComplianceCard(
+                  credentials: widget.credentials,
+                  onChanged: widget.onCredentialsChanged,
+                ),
+              ],
             ],
           ),
         ),

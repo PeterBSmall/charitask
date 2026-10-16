@@ -20,6 +20,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
   final Widget people;
   final Widget locations;
   final Widget groups;
+  final Widget compliance;
   final Widget security;
   final Widget analytics;
   final Widget notes;
@@ -35,6 +36,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
     required this.people,
     required this.locations,
     required this.groups,
+    required this.compliance,
     required this.security,
     required this.analytics,
     required this.notes,
@@ -209,18 +211,21 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
         return FunctionalRolesPage(organizationId: widget.organizationId);
 
       case 6:
-        return widget.security;
+        return widget.compliance;
 
       case 7:
-        return widget.analytics;
+        return widget.security;
 
       case 8:
-        return widget.notes;
+        return widget.analytics;
 
       case 9:
-        return const SizedBox.shrink();
+        return widget.notes;
 
       case 10:
+        return const SizedBox.shrink();
+
+      case 11:
         return widget.invitations;
 
       default:

@@ -1,5 +1,4 @@
 import '../../domain/repositories/people_repository.dart';
-
 import '../services/people_service.dart';
 
 class PeopleRepositoryImpl implements PeopleRepository {
@@ -15,6 +14,17 @@ class PeopleRepositoryImpl implements PeopleRepository {
   }
 
   @override
+  Future<Map<String, dynamic>?> getPerson({
+    required String organizationId,
+    required String personId,
+  }) {
+    return _service.getPerson(
+      organizationId: organizationId,
+      personId: personId,
+    );
+  }
+
+  @override
   Future<Map<String, dynamic>> createPerson({
     required String organizationId,
     required String firstName,
@@ -23,6 +33,8 @@ class PeopleRepositoryImpl implements PeopleRepository {
     String? email,
     String? phone,
     String? employmentType,
+    String? personType,
+    String? notes,
   }) {
     return _service.createPerson(
       organizationId: organizationId,
@@ -32,6 +44,37 @@ class PeopleRepositoryImpl implements PeopleRepository {
       email: email,
       phone: phone,
       employmentType: employmentType,
+      personType: personType,
+      notes: notes,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> updatePerson({
+    required String organizationId,
+    required String personId,
+    required String firstName,
+    required String lastName,
+    String? preferredName,
+    String? email,
+    String? phone,
+    String? employmentType,
+    String? personType,
+    String? notes,
+    required String status,
+  }) {
+    return _service.updatePerson(
+      organizationId: organizationId,
+      personId: personId,
+      firstName: firstName,
+      lastName: lastName,
+      preferredName: preferredName,
+      email: email,
+      phone: phone,
+      employmentType: employmentType,
+      personType: personType,
+      notes: notes,
+      status: status,
     );
   }
 

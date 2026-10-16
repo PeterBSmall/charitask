@@ -47,7 +47,7 @@ class PeopleMetrics extends StatelessWidget {
     final values = [
       total.toString(),
       active.toString(),
-      '—',
+      '0',
       inactive.toString(),
     ];
 
@@ -138,9 +138,7 @@ class _PeopleMetricCard extends StatelessWidget {
             ),
             child: Icon(icon, color: iconColor, size: 26),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,9 +155,7 @@ class _PeopleMetricCard extends StatelessWidget {
                     color: Color(0xFF2F3A4A),
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
                   label,
                   maxLines: 1,
@@ -171,9 +167,7 @@ class _PeopleMetricCard extends StatelessWidget {
                     color: Color(0xFF374151),
                   ),
                 ),
-
                 const SizedBox(height: 3),
-
                 Text(
                   subtitle,
                   maxLines: 2,

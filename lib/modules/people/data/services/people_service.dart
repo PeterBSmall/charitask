@@ -17,44 +17,45 @@ class PeopleService {
     final response = await _supabase
         .from('persons')
         .select('''
+        id,
+        first_name,
+        last_name,
+        preferred_name,
+        email,
+        phone,
+        employment_type,
+        person_type,
+        status,
+        organizational_role_assignments(
           id,
-          first_name,
-          last_name,
-          preferred_name,
-          email,
-          phone,
-          employment_type,
+          organizational_role_id,
           status,
-          organizational_role_assignments(
+          is_primary,
+          organizational_roles(
             id,
-            organizational_role_id,
-            status,
-            is_primary,
-            organizational_roles(
-              id,
-              name
-            )
-          ),
-          group_memberships(
-            id,
-            group_id,
-            status,
-            groups(
-              id,
-              name
-            )
-          ),
-          person_locations(
-            id,
-            location_id,
-            status,
-            is_primary,
-            locations(
-              id,
-              name
-            )
+            name
           )
-        ''')
+        ),
+        group_memberships(
+          id,
+          group_id,
+          status,
+          groups(
+            id,
+            name
+          )
+        ),
+        person_locations(
+          id,
+          location_id,
+          status,
+          is_primary,
+          locations(
+            id,
+            name
+          )
+        )
+      ''')
         .eq('organization_id', organizationId)
         .order('last_name', ascending: true);
 
@@ -165,15 +166,17 @@ class PeopleService {
     final response = await _supabase
         .from('persons')
         .select('''
-          id,
-          first_name,
-          last_name,
-          preferred_name,
-          email,
-          phone,
-          employment_type,
-          status
-        ''')
+        id,
+        first_name,
+        last_name,
+        preferred_name,
+        email,
+        phone,
+        employment_type,
+        person_type,
+        notes,
+        status
+      ''')
         .eq('organization_id', organizationId)
         .eq('id', personId)
         .maybeSingle();
@@ -194,6 +197,8 @@ class PeopleService {
     String? email,
     String? phone,
     String? employmentType,
+    String? personType,
+    String? notes,
   }) async {
     final response = await _supabase
         .from('persons')
@@ -205,7 +210,45 @@ class PeopleService {
           'email': email,
           'phone': phone,
           'employment_type': employmentType,
+          'person_type': personType,
+          'notes': notes,
+          'status': 'active',
         })
+        .select()
+        .single();
+
+    return Map<String, dynamic>.from(response);
+  }
+
+  /// Updates an existing person within the specified organization.
+  Future<Map<String, dynamic>> updatePerson({
+    required String organizationId,
+    required String personId,
+    required String firstName,
+    required String lastName,
+    String? preferredName,
+    String? email,
+    String? phone,
+    String? employmentType,
+    String? personType,
+    String? notes,
+    required String status,
+  }) async {
+    final response = await _supabase
+        .from('persons')
+        .update({
+          'first_name': firstName,
+          'last_name': lastName,
+          'preferred_name': preferredName,
+          'email': email,
+          'phone': phone,
+          'employment_type': employmentType,
+          'person_type': personType,
+          'notes': notes,
+          'status': status,
+        })
+        .eq('organization_id', organizationId)
+        .eq('id', personId)
         .select()
         .single();
 

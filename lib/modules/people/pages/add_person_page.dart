@@ -21,6 +21,12 @@ import 'package:charitask/modules/foundation/domain/models/functional_role.dart'
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:charitask/modules/people/domain/models/person_credential.dart';
+
+import 'package:intl/intl.dart';
+
+import 'package:charitask/modules/people/data/services/add_person_creation_service.dart';
+
 class AddPersonPage extends StatefulWidget {
   final String organizationId;
 
@@ -33,6 +39,7 @@ class AddPersonPage extends StatefulWidget {
 class _AddPersonPageState extends State<AddPersonPage> {
   late final PeopleRepository _repository;
   late final FunctionalRoleService _functionalRoleService;
+  late final AddPersonCreationService _creationService;
 
   int _currentStep = 0;
 
@@ -46,6 +53,10 @@ class _AddPersonPageState extends State<AddPersonPage> {
   final _phoneController = TextEditingController();
 
   final _dateOfBirthController = TextEditingController();
+  final _providerNameController = TextEditingController();
+  final _providerRelationshipController = TextEditingController();
+
+  String _informationProviderType = 'organization_staff';
   final _joinDateController = TextEditingController();
   final _notesController = TextEditingController();
 
@@ -57,6 +68,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
   String? _preferredContactMethod;
 
   List<FunctionalRole> _selectedFunctionalRoles = [];
+  List<PersonCredentialDraft> _credentialDrafts = [];
 
   static const List<String> _steps = [
     'Person Type',
@@ -73,7 +85,10 @@ class _AddPersonPageState extends State<AddPersonPage> {
     _repository = PeopleRepositoryImpl(PeopleService(Supabase.instance.client));
 
     _functionalRoleService = FunctionalRoleService();
-
+    _creationService = AddPersonCreationService(
+      repository: _repository,
+      functionalRoleService: _functionalRoleService,
+    );
     _firstNameController.addListener(_onFormChanged);
     _lastNameController.addListener(_onFormChanged);
     _preferredNameController.addListener(_onFormChanged);
@@ -322,8 +337,15 @@ class _AddPersonPageState extends State<AddPersonPage> {
           emailController: _emailController,
           phoneController: _phoneController,
           dateOfBirthController: _dateOfBirthController,
+          providerNameController: _providerNameController,
+          providerRelationshipController: _providerRelationshipController,
           notesController: _notesController,
-          connectionType: _connectionType ?? '',
+          informationProviderType: _informationProviderType,
+          onInformationProviderTypeChanged: (value) {
+            setState(() {
+              _informationProviderType = value;
+            });
+          },
           preferredContactMethod: _preferredContactMethod,
           onPreferredContactMethodChanged: (value) {
             setState(() {
@@ -339,6 +361,13 @@ class _AddPersonPageState extends State<AddPersonPage> {
           onFunctionalRolesChanged: (roles) {
             setState(() {
               _selectedFunctionalRoles = roles;
+            });
+          },
+          isVolunteer: _personType == 'Volunteer',
+          credentials: _credentialDrafts,
+          onCredentialsChanged: (credentials) {
+            setState(() {
+              _credentialDrafts = credentials;
             });
           },
         );
@@ -398,59 +427,89 @@ class _AddPersonPageState extends State<AddPersonPage> {
   }
 
   Future<void> _createPerson() async {
-    final firstName = _firstNameController.text.trim();
-    final lastName = _lastNameController.text.trim();
-    final preferredName = _preferredNameController.text.trim();
-    final email = _emailController.text.trim();
-    final phone = _phoneController.text.trim();
+    DateTime? dateOfBirth;
+    final dateOfBirthText = _dateOfBirthController.text.trim();
+
+    if (dateOfBirthText.isNotEmpty) {
+      try {
+        dateOfBirth = DateFormat('MM/dd/yyyy').parseStrict(dateOfBirthText);
+      } on FormatException {
+        setState(() => _currentStep = 1);
+        _showValidationMessage('Please select a valid date of birth.');
+        return;
+      }
+    }
+
+    final providerName = _providerNameController.text.trim();
+    final providerRelationship = _providerRelationshipController.text.trim();
 
     try {
-      final person = await _repository.createPerson(
+      final result = await _creationService.createPerson(
         organizationId: widget.organizationId,
-        firstName: firstName,
-        lastName: lastName,
-        preferredName: preferredName.isEmpty ? null : preferredName,
-        email: email.isEmpty ? null : email,
-        phone: phone.isEmpty ? null : phone,
-        employmentType: null,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        preferredName: _preferredNameController.text.trim().isEmpty
+            ? null
+            : _preferredNameController.text.trim(),
+        email: _emailController.text.trim().isEmpty
+            ? null
+            : _emailController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        personType: _personType,
+        membershipStatus: _membershipStatus.toLowerCase() == 'inactive'
+            ? 'inactive'
+            : 'active',
+        functionalRoles: _selectedFunctionalRoles,
+        credentials: _credentialDrafts,
+        dateOfBirth: dateOfBirth,
+        informationProviderType: _informationProviderType,
+        providerName: providerName.isEmpty ? null : providerName,
+        providerRelationship: providerRelationship.isEmpty
+            ? null
+            : providerRelationship,
       );
-
-      final personId = person['id'] as String?;
-
-      if (personId == null || personId.isEmpty) {
-        throw Exception('Person was created without an ID.');
-      }
-
-      final membershipStatus = _membershipStatus.toLowerCase() == 'inactive'
-          ? 'inactive'
-          : 'active';
-
-      await _repository.createOrganizationMembership(
-        organizationId: widget.organizationId,
-        personId: personId,
-        status: membershipStatus,
-      );
-
-      for (final role in _selectedFunctionalRoles) {
-        await _functionalRoleService.createAssignment(
-          organizationId: widget.organizationId,
-          personId: personId,
-          functionalRoleId: role.id,
-        );
-      }
 
       if (!mounted) return;
 
+      if (result.hasWarnings) {
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Person Created — Review Needed'),
+            content: Text(
+              '${result.warnings.join('\n\n')}\n\n'
+              'The person record has been created. '
+              'Do not submit this person again, as that could create a duplicate. '
+              'Please review the incomplete items separately.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+
+        if (!mounted) return;
+      }
+
       Navigator.of(context).pop(true);
+    } on AddPersonCreationException catch (error) {
+      if (!mounted) return;
+
+      setState(() => _currentStep = 1);
+      _showValidationMessage(error.message);
     } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unable to create person: $error'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showValidationMessage('Unable to create person: $error');
     }
   }
 }

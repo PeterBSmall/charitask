@@ -3,6 +3,11 @@ abstract class PeopleRepository {
     required String organizationId,
   });
 
+  Future<Map<String, dynamic>?> getPerson({
+    required String organizationId,
+    required String personId,
+  });
+
   Future<Map<String, dynamic>> createPerson({
     required String organizationId,
     required String firstName,
@@ -11,6 +16,22 @@ abstract class PeopleRepository {
     String? email,
     String? phone,
     String? employmentType,
+    String? personType,
+    String? notes,
+  });
+
+  Future<Map<String, dynamic>> updatePerson({
+    required String organizationId,
+    required String personId,
+    required String firstName,
+    required String lastName,
+    String? preferredName,
+    String? email,
+    String? phone,
+    String? employmentType,
+    String? personType,
+    String? notes,
+    required String status,
   });
 
   Future<void> createOrganizationMembership({

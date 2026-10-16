@@ -12,6 +12,7 @@ import 'settings/role_settings_danger_zone.dart';
 import 'settings/role_settings_identity.dart';
 import 'settings/role_settings_information.dart';
 import 'settings/role_settings_status.dart';
+import 'settings/role_settings_credential_requirements.dart';
 
 class RoleDetailsSettings extends StatefulWidget {
   final String organizationId;
@@ -391,6 +392,11 @@ class _RoleDetailsSettingsState extends State<RoleDetailsSettings> {
               _selectedCategoryId = value;
             });
           },
+        ),
+        const SizedBox(height: 16),
+        RoleSettingsCredentialRequirements(
+          organizationId: widget.organizationId,
+          role: widget.role,
         ),
         const SizedBox(height: 16),
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'add_person_step_template.dart';
 import 'add_person_story_panel.dart';
-
 import 'basic_information/sections/contact_section.dart';
 import 'basic_information/sections/notes_section.dart';
 import 'basic_information/sections/name_section.dart';
@@ -15,9 +14,12 @@ class BasicInformationStep extends StatelessWidget {
   final TextEditingController emailController;
   final TextEditingController phoneController;
   final TextEditingController dateOfBirthController;
+  final TextEditingController providerNameController;
+  final TextEditingController providerRelationshipController;
   final TextEditingController notesController;
 
-  final String connectionType;
+  final String informationProviderType;
+  final ValueChanged<String> onInformationProviderTypeChanged;
 
   final String? preferredContactMethod;
   final ValueChanged<String?> onPreferredContactMethodChanged;
@@ -30,9 +32,11 @@ class BasicInformationStep extends StatelessWidget {
     required this.emailController,
     required this.phoneController,
     required this.dateOfBirthController,
+    required this.providerNameController,
+    required this.providerRelationshipController,
     required this.notesController,
-    required this.connectionType,
-
+    required this.informationProviderType,
+    required this.onInformationProviderTypeChanged,
     required this.preferredContactMethod,
     required this.onPreferredContactMethodChanged,
   });
@@ -48,27 +52,25 @@ class BasicInformationStep extends StatelessWidget {
             'Start by getting to know the basics.',
         icon: Icons.person_add_alt_1_rounded,
       ),
-
       title: 'Basic information',
       description:
           'Add the essential details that help identify and connect with this person.',
-
+      sideContent: const _BasicInformationHelp(),
       child: _BasicInformationForm(
         firstNameController: firstNameController,
         lastNameController: lastNameController,
         preferredNameController: preferredNameController,
         emailController: emailController,
         phoneController: phoneController,
-
         dateOfBirthController: dateOfBirthController,
+        providerNameController: providerNameController,
+        providerRelationshipController: providerRelationshipController,
         notesController: notesController,
-        connectionType: connectionType,
-
+        informationProviderType: informationProviderType,
+        onInformationProviderTypeChanged: onInformationProviderTypeChanged,
         preferredContactMethod: preferredContactMethod,
         onPreferredContactMethodChanged: onPreferredContactMethodChanged,
       ),
-
-      sideContent: const _BasicInformationHelp(),
     );
   }
 }
@@ -80,9 +82,12 @@ class _BasicInformationForm extends StatelessWidget {
   final TextEditingController emailController;
   final TextEditingController phoneController;
   final TextEditingController dateOfBirthController;
+  final TextEditingController providerNameController;
+  final TextEditingController providerRelationshipController;
   final TextEditingController notesController;
 
-  final String connectionType;
+  final String informationProviderType;
+  final ValueChanged<String> onInformationProviderTypeChanged;
 
   final String? preferredContactMethod;
   final ValueChanged<String?> onPreferredContactMethodChanged;
@@ -94,10 +99,11 @@ class _BasicInformationForm extends StatelessWidget {
     required this.emailController,
     required this.phoneController,
     required this.dateOfBirthController,
+    required this.providerNameController,
+    required this.providerRelationshipController,
     required this.notesController,
-
-    required this.connectionType,
-
+    required this.informationProviderType,
+    required this.onInformationProviderTypeChanged,
     required this.preferredContactMethod,
     required this.onPreferredContactMethodChanged,
   });
@@ -121,49 +127,30 @@ class _BasicInformationForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ============================================================
-          // NAME
-          // ============================================================
           NameSection(
             firstNameController: firstNameController,
             lastNameController: lastNameController,
             preferredNameController: preferredNameController,
           ),
-
-          // ============================================================
-          // PERSONAL DETAILS — INTERNAL PEOPLE ONLY
-          // ============================================================
-          if (connectionType == 'internal') ...[
-            const SizedBox(height: 32),
-
-            PersonalDetailsSection(
-              dateOfBirthController: dateOfBirthController,
-            ),
-          ],
-
           const SizedBox(height: 32),
-
+          PersonalDetailsSection(
+            dateOfBirthController: dateOfBirthController,
+            providerNameController: providerNameController,
+            providerRelationshipController: providerRelationshipController,
+            informationProviderType: informationProviderType,
+            onInformationProviderTypeChanged: onInformationProviderTypeChanged,
+          ),
+          const SizedBox(height: 32),
           const Divider(),
-
           const SizedBox(height: 28),
-
-          // ============================================================
-          // CONTACT INFORMATION
-          // ============================================================
           ContactSection(
             emailController: emailController,
             phoneController: phoneController,
             preferredContactMethod: preferredContactMethod,
             onPreferredContactMethodChanged: onPreferredContactMethodChanged,
           ),
-
           const SizedBox(height: 32),
-
-          // ============================================================
-          // NOTES
-          // ============================================================
           NotesSection(controller: notesController),
-
           const SizedBox(height: 40),
         ],
       ),
@@ -207,9 +194,7 @@ class _BasicInformationHelp extends StatelessWidget {
                   ),
                 ],
               ),
-
               SizedBox(height: 18),
-
               Text(
                 'Basic information helps your team identify the right person, '
                 'communicate with them, and keep your organization connected.',
@@ -222,9 +207,7 @@ class _BasicInformationHelp extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(height: 20),
-
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -236,9 +219,7 @@ class _BasicInformationHelp extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(Icons.lightbulb_outline_rounded, color: Color(0xFF5B4BC4)),
-
               SizedBox(height: 12),
-
               Text(
                 'Tip',
                 style: TextStyle(
@@ -247,9 +228,7 @@ class _BasicInformationHelp extends StatelessWidget {
                   color: Color(0xFF2F3A4A),
                 ),
               ),
-
               SizedBox(height: 6),
-
               Text(
                 'You can always update this information later.',
                 style: TextStyle(
