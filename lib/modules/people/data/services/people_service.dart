@@ -21,6 +21,7 @@ class PeopleService {
         first_name,
         last_name,
         preferred_name,
+        person_type,
         email,
         phone,
         employment_type,
@@ -86,7 +87,7 @@ class PeopleService {
         return location['status'] == 'active';
       }).toList();
 
-      String role = '—';
+      String role = '\u2014';
 
       if (activeRoleAssignments.isNotEmpty) {
         final primaryRoles = activeRoleAssignments.where((assignment) {
@@ -137,8 +138,8 @@ class PeopleService {
       return {
         ...person,
         'role': role,
-        'groups': groups.isEmpty ? '—' : groups,
-        'locations': locations.isEmpty ? '—' : locations,
+        'groups': groups.isEmpty ? '\u2014' : groups,
+        'locations': locations.isEmpty ? '\u2014' : locations,
       };
     }).toList();
   }
@@ -170,6 +171,7 @@ class PeopleService {
         first_name,
         last_name,
         preferred_name,
+        person_type,
         email,
         phone,
         employment_type,
