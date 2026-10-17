@@ -38,6 +38,121 @@ class LocationService {
     return Location.fromMap(Map<String, dynamic>.from(row));
   }
 
+  Future<List<Map<String, dynamic>>> getPersonLocationAssignments({
+    required String organizationId,
+    required String personId,
+    bool activeOnly = true,
+  }) async {
+    var query = _supabase
+        .from('person_locations')
+        .select('''
+          id,
+          organization_id,
+          person_id,
+          location_id,
+          status,
+          is_primary,
+          started_at,
+          ended_at,
+          created_at,
+          updated_at,
+          locations (
+            id,
+            name,
+            location_type,
+            status
+          )
+        ''')
+        .eq('organization_id', organizationId)
+        .eq('person_id', personId);
+
+    if (activeOnly) {
+      query = query.eq('status', 'active');
+    }
+
+    final rows = await query.order('started_at', ascending: false);
+
+    return rows.map((row) => Map<String, dynamic>.from(row)).toList();
+  }
+
+  Future<void> assignPersonToLocation({
+    required String organizationId,
+    required String personId,
+    required String locationId,
+    bool makePrimary = false,
+    String? createdByPersonId,
+  }) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    final activeAssignment = await _supabase
+        .from('person_locations')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('person_id', personId)
+        .eq('location_id', locationId)
+        .eq('status', 'active')
+        .maybeSingle();
+
+    if (activeAssignment != null) {
+      if (makePrimary) {
+        await _supabase
+            .from('person_locations')
+            .update({'is_primary': false, 'updated_at': now})
+            .eq('organization_id', organizationId)
+            .eq('person_id', personId)
+            .eq('status', 'active')
+            .eq('is_primary', true);
+
+        await _supabase
+            .from('person_locations')
+            .update({'is_primary': true, 'updated_at': now})
+            .eq('organization_id', organizationId)
+            .eq('id', activeAssignment['id']);
+      }
+
+      return;
+    }
+
+    if (makePrimary) {
+      await _supabase
+          .from('person_locations')
+          .update({'is_primary': false, 'updated_at': now})
+          .eq('organization_id', organizationId)
+          .eq('person_id', personId)
+          .eq('status', 'active')
+          .eq('is_primary', true);
+    }
+
+    await _supabase.from('person_locations').insert({
+      'organization_id': organizationId,
+      'person_id': personId,
+      'location_id': locationId,
+      'status': 'active',
+      'is_primary': makePrimary,
+      'created_by_person_id': createdByPersonId,
+    });
+  }
+
+  Future<void> endPersonLocationAssignment({
+    required String organizationId,
+    required String assignmentId,
+    String? updatedByPersonId,
+  }) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _supabase
+        .from('person_locations')
+        .update({
+          'status': 'inactive',
+          'ended_at': now,
+          'updated_at': now,
+          'updated_by_person_id': updatedByPersonId,
+        })
+        .eq('organization_id', organizationId)
+        .eq('id', assignmentId)
+        .eq('status', 'active');
+  }
+
   Future<List<Map<String, dynamic>>> getLocationCategoryTags({
     required String organizationId,
   }) async {

@@ -6,6 +6,67 @@ class GroupMembershipService {
   GroupMembershipService({SupabaseClient? supabase})
     : _supabase = supabase ?? Supabase.instance.client;
 
+  /// Loads a person's group memberships, including historical periods
+  /// when [activeOnly] is false.
+  Future<List<Map<String, dynamic>>> getPersonMemberships({
+    required String organizationId,
+    required String personId,
+    bool activeOnly = true,
+  }) async {
+    var query = _supabase
+        .from('group_memberships')
+        .select('''
+          id,
+          organization_id,
+          group_id,
+          person_id,
+          status,
+          membership_role,
+          started_at,
+          ended_at,
+          groups (
+            id,
+            name,
+            description,
+            group_type,
+            color,
+            location_id,
+            status
+          )
+        ''')
+        .eq('organization_id', organizationId)
+        .eq('person_id', personId);
+
+    if (activeOnly) {
+      query = query.eq('status', 'active');
+    }
+
+    final rows = await query.order('started_at', ascending: false);
+
+    return rows.map((row) => Map<String, dynamic>.from(row)).toList();
+  }
+
+  /// Ends one specific membership without deleting its history.
+  Future<void> endMembership({
+    required String organizationId,
+    required String membershipId,
+    String? updatedByPersonId,
+  }) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _supabase
+        .from('group_memberships')
+        .update({
+          'status': 'inactive',
+          'ended_at': now,
+          'updated_at': now,
+          'updated_by_person_id': updatedByPersonId,
+        })
+        .eq('organization_id', organizationId)
+        .eq('id', membershipId)
+        .eq('status', 'active');
+  }
+
   Future<List<Map<String, dynamic>>> getMembers({
     required String organizationId,
     required String groupId,
@@ -44,31 +105,16 @@ ended_at,
     required String personId,
     String membershipRole = 'member',
   }) async {
-    final now = DateTime.now().toUtc().toIso8601String();
-
-    final existing = await _supabase
+    final existingActive = await _supabase
         .from('group_memberships')
         .select('id')
         .eq('organization_id', organizationId)
         .eq('group_id', groupId)
         .eq('person_id', personId)
+        .eq('status', 'active')
         .maybeSingle();
 
-    if (existing != null) {
-      await _supabase
-          .from('group_memberships')
-          .update({
-            'status': 'active',
-            'membership_role': membershipRole,
-            'started_at': now,
-            'ended_at': null,
-            'updated_at': now,
-          })
-          .eq('id', existing['id'])
-          .eq('organization_id', organizationId);
-
-      return;
-    }
+    if (existingActive != null) return;
 
     await _supabase.from('group_memberships').insert({
       'organization_id': organizationId,

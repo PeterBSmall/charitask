@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:charitask/modules/people/widgets/edit_person/edit_person_organizational_assignments.dart';
+import 'package:charitask/modules/people/widgets/edit_person/edit_person_app_bar_title.dart';
 
 import 'package:intl/intl.dart';
 
@@ -17,8 +19,6 @@ import 'package:charitask/modules/people/data/services/people_service.dart';
 import 'package:charitask/modules/people/data/services/person_private_details_service.dart';
 
 import 'package:charitask/modules/people/domain/repositories/people_repository.dart';
-
-import 'package:charitask/modules/people/widgets/edit_person/edit_person_assignments.dart';
 
 import 'package:charitask/modules/people/widgets/edit_person/edit_person_basic_information.dart';
 
@@ -124,6 +124,8 @@ class _EditPersonPageState extends State<EditPersonPage> {
 
   bool _canManageFunctionalRoles = false;
 
+  bool _canViewGroups = false;
+
   bool _canViewCredentials = false;
 
   bool _canManageCredentials = false;
@@ -133,8 +135,6 @@ class _EditPersonPageState extends State<EditPersonPage> {
   bool _canManageBackgroundChecks = false;
 
   bool _privateDetailsLoadFailed = false;
-
-  String? _roleLoadError;
 
   List<FunctionalRole> _functionalRoles = [];
 
@@ -246,6 +246,7 @@ class _EditPersonPageState extends State<EditPersonPage> {
         _hasPermission('credentials.background_checks.view'),
 
         _hasPermission('credentials.background_checks.manage'),
+        _hasPermission('groups.view'),
       ]);
 
       _canManagePrivateDetails = permissions[1];
@@ -263,6 +264,8 @@ class _EditPersonPageState extends State<EditPersonPage> {
       _canViewBackgroundChecks = permissions[6];
 
       _canManageBackgroundChecks = permissions[7];
+
+      _canViewGroups = permissions[8];
 
       if (_canViewPrivateDetails) {
         try {
@@ -300,12 +303,13 @@ class _EditPersonPageState extends State<EditPersonPage> {
         }
       }
 
-      if (_canViewFunctionalRoles || _canManageFunctionalRoles) {
+      if (_canViewGroups ||
+          _canViewFunctionalRoles ||
+          _canManageFunctionalRoles) {
         try {
           await _loadFunctionalRoleData();
-        } catch (_) {
-          _roleLoadError =
-              'Functional roles could not be loaded. Please try again.';
+        } catch (error) {
+          debugPrint('Functional roles could not be loaded: $error');
         }
       }
     } catch (error) {
@@ -339,27 +343,6 @@ class _EditPersonPageState extends State<EditPersonPage> {
     _functionalRoles = roles;
 
     _roleAssignments = assignments;
-
-    _roleLoadError = null;
-  }
-
-  Future<void> _refreshFunctionalRoleData() async {
-    try {
-      await _loadFunctionalRoleData();
-
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (error) {
-      debugPrint('Functional role refresh failed: $error');
-
-      if (mounted) {
-        setState(() {
-          _roleLoadError =
-              'Functional roles could not be refreshed. Please try again.';
-        });
-      }
-    }
   }
 
   List<String> get _personTypeOptions {
@@ -386,44 +369,6 @@ class _EditPersonPageState extends State<EditPersonPage> {
         .map(
           (assignment) =>
               roles[assignment.functionalRoleId]?.name ?? 'Unavailable role',
-        )
-        .toList();
-  }
-
-  List<EditPersonRoleOption> get _availableRoleOptions {
-    final assignedIds = _roleAssignments
-        .where((assignment) => assignment.isActive)
-        .map((assignment) => assignment.functionalRoleId)
-        .toSet();
-
-    return _functionalRoles
-        .where((role) => role.isActive && !assignedIds.contains(role.id))
-        .map(
-          (role) => EditPersonRoleOption(
-            id: role.id,
-
-            name: role.name,
-
-            categoryName: role.categoryName,
-          ),
-        )
-        .toList();
-  }
-
-  List<EditPersonRoleAssignment> get _assignmentItems {
-    final roles = _rolesById;
-
-    return _roleAssignments
-        .where((assignment) => assignment.isActive)
-        .map(
-          (assignment) => EditPersonRoleAssignment(
-            id: assignment.id,
-
-            roleName:
-                roles[assignment.functionalRoleId]?.name ?? 'Unavailable role',
-
-            assignedAt: assignment.assignedAt,
-          ),
         )
         .toList();
   }
@@ -634,76 +579,6 @@ class _EditPersonPageState extends State<EditPersonPage> {
     }
   }
 
-  Future<void> _assignRole(String roleId) async {
-    if (!_canManageFunctionalRoles) return;
-
-    try {
-      await _functionalRoleService.createAssignment(
-        organizationId: widget.organizationId,
-
-        personId: widget.personId,
-
-        functionalRoleId: roleId,
-      );
-
-      await _refreshFunctionalRoleData();
-
-      _showMessage('Functional role assigned.');
-    } catch (error) {
-      debugPrint('Functional role assignment failed: $error');
-
-      _showMessage('Unable to assign this role. Please try again.');
-    }
-  }
-
-  Future<void> _endRoleAssignment(String assignmentId) async {
-    if (!_canManageFunctionalRoles) return;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('End role assignment?'),
-
-        content: const Text(
-          'This will end the person’s current assignment to this role.',
-        ),
-
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-
-            child: const Text('Cancel'),
-          ),
-
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-
-            child: const Text('End Assignment'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
-
-    try {
-      await _functionalRoleService.endAssignment(
-        organizationId: widget.organizationId,
-
-        assignmentId: assignmentId,
-      );
-
-      await _refreshFunctionalRoleData();
-
-      _showMessage('Role assignment ended.');
-    } catch (error) {
-      debugPrint('Ending role assignment failed: $error');
-
-      _showMessage('Unable to end this assignment. Please try again.');
-    }
-  }
-
   Widget _buildSelectedSection() {
     switch (_selectedSection) {
       case 'private':
@@ -743,36 +618,14 @@ class _EditPersonPageState extends State<EditPersonPage> {
         );
 
       case 'assignments':
-        if (_roleLoadError != null) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-
-            children: [
-              Text(_roleLoadError!),
-
-              const SizedBox(height: 12),
-
-              OutlinedButton.icon(
-                onPressed: _refreshFunctionalRoleData,
-
-                icon: const Icon(Icons.refresh),
-
-                label: const Text('Retry'),
-              ),
-            ],
-          );
-        }
-
-        return EditPersonAssignments(
-          assignments: _assignmentItems,
-
-          availableRoles: _availableRoleOptions,
-
-          canManage: _canManageFunctionalRoles,
-
-          onAssignRole: _assignRole,
-
-          onEndAssignment: _endRoleAssignment,
+        return EditPersonOrganizationalAssignments(
+          organizationId: widget.organizationId,
+          personId: widget.personId,
+          canViewGroups: _canViewGroups,
+          functionalRolesAvailable:
+              _canViewFunctionalRoles || _canManageFunctionalRoles,
+          canManageFunctionalRoles: _canManageFunctionalRoles,
+          canViewFunctionalRoles: _canViewFunctionalRoles,
         );
 
       case 'basic':
@@ -835,7 +688,11 @@ class _EditPersonPageState extends State<EditPersonPage> {
       backgroundColor: const Color(0xFFF7F8FC),
 
       appBar: AppBar(
-        title: const Text('Edit Person'),
+        title: EditPersonAppBarTitle(
+          firstNameController: _firstNameController,
+          lastNameController: _lastNameController,
+          preferredNameController: _preferredNameController,
+        ),
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         actions: [

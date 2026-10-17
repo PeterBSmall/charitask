@@ -127,6 +127,12 @@ class _EditPersonAssignmentsState extends State<EditPersonAssignments> {
     final theme = Theme.of(context);
     final canSelectRole = widget.availableRoles.isNotEmpty;
 
+    final sortedRoles = [...widget.availableRoles]
+      ..sort(
+        (a, b) =>
+            a.name.trim().toLowerCase().compareTo(b.name.trim().toLowerCase()),
+      );
+
     return Card(
       elevation: 0,
       color: theme.colorScheme.surface,
@@ -159,7 +165,7 @@ class _EditPersonAssignmentsState extends State<EditPersonAssignments> {
                     ? 'Choose a functional role'
                     : 'No additional roles available',
               ),
-              items: widget.availableRoles.map((role) {
+              items: sortedRoles.map((role) {
                 final category = role.categoryName?.trim();
                 final label = category == null || category.isEmpty
                     ? role.name

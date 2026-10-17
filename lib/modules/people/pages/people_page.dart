@@ -43,6 +43,9 @@ import 'package:charitask/modules/people/widgets/people_toolbar.dart';
 
 import 'package:charitask/platform/authorization/authorization_service.dart';
 
+import 'package:charitask/modules/people/widgets/people_filters_dialog.dart';
+import 'package:charitask/modules/people/widgets/people_filter_engine.dart';
+
 class PeoplePage extends StatefulWidget {
   final String organizationId;
 
@@ -94,7 +97,7 @@ class _PeoplePageState extends State<PeoplePage> {
   String? _errorMessage;
 
   String _searchQuery = '';
-
+  PeopleFilterSelection _activeFilters = const PeopleFilterSelection();
   @override
   void initState() {
     super.initState();
@@ -592,6 +595,32 @@ class _PeoplePageState extends State<PeoplePage> {
     await _saveColumnPreferences();
   }
 
+  Future<void> _showFiltersDialog() async {
+    final selection = await showPeopleFiltersDialog(
+      context: context,
+      personTypes: PeopleFilterEngine.options(_people, 'person_type'),
+      statuses: PeopleFilterEngine.options(_people, 'status'),
+      roles: PeopleFilterEngine.options(_people, 'role', commaSeparated: true),
+      groups: PeopleFilterEngine.options(
+        _people,
+        'groups',
+        commaSeparated: true,
+      ),
+      locations: PeopleFilterEngine.options(
+        _people,
+        'locations',
+        commaSeparated: true,
+      ),
+      initialSelection: _activeFilters,
+    );
+
+    if (selection == null || !mounted) return;
+
+    setState(() {
+      _activeFilters = selection;
+    });
+  }
+
   Future<void> _viewCredentialCompliance(
     String personId,
 
@@ -632,68 +661,11 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   List<Map<String, dynamic>> get _filteredPeople {
-    final query = _searchQuery.trim().toLowerCase();
-
-    final filtered = _people.where((person) {
-      if (query.isEmpty) {
-        return true;
-      }
-
-      final searchableValues = [
-        person['first_name'],
-
-        person['last_name'],
-
-        person['preferred_name'],
-
-        person['email'],
-
-        person['phone'],
-
-        person['person_type'],
-
-        person['role'],
-
-        person['groups'],
-
-        person['locations'],
-      ];
-
-      return searchableValues.any(
-        (value) =>
-            value != null && value.toString().toLowerCase().contains(query),
-      );
-    }).toList();
-
-    filtered.sort((a, b) {
-      final aPreferred = a['preferred_name']?.toString().trim();
-
-      final aFirst = a['first_name']?.toString().trim() ?? '';
-
-      final aLast = a['last_name']?.toString().trim() ?? '';
-
-      final bPreferred = b['preferred_name']?.toString().trim();
-
-      final bFirst = b['first_name']?.toString().trim() ?? '';
-
-      final bLast = b['last_name']?.toString().trim() ?? '';
-
-      final aFirstName = aPreferred != null && aPreferred.isNotEmpty
-          ? aPreferred
-          : aFirst;
-
-      final bFirstName = bPreferred != null && bPreferred.isNotEmpty
-          ? bPreferred
-          : bFirst;
-
-      final aName = '$aFirstName $aLast'.trim().toLowerCase();
-
-      final bName = '$bFirstName $bLast'.trim().toLowerCase();
-
-      return aName.compareTo(bName);
-    });
-
-    return filtered;
+    return PeopleFilterEngine.apply(
+      people: _people,
+      searchQuery: _searchQuery,
+      filters: _activeFilters,
+    );
   }
 
   @override
@@ -735,6 +707,7 @@ class _PeoplePageState extends State<PeoplePage> {
               },
 
               onColumnsPressed: _showColumnsDialog,
+              onFiltersPressed: _showFiltersDialog,
             ),
 
             const SizedBox(height: 24),
