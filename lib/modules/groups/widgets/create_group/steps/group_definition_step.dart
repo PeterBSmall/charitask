@@ -5,7 +5,6 @@ import 'package:charitask/modules/groups/domain/models/group.dart';
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_owner_location_field.dart';
 import 'package:charitask/modules/locations/pages/add_location_page.dart';
 import 'package:charitask/modules/groups/widgets/create_group/group_type_selector.dart';
-import 'package:charitask/modules/groups/widgets/create_group/group_visibility_selector.dart';
 
 class GroupDefinitionStep extends StatefulWidget {
   final CreateGroupDraft draft;
@@ -97,18 +96,6 @@ class _GroupDefinitionStepState extends State<GroupDefinitionStep> {
         _buildBasicInformation(),
 
         const SizedBox(height: 26),
-
-        _section(
-          title: 'Visibility',
-          subtitle: 'Choose who can see this group.',
-          child: GroupVisibilitySelector(
-            draft: widget.draft,
-            onChanged: () {
-              setState(() {});
-              widget.onChanged?.call();
-            },
-          ),
-        ),
 
         const SizedBox(height: 26),
 

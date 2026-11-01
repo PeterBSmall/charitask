@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../platform/authorization/authorization.dart';
 
 import 'package:charitask/modules/groups/domain/models/create_group_draft.dart';
 import 'package:charitask/modules/groups/widgets/create_group/create_group_footer.dart';
@@ -9,6 +11,10 @@ import 'package:charitask/modules/groups/widgets/create_group/steps/group_defini
 import 'package:charitask/modules/groups/widgets/create_group/steps/group_membership_step.dart';
 import 'package:charitask/modules/groups/data/services/group_service.dart';
 import 'package:charitask/modules/groups/data/services/group_membership_service.dart';
+import 'package:charitask/modules/groups/widgets/create_group/steps/group_associations_step.dart';
+import 'package:charitask/modules/groups/widgets/create_group/steps/group_visibility_step.dart';
+import 'package:charitask/modules/groups/data/services/group_location_service.dart';
+import 'package:charitask/modules/groups/widgets/create_group/steps/group_review_step.dart';
 
 class CreateGroupPage extends StatefulWidget {
   final String organizationId;
@@ -25,6 +31,53 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   final GroupService _groupService = GroupService();
   final GroupMembershipService _groupMembershipService =
       GroupMembershipService();
+  final GroupLocationService _groupLocationService = GroupLocationService();
+  final AuthorizationService _authorizationService = AuthorizationService(
+    Supabase.instance.client,
+  );
+
+  bool _canCreate = false;
+  bool _canManage = false;
+  bool _checkingPermissions = true;
+  @override
+  void initState() {
+    super.initState();
+    _loadPermissions();
+  }
+
+  Future<void> _loadPermissions() async {
+    try {
+      final results = await Future.wait([
+        _authorizationService.hasPermission(
+          organizationId: widget.organizationId,
+          permissionKey: 'groups.create',
+        ),
+        _authorizationService.hasPermission(
+          organizationId: widget.organizationId,
+          permissionKey: 'groups.manage',
+        ),
+      ]);
+
+      if (!mounted) return;
+
+      setState(() {
+        _canCreate = results[0];
+        _canManage = results[1];
+        _checkingPermissions = false;
+      });
+    } catch (error) {
+      debugPrint('CreateGroupPage permission check failed: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _canCreate = false;
+        _canManage = false;
+        _checkingPermissions = false;
+      });
+    }
+  }
+
   bool _saving = false;
 
   int _currentStep = 0;
@@ -38,10 +91,22 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   ];
 
   bool get _canContinue {
+    if (_checkingPermissions || !_canCreate) {
+      return false;
+    }
+
     if (_currentStep == 0) {
       return _draft.isDefinitionComplete &&
           _draft.ownerType != null &&
           _draft.ownerId != null;
+    }
+
+    if (_currentStep == 1 && _draft.memberRoles.isNotEmpty) {
+      return _canManage;
+    }
+
+    if (_currentStep == 2 && _draft.associatedLocationIds.isNotEmpty) {
+      return _canManage;
     }
 
     return true;
@@ -61,6 +126,33 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   }
 
   Future<void> _createGroup() async {
+    if (_checkingPermissions || !_canCreate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You do not have permission to create groups.'),
+        ),
+      );
+      return;
+    }
+
+    if (_draft.memberRoles.isNotEmpty && !_canManage) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You need group management permission to add members.'),
+        ),
+      );
+      return;
+    }
+    if (_draft.associatedLocationIds.isNotEmpty && !_canManage) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'You need group management permission to associate locations.',
+          ),
+        ),
+      );
+      return;
+    }
     if (!_draft.isDefinitionComplete) return;
 
     final groupType = _draft.groupType;
@@ -101,6 +193,13 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
             ? null
             : _draft.locationIds.first,
       );
+      if (_draft.associatedLocationIds.isNotEmpty) {
+        await _groupLocationService.setLocations(
+          organizationId: widget.organizationId,
+          groupId: createdGroup.id,
+          locationIds: _draft.associatedLocationIds.toList(),
+        );
+      }
       if (_draft.memberRoles.isNotEmpty) {
         await _groupMembershipService.addMembers(
           organizationId: widget.organizationId,
@@ -167,6 +266,35 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         return GroupMembershipStep(
           draft: _draft,
           organizationId: widget.organizationId,
+        );
+
+      case 2:
+        return GroupAssociationsStep(
+          draft: _draft,
+          organizationId: widget.organizationId,
+          canManage: _canManage,
+          onChanged: () {
+            setState(() {});
+          },
+        );
+
+      case 3:
+        return GroupPermissionsStep(
+          draft: _draft,
+          onChanged: () {
+            setState(() {});
+          },
+        );
+
+      case 4:
+        return GroupReviewStep(
+          draft: _draft,
+          organizationId: widget.organizationId,
+          onEditStep: (step) {
+            setState(() {
+              _currentStep = step;
+            });
+          },
         );
 
       default:

@@ -150,19 +150,11 @@ class _GroupsPageState extends State<GroupsPage> {
 
   int get _activeGroups => _groups.where((group) => group.isActive).length;
 
-  int get _staffGroups => _groups
-      .where(
-        (group) =>
-            group.membershipComposition.contains(GroupMembershipType.staff),
-      )
-      .length;
+  int get _staffGroups =>
+      _groups.where((group) => group.groupType == GroupType.staffGroup).length;
 
   int get _volunteerGroups => _groups
-      .where(
-        (group) => group.membershipComposition.contains(
-          GroupMembershipType.volunteers,
-        ),
-      )
+      .where((group) => group.groupType == GroupType.volunteerGroup)
       .length;
 
   int get _programGroups => _groups
@@ -235,7 +227,7 @@ class _GroupsPageState extends State<GroupsPage> {
                             runSpacing: 8,
                             children: [
                               _buildArchivedGroupsButton(),
-                              _buildAddGroupButton(compact: true),
+                              _buildAddGroupButton(),
                             ],
                           ),
                         ),
@@ -410,7 +402,7 @@ class _GroupsPageState extends State<GroupsPage> {
               crossAxisCount: columns,
               crossAxisSpacing: 14,
               mainAxisSpacing: 14,
-              childAspectRatio: columns == 1 ? 1.65 : 1.45,
+              mainAxisExtent: 270,
             ),
             itemBuilder: (context, index) {
               final group = groups[index];
@@ -577,6 +569,9 @@ class _GroupsPageState extends State<GroupsPage> {
               : changes.description.trim(),
           'group_type': changes.groupType.value,
           'visibility': changes.visibility.value,
+          'owner_type': changes.ownerType.value,
+          'owner_id': changes.ownerId,
+          'location_id': changes.locationId,
         },
       );
 

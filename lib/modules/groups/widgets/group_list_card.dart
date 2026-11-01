@@ -58,7 +58,13 @@ class GroupListCard extends StatelessWidget {
               const SizedBox(width: 18),
               _buildMembers(),
               const SizedBox(width: 22),
-              GroupOwnerLine(ownerType: group.ownerType),
+              Flexible(
+                flex: 2,
+                child: GroupOwnerLine(
+                  ownerType: group.ownerType,
+                  ownerName: group.ownerName,
+                ),
+              ),
               const SizedBox(width: 10),
               _buildMenu(),
             ],

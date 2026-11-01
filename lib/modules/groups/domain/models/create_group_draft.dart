@@ -32,6 +32,7 @@ class CreateGroupDraft {
   final Map<String, String> memberRoles = {};
 
   final Set<String> locationIds = {};
+  final Set<String> associatedLocationIds = {};
 
   bool get isDefinitionComplete {
     return groupTypeOption != null && name.trim().isNotEmpty;
@@ -67,5 +68,6 @@ class CreateGroupDraft {
     memberIds.clear();
     memberRoles.clear();
     locationIds.clear();
+    associatedLocationIds.clear();
   }
 }

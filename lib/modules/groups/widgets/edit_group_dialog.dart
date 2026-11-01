@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/groups/domain/models/group.dart';
+import 'package:charitask/modules/groups/widgets/create_group/steps/group_owner_location_field.dart';
 
 class GroupEditData {
   final String name;
   final String description;
   final GroupType groupType;
   final GroupVisibility visibility;
+  final GroupOwnerType ownerType;
+  final String? ownerId;
+  final String? locationId;
 
   const GroupEditData({
     required this.name,
     required this.description,
     required this.groupType,
     required this.visibility,
+    required this.ownerType,
+    required this.ownerId,
+    required this.locationId,
   });
 }
 
@@ -36,18 +43,35 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
 
   late GroupType _groupType;
   late GroupVisibility _visibility;
+  late GroupOwnerType? _ownerType;
+  late String? _ownerId;
+
+  String? _ownerError;
 
   @override
   void initState() {
     super.initState();
 
     _nameController = TextEditingController(text: widget.group.name);
+
     _descriptionController = TextEditingController(
       text: widget.group.description ?? '',
     );
 
     _groupType = widget.group.groupType ?? GroupType.team;
     _visibility = widget.group.visibility;
+    _ownerType = widget.group.ownerType;
+
+    // Preserve the existing owner. Fall back to location_id for
+    // older records whose owner_id may not have been populated.
+    _ownerId =
+        widget.group.ownerId ??
+        (widget.group.ownerType == GroupOwnerType.location
+            ? widget.group.locationId
+            : null) ??
+        (widget.group.ownerType == GroupOwnerType.organization
+            ? widget.group.organizationId
+            : null);
   }
 
   @override
@@ -75,8 +99,176 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     );
   }
 
+  Widget _buildOwnershipCard() {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.account_tree_outlined, color: _cyan, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Group Ownership',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Choose the organization or location this group '
+            'primarily belongs to.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: const Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<GroupOwnerType>(
+            initialValue: _ownerType,
+            isExpanded: true,
+            decoration: _decoration('Owner Type *'),
+            items: GroupOwnerType.values.map((type) {
+              final isSupported =
+                  type == GroupOwnerType.organization ||
+                  type == GroupOwnerType.location;
+
+              return DropdownMenuItem<GroupOwnerType>(
+                value: type,
+                enabled: isSupported,
+                child: Text(type.label),
+              );
+            }).toList(),
+            validator: (value) {
+              if (value == null) {
+                return 'Select an owner type.';
+              }
+              return null;
+            },
+            onChanged: (value) {
+              if (value == null) return;
+
+              setState(() {
+                final previousType = _ownerType;
+
+                _ownerType = value;
+                _ownerError = null;
+
+                if (value == GroupOwnerType.organization) {
+                  _ownerId = widget.group.organizationId;
+                } else if (value == GroupOwnerType.location &&
+                    previousType != GroupOwnerType.location) {
+                  // Require a fresh location when changing owner type.
+                  _ownerId = null;
+                }
+              });
+            },
+          ),
+          const SizedBox(height: 14),
+          _buildOwnerField(),
+          if (_ownerError != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _ownerError!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOwnerField() {
+    switch (_ownerType) {
+      case GroupOwnerType.organization:
+        return TextFormField(
+          key: const ValueKey('organization-owner'),
+          initialValue: 'Current Organization',
+          enabled: false,
+          decoration: _decoration('Owner'),
+        );
+
+      case GroupOwnerType.location:
+        return GroupOwnerLocationField(
+          key: ValueKey(_ownerId),
+          organizationId: widget.group.organizationId,
+          selectedLocationId: _ownerId,
+          onChanged: (location) {
+            setState(() {
+              _ownerId = location?.id;
+              _ownerError = null;
+            });
+          },
+        );
+
+      case GroupOwnerType.program:
+      case GroupOwnerType.event:
+      case GroupOwnerType.project:
+        return TextFormField(
+          key: ValueKey('unsupported-owner-$_ownerType'),
+          initialValue: '${_ownerType!.label} selection is not available yet.',
+          enabled: false,
+          decoration: _decoration('Owner'),
+        );
+
+      case null:
+        return TextFormField(
+          enabled: false,
+          initialValue: 'Select an owner type above.',
+          decoration: _decoration('Owner'),
+        );
+    }
+  }
+
   void _save() {
     if (!_formKey.currentState!.validate()) return;
+
+    final ownerType = _ownerType;
+    if (ownerType == null) return;
+
+    final String? ownerIdToSave;
+
+    if (ownerType == GroupOwnerType.organization) {
+      ownerIdToSave = widget.group.organizationId;
+    } else if (ownerType == GroupOwnerType.location) {
+      ownerIdToSave = _ownerId;
+    } else {
+      // Until these owner types have editable selectors, preserve
+      // their existing ownership rather than inventing a new owner.
+      ownerIdToSave = widget.group.ownerId;
+    }
+
+    if (ownerType == GroupOwnerType.location &&
+        (ownerIdToSave == null || ownerIdToSave.trim().isEmpty)) {
+      setState(() {
+        _ownerError = 'Select a location to own this group.';
+      });
+      return;
+    }
+
+    final String? locationIdToSave;
+
+    if (ownerType == GroupOwnerType.location) {
+      locationIdToSave = ownerIdToSave;
+    } else if (ownerType == GroupOwnerType.organization) {
+      locationIdToSave = null;
+    } else {
+      locationIdToSave = widget.group.locationId;
+    }
 
     Navigator.of(context).pop(
       GroupEditData(
@@ -84,6 +276,9 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
         description: _descriptionController.text.trim(),
         groupType: _groupType,
         visibility: _visibility,
+        ownerType: ownerType,
+        ownerId: ownerIdToSave,
+        locationId: locationIdToSave,
       ),
     );
   }
@@ -109,6 +304,8 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
                     'Update the group details below.',
                     style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
                   ),
+                  const SizedBox(height: 16),
+                  _buildOwnershipCard(),
                   const SizedBox(height: 22),
                   TextFormField(
                     controller: _nameController,

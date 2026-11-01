@@ -1,5 +1,4 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:charitask/modules/groups/domain/models/group.dart';
 
 class GroupService {
@@ -21,18 +20,40 @@ class GroupService {
         .map((row) => _fromMap(Map<String, dynamic>.from(row)))
         .toList();
 
-    if (groups.isEmpty) {
-      return groups;
-    }
+    if (groups.isEmpty) return groups;
 
     final counts = await _getMemberCounts(
       organizationId: organizationId,
       groupIds: groups.map((group) => group.id).toList(),
     );
 
-    return groups
+    final groupsWithCounts = groups
         .map((group) => group.copyWith(memberCount: counts[group.id] ?? 0))
         .toList();
+
+    return _resolveOwnerNames(groupsWithCounts, organizationId: organizationId);
+  }
+
+  Future<int> getActiveGroupCountForLocation({
+    required String organizationId,
+    required String locationId,
+  }) async {
+    final rows = await _supabase
+        .from('groups')
+        .select('id, location_id, owner_type, owner_id')
+        .eq('organization_id', organizationId)
+        .eq('status', 'active')
+        .isFilter('archived_at', null);
+
+    return rows.where((row) {
+      final group = Map<String, dynamic>.from(row);
+
+      final matchesLocationId = group['location_id'] == locationId;
+      final matchesLocationOwner =
+          group['owner_type'] == 'location' && group['owner_id'] == locationId;
+
+      return matchesLocationId || matchesLocationOwner;
+    }).length;
   }
 
   Future<List<Group>> getArchivedGroups({
@@ -50,18 +71,18 @@ class GroupService {
         .map((row) => _fromMap(Map<String, dynamic>.from(row)))
         .toList();
 
-    if (groups.isEmpty) {
-      return groups;
-    }
+    if (groups.isEmpty) return groups;
 
     final counts = await _getMemberCounts(
       organizationId: organizationId,
       groupIds: groups.map((group) => group.id).toList(),
     );
 
-    return groups
+    final groupsWithCounts = groups
         .map((group) => group.copyWith(memberCount: counts[group.id] ?? 0))
         .toList();
+
+    return _resolveOwnerNames(groupsWithCounts, organizationId: organizationId);
   }
 
   Future<Group?> getGroup({
@@ -84,7 +105,13 @@ class GroupService {
       groupIds: [groupId],
     );
 
-    return group.copyWith(memberCount: counts[groupId] ?? 0);
+    final groupWithCount = group.copyWith(memberCount: counts[groupId] ?? 0);
+
+    final resolvedGroups = await _resolveOwnerNames([
+      groupWithCount,
+    ], organizationId: organizationId);
+
+    return resolvedGroups.first;
   }
 
   Future<Group> createGroup({
@@ -139,7 +166,6 @@ class GroupService {
     final ownerType = sourceGroup.ownerType;
     final ownerId = sourceGroup.ownerId;
 
-    // Preserve the original ownership instead of silently changing it.
     if (groupType == null || ownerType == null || ownerId == null) {
       throw StateError(
         'This group is missing its type or ownership information '
@@ -147,8 +173,6 @@ class GroupService {
       );
     }
 
-    // Include archived groups because slug uniqueness applies to all
-    // groups in the organization, not only active groups.
     final rows = await _supabase
         .from('groups')
         .select('slug')
@@ -215,7 +239,13 @@ class GroupService {
       groupIds: [groupId],
     );
 
-    return group.copyWith(memberCount: counts[groupId] ?? 0);
+    final groupWithCount = group.copyWith(memberCount: counts[groupId] ?? 0);
+
+    final resolvedGroups = await _resolveOwnerNames([
+      groupWithCount,
+    ], organizationId: organizationId);
+
+    return resolvedGroups.first;
   }
 
   Future<void> archiveGroup({
@@ -250,13 +280,54 @@ class GroupService {
         .single();
   }
 
+  Future<List<Group>> _resolveOwnerNames(
+    List<Group> groups, {
+    required String organizationId,
+  }) async {
+    final locationOwnerIds = groups
+        .where(
+          (group) =>
+              group.ownerType == GroupOwnerType.location &&
+              group.ownerId != null,
+        )
+        .map((group) => group.ownerId!)
+        .toSet()
+        .toList();
+
+    if (locationOwnerIds.isEmpty) return groups;
+
+    final locationRows = await _supabase
+        .from('locations')
+        .select('id, name')
+        .eq('organization_id', organizationId)
+        .inFilter('id', locationOwnerIds);
+
+    final locationNames = <String, String>{};
+
+    for (final row in locationRows) {
+      final location = Map<String, dynamic>.from(row);
+      final id = location['id'] as String?;
+      final name = location['name'] as String?;
+
+      if (id != null && name != null && name.trim().isNotEmpty) {
+        locationNames[id] = name.trim();
+      }
+    }
+
+    return groups.map((group) {
+      final ownerName = group.ownerType == GroupOwnerType.location
+          ? locationNames[group.ownerId]
+          : null;
+
+      return group.copyWith(ownerName: ownerName);
+    }).toList();
+  }
+
   Future<Map<String, int>> _getMemberCounts({
     required String organizationId,
     required List<String> groupIds,
   }) async {
-    if (groupIds.isEmpty) {
-      return {};
-    }
+    if (groupIds.isEmpty) return {};
 
     final rows = await _supabase
         .from('group_memberships')
@@ -306,7 +377,6 @@ class GroupService {
 
   DateTime? _parseDateTime(dynamic value) {
     if (value == null) return null;
-
     return DateTime.tryParse(value.toString());
   }
 }

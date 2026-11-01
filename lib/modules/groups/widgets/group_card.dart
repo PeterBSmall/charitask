@@ -160,7 +160,12 @@ class GroupCard extends StatelessWidget {
       children: [
         const Icon(Icons.account_tree_outlined, size: 17, color: _muted),
         const SizedBox(width: 7),
-        Expanded(child: GroupOwnerLine(ownerType: group.ownerType)),
+        Expanded(
+          child: GroupOwnerLine(
+            ownerType: group.ownerType,
+            ownerName: group.ownerName,
+          ),
+        ),
       ],
     );
   }
@@ -202,9 +207,10 @@ class GroupCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 5),
-          const Text(
-            'members',
-            style: TextStyle(
+          const SizedBox(width: 5),
+          Text(
+            group.memberCount == 1 ? 'member' : 'members',
+            style: const TextStyle(
               color: _gray,
               fontSize: 12,
               fontWeight: FontWeight.w600,

@@ -239,6 +239,9 @@ class Group {
   final GroupType? groupType;
   final GroupOwnerType? ownerType;
   final String? ownerId;
+
+  final String? ownerName;
+
   final List<GroupMembershipType> membershipComposition;
   final String? locationId;
   final String status;
@@ -259,6 +262,9 @@ class Group {
     this.groupType,
     this.ownerType,
     this.ownerId,
+
+    this.ownerName,
+
     this.membershipComposition = const [],
     this.locationId,
     this.status = 'active',
@@ -280,6 +286,7 @@ class Group {
     GroupType? groupType,
     GroupOwnerType? ownerType,
     String? ownerId,
+    String? ownerName,
     List<GroupMembershipType>? membershipComposition,
     String? locationId,
     String? status,
@@ -300,6 +307,7 @@ class Group {
       groupType: groupType ?? this.groupType,
       ownerType: ownerType ?? this.ownerType,
       ownerId: ownerId ?? this.ownerId,
+      ownerName: ownerName ?? this.ownerName,
       membershipComposition:
           membershipComposition ?? this.membershipComposition,
       locationId: locationId ?? this.locationId,

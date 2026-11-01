@@ -4,8 +4,9 @@ import '../domain/models/group.dart';
 
 class GroupOwnerLine extends StatelessWidget {
   final GroupOwnerType? ownerType;
+  final String? ownerName;
 
-  const GroupOwnerLine({super.key, required this.ownerType});
+  const GroupOwnerLine({super.key, required this.ownerType, this.ownerName});
 
   static const _navy = Color(0xFF1E293B);
   static const _gray = Color(0xFF64748B);
@@ -13,6 +14,13 @@ class GroupOwnerLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final type = ownerType;
+
+    final label =
+        type == GroupOwnerType.location &&
+            ownerName != null &&
+            ownerName!.trim().isNotEmpty
+        ? ownerName!.trim()
+        : _labelFor(type);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -28,12 +36,16 @@ class GroupOwnerLine extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Text(
-          _labelFor(type),
-          style: const TextStyle(
-            color: _navy,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: _navy,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],

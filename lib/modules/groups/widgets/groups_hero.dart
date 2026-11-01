@@ -6,8 +6,8 @@ class GroupsHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-      padding: const EdgeInsets.fromLTRB(34, 26, 26, 26),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         gradient: const LinearGradient(
@@ -21,16 +21,33 @@ class GroupsHero extends StatelessWidget {
           final narrow = constraints.maxWidth < 600;
           final compact = constraints.maxWidth < 800;
 
-          return Stack(
-            children: [
-              if (!compact)
-                const Positioned(
-                  right: -10,
-                  top: -35,
-                  child: _HeroPeopleDecoration(),
+          final horizontalPadding = narrow ? 20.0 : 34.0;
+          final verticalPadding = narrow ? 20.0 : 26.0;
+
+          return Padding(
+            padding: EdgeInsets.fromLTRB(
+              horizontalPadding,
+              verticalPadding,
+              narrow ? 20 : 26,
+              verticalPadding,
+            ),
+            child: Stack(
+              children: [
+                if (!compact)
+                  const Positioned(
+                    right: -10,
+                    top: -35,
+                    child: _HeroPeopleDecoration(),
+                  ),
+                _buildContent(
+                  narrow: narrow,
+                  width:
+                      constraints.maxWidth -
+                      horizontalPadding -
+                      (narrow ? 20 : 26),
                 ),
-              _buildContent(narrow: narrow, width: constraints.maxWidth),
-            ],
+              ],
+            ),
           );
         },
       ),
