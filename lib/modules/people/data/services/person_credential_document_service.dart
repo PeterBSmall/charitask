@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:charitask/modules/people/domain/models/person_credential.dart';
 import 'package:charitask/modules/people/domain/models/person_credential_document.dart';
+import 'package:charitask/modules/people/domain/models/person_credential_document_record.dart';
 
 class PersonCredentialDocumentService {
   final SupabaseClient _supabase;
@@ -113,6 +114,50 @@ class PersonCredentialDocumentService {
 
       rethrow;
     }
+  }
+
+  Future<List<PersonCredentialDocumentRecord>> getDocumentsForCredential({
+    required String organizationId,
+    required String personId,
+    required String credentialId,
+  }) async {
+    final rows = await _supabase
+        .from('person_credential_documents')
+        .select(
+          'id, credential_id, file_name, content_type, file_size, created_at',
+        )
+        .eq('organization_id', organizationId)
+        .eq('person_id', personId)
+        .eq('credential_id', credentialId)
+        .order('created_at');
+
+    return List<Map<String, dynamic>>.from(
+      rows,
+    ).map(PersonCredentialDocumentRecord.fromMap).toList();
+  }
+
+  Future<String> createDocumentViewUrl({
+    required String organizationId,
+    required String personId,
+    required String credentialId,
+    required String documentId,
+  }) async {
+    final row = await _supabase
+        .from('person_credential_documents')
+        .select('storage_path')
+        .eq('id', documentId)
+        .eq('organization_id', organizationId)
+        .eq('person_id', personId)
+        .eq('credential_id', credentialId)
+        .maybeSingle();
+
+    if (row == null) {
+      throw StateError('The requested credential document was not found.');
+    }
+
+    final storagePath = row['storage_path'] as String;
+
+    return _supabase.storage.from(bucketName).createSignedUrl(storagePath, 60);
   }
 
   Future<List<String>> getStoragePathsForCredential({

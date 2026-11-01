@@ -81,7 +81,12 @@ class _OnboardingEntryPageState extends State<OnboardingEntryPage> {
     // ------------------------------------------------------------
 
     try {
+      debugPrint('>>> BEFORE AUTH GET USER');
+
       final userResponse = await supabase.auth.getUser();
+
+      debugPrint('>>> AFTER AUTH GET USER');
+
       final authUser = userResponse.user;
 
       if (authUser == null) {

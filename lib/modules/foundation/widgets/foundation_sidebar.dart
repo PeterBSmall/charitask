@@ -125,17 +125,24 @@ class FoundationSidebar extends StatelessWidget {
               ),
 
               CTTile(
-                icon: Icons.shield_outlined,
-                label: 'Security',
+                icon: Icons.receipt_long_outlined,
+                label: 'Compliance Receipts',
                 selected: selectedIndex == 7,
                 onTap: () => onSelected(7),
               ),
 
               CTTile(
-                icon: Icons.bar_chart_outlined,
-                label: 'Analytics',
+                icon: Icons.shield_outlined,
+                label: 'Security',
                 selected: selectedIndex == 8,
                 onTap: () => onSelected(8),
+              ),
+
+              CTTile(
+                icon: Icons.bar_chart_outlined,
+                label: 'Analytics',
+                selected: selectedIndex == 9,
+                onTap: () => onSelected(9),
               ),
 
               const Padding(
@@ -148,8 +155,8 @@ class FoundationSidebar extends StatelessWidget {
               CTTile(
                 icon: Icons.sticky_note_2_outlined,
                 label: 'Notes',
-                selected: selectedIndex == 9,
-                onTap: () => onSelected(9),
+                selected: selectedIndex == 10,
+                onTap: () => onSelected(10),
                 trailing: Container(
                   width: 8,
                   height: 8,
@@ -163,15 +170,15 @@ class FoundationSidebar extends StatelessWidget {
               CTTile(
                 icon: Icons.settings_outlined,
                 label: 'Settings',
-                selected: selectedIndex == 10,
-                onTap: () => onSelected(10),
+                selected: selectedIndex == 11,
+                onTap: () => onSelected(11),
               ),
 
               CTTile(
                 icon: Icons.mail_outline_rounded,
                 label: 'Invitations',
-                selected: selectedIndex == 11,
-                onTap: () => onSelected(11),
+                selected: selectedIndex == 12,
+                onTap: () => onSelected(12),
               ),
 
               const Padding(
@@ -350,17 +357,24 @@ class FoundationSidebar extends StatelessWidget {
                     ),
 
                     _buildCollapsedIcon(
-                      icon: Icons.shield_outlined,
-                      tooltip: 'Security',
+                      icon: Icons.receipt_long_outlined,
+                      tooltip: 'Compliance Receipts',
                       selected: selectedIndex == 7,
                       onTap: () => onSelected(7),
                     ),
 
                     _buildCollapsedIcon(
-                      icon: Icons.bar_chart_outlined,
-                      tooltip: 'Analytics',
+                      icon: Icons.shield_outlined,
+                      tooltip: 'Security',
                       selected: selectedIndex == 8,
                       onTap: () => onSelected(8),
+                    ),
+
+                    _buildCollapsedIcon(
+                      icon: Icons.bar_chart_outlined,
+                      tooltip: 'Analytics',
+                      selected: selectedIndex == 9,
+                      onTap: () => onSelected(9),
                     ),
 
                     const SizedBox(height: 8),
@@ -368,23 +382,22 @@ class FoundationSidebar extends StatelessWidget {
                     _buildCollapsedIcon(
                       icon: Icons.sticky_note_2_outlined,
                       tooltip: 'Notes',
-                      selected: selectedIndex == 9,
-                      onTap: () => onSelected(9),
+                      selected: selectedIndex == 10,
+                      onTap: () => onSelected(10),
                       showDot: true,
                     ),
 
                     _buildCollapsedIcon(
                       icon: Icons.settings_outlined,
                       tooltip: 'Settings',
-                      selected: selectedIndex == 10,
-                      onTap: () => onSelected(10),
+                      selected: selectedIndex == 11,
+                      onTap: () => onSelected(11),
                     ),
-
                     _buildCollapsedIcon(
                       icon: Icons.mail_outline_rounded,
                       tooltip: 'Invitations',
-                      selected: selectedIndex == 11,
-                      onTap: () => onSelected(11),
+                      selected: selectedIndex == 12,
+                      onTap: () => onSelected(12),
                     ),
                   ],
                 ),

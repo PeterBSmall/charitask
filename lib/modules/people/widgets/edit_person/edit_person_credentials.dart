@@ -168,7 +168,24 @@ class _EditPersonCredentialsState extends State<EditPersonCredentials> {
       return;
     }
 
-    final category = assessment.requirement.category;
+    final requirement = assessment.requirement;
+
+    if (requirement == null) {
+      _showMessage(
+        'This is a reusable compliance requirement. Open Compliance '
+        'Requirements to manage it.',
+      );
+      return;
+    }
+
+    final category = requirement.category;
+
+    if (!_canManageCategory(category)) {
+      _showMessage(
+        'You do not have permission to manage this credential category.',
+      );
+      return;
+    }
     if (!_canManageCategory(category)) {
       _showMessage(
         'You do not have permission to manage this credential category.',
@@ -178,9 +195,9 @@ class _EditPersonCredentialsState extends State<EditPersonCredentials> {
 
     final existing = assessment.matchingCredential;
     if (existing != null) {
-      await _editCredential(existing, requirement: assessment.requirement);
+      await _editCredential(existing, requirement: requirement);
     } else {
-      await _addCredential(requirement: assessment.requirement);
+      await _addCredential(requirement: requirement);
     }
   }
 
@@ -390,53 +407,45 @@ class _EditPersonCredentialsState extends State<EditPersonCredentials> {
 
     setState(() => _isSaving = true);
 
-    var cleanupFailed = false;
-
     try {
-      // Collect storage paths before deleting document metadata.
       final storagePaths = await _documentService.getStoragePathsForCredential(
         organizationId: widget.organizationId,
         personId: widget.personId,
         credentialId: credential.id,
       );
 
-      // Delete document metadata first to satisfy the foreign key.
+      // Remove files first. If this fails, preserve the database records
+      // so the user can retry without losing the document references.
+      if (storagePaths.isNotEmpty) {
+        await _documentService.removeStorageObjects(storagePaths);
+      }
+
+      // Delete metadata only after Storage removal succeeds.
       await _documentService.deleteDocumentMetadataForCredential(
         organizationId: widget.organizationId,
         personId: widget.personId,
         credentialId: credential.id,
       );
 
-      // Now delete the credential record.
+      // Delete the credential after its document metadata is removed.
       await _credentialService.deleteCredential(
         organizationId: widget.organizationId,
         personId: widget.personId,
         credentialId: credential.id,
       );
 
-      // Remove the files from storage after the database deletions succeed.
-      try {
-        await _documentService.removeStorageObjects(storagePaths);
-      } catch (error) {
-        debugPrint('Credential file cleanup failed: $error');
-        cleanupFailed = true;
-      }
-
       await _loadCredentials(showLoading: false);
 
       if (!mounted) return;
-
-      _showMessage(
-        cleanupFailed
-            ? 'Credential deleted, but some supporting files may need '
-                  'cleanup.'
-            : 'Credential deleted.',
-      );
+      _showMessage('Credential deleted.');
     } catch (error) {
       debugPrint('Deleting credential failed: $error');
 
       if (mounted) {
-        _showMessage('Unable to delete the credential. Please try again.');
+        _showMessage(
+          'Unable to complete credential deletion. '
+          'Please retry and check the error logs if it persists.',
+        );
       }
     } finally {
       if (mounted) {

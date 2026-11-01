@@ -196,6 +196,55 @@ class _EditPersonOrganizationalAssignmentsState
     }
   }
 
+  Future<void> _changeMembershipRole(
+    Map<String, dynamic> membership,
+    String membershipRole,
+  ) async {
+    if (!widget.canViewGroups || !_canManageGroups) return;
+
+    final groupId = membership['group_id']?.toString();
+    final personId = membership['person_id']?.toString();
+
+    if (groupId == null ||
+        groupId.isEmpty ||
+        personId == null ||
+        personId.isEmpty) {
+      _showMessage('Unable to identify this group membership.');
+      return;
+    }
+
+    const roleLabels = {
+      'member': 'Member',
+      'leader': 'Leader',
+      'co_leader': 'Co-Leader',
+      'coordinator': 'Coordinator',
+    };
+
+    try {
+      await _membershipService.updateMemberRole(
+        organizationId: widget.organizationId,
+        groupId: groupId,
+        personId: personId,
+        membershipRole: membershipRole,
+      );
+
+      if (!mounted) return;
+
+      _showMessage(
+        'Group role updated to '
+        '${roleLabels[membershipRole] ?? membershipRole}.',
+      );
+
+      await _refreshGroups();
+    } catch (error) {
+      debugPrint('Updating group membership role failed: $error');
+
+      if (!mounted) return;
+
+      _showMessage('Unable to update the group role.');
+    }
+  }
+
   Future<void> _endMembership(String membershipId) async {
     if (!widget.canViewGroups || !_canManageGroups) return;
 
@@ -435,8 +484,8 @@ class _EditPersonOrganizationalAssignmentsState
               canManage: _canManageGroups,
               onAddGroup: _addGroup,
               onEndMembership: _endMembership,
+              onChangeMembershipRole: _changeMembershipRole,
             ),
-
         // Locations panel
         if (_selectedTab == 'locations' && _canViewLocations)
           if (_isLoadingLocations)

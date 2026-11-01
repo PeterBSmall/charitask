@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:charitask/modules/foundation/domain/models/location.dart';
 import 'package:charitask/modules/locations/widgets/location_relationship_metric.dart';
@@ -8,12 +8,14 @@ import 'package:charitask/shared/design_system/design_system.dart';
 class LocationCard extends StatelessWidget {
   final Location location;
   final int peopleCount;
+  final int groupCount;
   final VoidCallback? onTap;
 
   const LocationCard({
     super.key,
     required this.location,
     required this.peopleCount,
+    required this.groupCount,
     this.onTap,
   });
 
@@ -44,15 +46,10 @@ class LocationCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
-
               if (_hasAddress) ...[const SizedBox(height: 12), _buildAddress()],
-
               const SizedBox(height: 14),
-
               const Divider(height: 1, color: Color(0xFFE2E8F0)),
-
               const SizedBox(height: 14),
-
               _buildRelationships(),
             ],
           ),
@@ -78,9 +75,7 @@ class LocationCard extends StatelessWidget {
             size: 25,
           ),
         ),
-
         const SizedBox(width: 12),
-
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,9 +91,7 @@ class LocationCard extends StatelessWidget {
                   height: 1.2,
                 ),
               ),
-
               const SizedBox(height: 7),
-
               Wrap(
                 spacing: 7,
                 runSpacing: 5,
@@ -110,9 +103,7 @@ class LocationCard extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(width: 8),
-
         const Padding(
           padding: EdgeInsets.only(top: 4),
           child: Icon(
@@ -178,18 +169,16 @@ class LocationCard extends StatelessWidget {
                 value: peopleCount.toString(),
               ),
             ),
-            const Expanded(
+            Expanded(
               child: LocationRelationshipMetric(
                 icon: Icons.groups_outlined,
                 label: 'Groups',
-                value: '—',
+                value: groupCount.toString(),
               ),
             ),
           ],
         ),
-
         const SizedBox(height: 12),
-
         Row(
           children: [
             const Expanded(
@@ -212,9 +201,7 @@ class LocationCard extends StatelessWidget {
     );
   }
 
-  bool get _hasAddress {
-    return _addressText.trim().isNotEmpty;
-  }
+  bool get _hasAddress => _addressText.trim().isNotEmpty;
 
   String get _addressText {
     final parts = <String>[

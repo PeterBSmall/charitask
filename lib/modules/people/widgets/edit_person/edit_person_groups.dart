@@ -10,6 +10,7 @@ class EditPersonGroups extends StatefulWidget {
     required this.canManage,
     required this.onAddGroup,
     required this.onEndMembership,
+    required this.onChangeMembershipRole,
   });
 
   final List<Map<String, dynamic>> memberships;
@@ -17,6 +18,8 @@ class EditPersonGroups extends StatefulWidget {
   final bool canManage;
   final ValueChanged<String> onAddGroup;
   final ValueChanged<String> onEndMembership;
+  final void Function(Map<String, dynamic> membership, String membershipRole)
+  onChangeMembershipRole;
 
   @override
   State<EditPersonGroups> createState() => _EditPersonGroupsState();
@@ -24,6 +27,13 @@ class EditPersonGroups extends StatefulWidget {
 
 class _EditPersonGroupsState extends State<EditPersonGroups> {
   String? _selectedGroupId;
+
+  static const Map<String, String> _groupRoleLabels = {
+    'member': 'Member',
+    'leader': 'Leader',
+    'co_leader': 'Co-Leader',
+    'coordinator': 'Coordinator',
+  };
 
   List<Group> get _unassignedGroups {
     final assignedIds = widget.memberships
@@ -34,7 +44,11 @@ class _EditPersonGroupsState extends State<EditPersonGroups> {
 
     return widget.availableGroups
         .where((group) => !assignedIds.contains(group.id))
-        .toList();
+        .toList()
+      ..sort(
+        (a, b) =>
+            a.name.trim().toLowerCase().compareTo(b.name.trim().toLowerCase()),
+      );
   }
 
   @override
@@ -199,41 +213,76 @@ class _EditPersonGroupsState extends State<EditPersonGroups> {
 
     final groupType =
         group?.groupType?.label ??
-        GroupType.fromValue(groupData?['group_type']?.toString())?.label;
+        GroupType.fromValue(groupData?['group_type']?.toString())?.label ??
+        'Not specified';
 
     final role = membership['membership_role']?.toString() ?? 'member';
-    final roleLabel = role.replaceAll('_', ' ');
+    final roleLabel = _groupRoleLabels[role] ?? _formatRoleLabel(role);
 
     final startedAt = DateTime.tryParse(
       membership['started_at']?.toString() ?? '',
     );
 
+    final memberSince = startedAt == null
+        ? 'Not recorded'
+        : MaterialLocalizations.of(context).formatMediumDate(startedAt);
+
     final membershipId = membership['id']?.toString();
+
+    final canEditMembership =
+        widget.canManage &&
+        membershipId != null &&
+        membership['status'] == 'active';
+
+    Widget detailLine(String label, String value) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 5),
+        child: Text.rich(
+          TextSpan(
+            style: theme.textTheme.bodyMedium,
+            children: [
+              TextSpan(
+                text: '$label: ',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              TextSpan(
+                text: value,
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+          softWrap: true,
+        ),
+      );
+    }
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(9),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               Icons.groups_outlined,
-              size: 20,
+              size: 22,
               color: theme.colorScheme.onPrimaryContainer,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,40 +290,45 @@ class _EditPersonGroupsState extends State<EditPersonGroups> {
                 Text(
                   groupName,
                   softWrap: true,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  groupType == null ? roleLabel : '$roleLabel · $groupType',
-                  softWrap: true,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                if (startedAt != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Member since ${MaterialLocalizations.of(context).formatMediumDate(startedAt)}',
-                    softWrap: true,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                const SizedBox(height: 10),
+                detailLine('Role', roleLabel),
+                detailLine('Type', groupType),
+                detailLine('Member Since', memberSince),
               ],
             ),
           ),
-          if (widget.canManage && membershipId != null)
+          if (canEditMembership) ...[
+            PopupMenuButton<String>(
+              tooltip: 'Change group role',
+              icon: const Icon(Icons.manage_accounts_outlined),
+              onSelected: (selectedRole) {
+                if (selectedRole != role) {
+                  widget.onChangeMembershipRole(membership, selectedRole);
+                }
+              },
+              itemBuilder: (context) => _groupRoleLabels.entries
+                  .map(
+                    (entry) => CheckedPopupMenuItem<String>(
+                      value: entry.key,
+                      checked: entry.key == role,
+                      child: Text(entry.value),
+                    ),
+                  )
+                  .toList(),
+            ),
             IconButton(
               tooltip: 'End group membership',
-              onPressed: () => widget.onEndMembership(membershipId),
+              onPressed: () => widget.onEndMembership(membershipId!),
               icon: Icon(
                 Icons.remove_circle_outline,
                 color: theme.colorScheme.error,
               ),
             ),
+          ],
         ],
       ),
     );
@@ -319,6 +373,17 @@ class _EditPersonGroupsState extends State<EditPersonGroups> {
         ],
       ),
     );
+  }
+
+  String _formatRoleLabel(String role) {
+    return role
+        .split('_')
+        .map(
+          (part) => part.isEmpty
+              ? part
+              : '${part[0].toUpperCase()}${part.substring(1)}',
+        )
+        .join(' ');
   }
 
   Group? _findGroup(String? groupId) {

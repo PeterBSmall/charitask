@@ -21,22 +21,39 @@ enum CredentialRequirementItemStatus {
 
 class CredentialRequirementAssessment {
   const CredentialRequirementAssessment({
-    required this.requirement,
+    this.requirement,
     required this.roleName,
     required this.status,
     this.matchingCredential,
+    this.reusableRequirementName,
+    this.reusableRequirementDescription,
+    this.reusableRequirementCategory,
   });
 
-  final FunctionalRoleCredentialRequirement requirement;
+  final FunctionalRoleCredentialRequirement? requirement;
   final String roleName;
   final CredentialRequirementItemStatus status;
   final PersonCredential? matchingCredential;
+  final String? reusableRequirementName;
+  final String? reusableRequirementDescription;
+  final String? reusableRequirementCategory;
 
   String get displayName {
-    final name = requirement.credentialName?.trim();
+    final reusableName = reusableRequirementName?.trim();
+
+    if (reusableName != null && reusableName.isNotEmpty) {
+      return reusableName;
+    }
+
+    final legacyRequirement = requirement;
+    if (legacyRequirement == null) {
+      return 'Compliance requirement';
+    }
+
+    final name = legacyRequirement.credentialName?.trim();
 
     if (name == null || name.isEmpty) {
-      return '${requirement.category.label} (any qualifying credential)';
+      return '${legacyRequirement.category.label} (any qualifying credential)';
     }
 
     return name;
@@ -60,6 +77,7 @@ class CredentialComplianceResult {
     required this.expiredRequirements,
     required this.reviewRequirements,
     required this.accessRestricted,
+
     this.requirementAssessments = const [],
   });
 

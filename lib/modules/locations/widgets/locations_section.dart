@@ -8,12 +8,14 @@ class LocationsSection extends StatelessWidget {
   final List<Location> locations;
   final Map<String, int> peopleCounts;
   final ValueChanged<Location> onLocationTap;
+  final Map<String, int> groupCounts;
 
   const LocationsSection({
     super.key,
     required this.locations,
     required this.peopleCounts,
     required this.onLocationTap,
+    required this.groupCounts,
   });
 
   @override
@@ -73,6 +75,7 @@ class LocationsSection extends StatelessWidget {
                           child: LocationCard(
                             location: rowLocations[j],
                             peopleCount: peopleCounts[rowLocations[j].id] ?? 0,
+                            groupCount: groupCounts[rowLocations[j].id] ?? 0,
                             onTap: () => onLocationTap(rowLocations[j]),
                           ),
                         )

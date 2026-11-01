@@ -21,6 +21,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
   final Widget locations;
   final Widget groups;
   final Widget compliance;
+  final Widget complianceReceipts;
   final Widget security;
   final Widget analytics;
   final Widget notes;
@@ -37,6 +38,7 @@ class FoundationWorkspaceShell extends StatefulWidget {
     required this.locations,
     required this.groups,
     required this.compliance,
+    required this.complianceReceipts,
     required this.security,
     required this.analytics,
     required this.notes,
@@ -214,18 +216,21 @@ class _FoundationWorkspaceShellState extends State<FoundationWorkspaceShell> {
         return widget.compliance;
 
       case 7:
-        return widget.security;
+        return widget.complianceReceipts;
 
       case 8:
-        return widget.analytics;
+        return widget.security;
 
       case 9:
-        return widget.notes;
+        return widget.analytics;
 
       case 10:
-        return const SizedBox.shrink();
+        return widget.notes;
 
       case 11:
+        return const SizedBox.shrink();
+
+      case 12:
         return widget.invitations;
 
       default:

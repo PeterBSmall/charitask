@@ -9,6 +9,7 @@ import 'package:charitask/modules/foundation/widgets/foundation_workspace_shell.
 import 'package:charitask/modules/locations/pages/locations_page.dart';
 import 'package:charitask/modules/people/pages/people_page.dart';
 import 'package:charitask/modules/people/pages/compliance_page.dart';
+import 'package:charitask/modules/people/pages/compliance_receipts_page.dart';
 import 'package:charitask/modules/groups/pages/groups_page.dart';
 import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/shared/design_system/journey/ct_journey_controller.dart';
@@ -47,6 +48,10 @@ class FoundationWorkspacePage extends StatelessWidget {
       groups: GroupsPage(organizationId: organizationId),
 
       compliance: CompliancePage(organizationId: organizationId),
+
+      complianceReceipts: ComplianceReceiptsPage(
+        organizationId: organizationId,
+      ),
 
       security: const _FoundationPlaceholderPage(
         title: 'Security',

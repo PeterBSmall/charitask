@@ -9,6 +9,10 @@ import 'package:charitask/shared/design_system/design_system.dart';
 import 'package:charitask/modules/locations/pages/edit_location_page.dart';
 import '../../../platform/authorization/authorization.dart';
 
+import 'package:charitask/modules/groups/data/services/group_service.dart';
+import 'package:charitask/modules/groups/domain/models/group.dart';
+import 'package:charitask/modules/groups/widgets/group_card.dart';
+
 class LocationDetailsPage extends StatefulWidget {
   final String organizationId;
   final String locationId;
@@ -32,6 +36,16 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
   final PeopleService _peopleService = PeopleService(Supabase.instance.client);
   final LocationOperatingHoursService _operatingHoursService =
       LocationOperatingHoursService();
+
+  final GroupService _groupService = GroupService();
+
+  List<Group> _locationGroups = [];
+  bool _isLoadingGroups = false;
+  String? _groupsError;
+
+  List<Map<String, dynamic>> _locationPeople = [];
+  bool _isLoadingPeople = false;
+  String? _peopleError;
 
   late final TabController _tabController;
 
@@ -62,6 +76,8 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
     _tabController = TabController(length: _tabs.length, vsync: this);
 
     _loadLocation();
+    _loadLocationGroups();
+    _loadLocationPeople();
   }
 
   @override
@@ -137,6 +153,79 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
       setState(() {
         _errorMessage = error.toString();
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadLocationGroups() async {
+    if (mounted) {
+      setState(() {
+        _isLoadingGroups = true;
+        _groupsError = null;
+      });
+    }
+
+    try {
+      final groups = await _groupService.getGroups(
+        organizationId: widget.organizationId,
+      );
+
+      final locationGroups = groups.where((group) {
+        return group.locationId == widget.locationId ||
+            (group.ownerType == GroupOwnerType.location &&
+                group.ownerId == widget.locationId);
+      }).toList();
+
+      if (!mounted) return;
+
+      setState(() {
+        _locationGroups = locationGroups;
+        _isLoadingGroups = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _groupsError = error.toString();
+        _isLoadingGroups = false;
+      });
+    }
+  }
+
+  Future<void> _loadLocationPeople() async {
+    setState(() {
+      _isLoadingPeople = true;
+      _peopleError = null;
+    });
+
+    try {
+      final people = await _peopleService.getPeople(
+        organizationId: widget.organizationId,
+      );
+
+      final locationPeople = people.where((person) {
+        final assignments = List<Map<String, dynamic>>.from(
+          person['person_locations'] ?? const [],
+        );
+
+        return assignments.any((assignment) {
+          return assignment['location_id'] == widget.locationId &&
+              assignment['status'] == 'active';
+        });
+      }).toList();
+
+      if (!mounted) return;
+
+      setState(() {
+        _locationPeople = locationPeople;
+        _isLoadingPeople = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _peopleError = error.toString();
+        _isLoadingPeople = false;
       });
     }
   }
@@ -233,8 +322,8 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
             controller: _tabController,
             children: [
               _buildOverview(location),
-              _buildPlaceholderTab('Groups'),
-              _buildPlaceholderTab('People'),
+              _buildGroupsTab(),
+              _buildPeopleTab(),
               _buildPlaceholderTab('Workspaces'),
               _buildPlaceholderTab('Assets'),
               _buildPlaceholderTab('Activity'),
@@ -539,6 +628,224 @@ class _LocationDetailsPageState extends State<LocationDetailsPage>
         : hour;
 
     return '$displayHour:$minute $period';
+  }
+
+  Widget _buildGroupsTab() {
+    if (_isLoadingGroups) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_groupsError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 42,
+                color: Color(0xFFB3261E),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text('Unable to load groups', style: AppTypography.title),
+              const SizedBox(height: 8),
+              Text(
+                _groupsError!,
+                textAlign: TextAlign.center,
+                style: AppTypography.body,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              OutlinedButton.icon(
+                onPressed: _loadLocationGroups,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try Again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_locationGroups.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.groups_outlined,
+                size: 48,
+                color: Color(0xFF06B6D4),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text('No groups assigned', style: AppTypography.title),
+              const SizedBox(height: 8),
+              Text(
+                'Groups associated with this location will appear here.',
+                textAlign: TextAlign.center,
+                style: AppTypography.body,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadLocationGroups,
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text('Location Groups', style: AppTypography.title),
+              ),
+              Text(
+                '${_locationGroups.length} '
+                '${_locationGroups.length == 1 ? 'group' : 'groups'}',
+                style: AppTypography.body,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ..._locationGroups.map(
+            (group) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: GroupCard(
+                group: group,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${group.name} selected. '
+                        'Group details navigation is not implemented yet.',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPeopleTab() {
+    if (_isLoadingPeople) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_peopleError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 42,
+                color: Color(0xFFB3261E),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text('Unable to load people', style: AppTypography.title),
+              const SizedBox(height: 8),
+              Text(
+                _peopleError!,
+                textAlign: TextAlign.center,
+                style: AppTypography.body,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              OutlinedButton.icon(
+                onPressed: _loadLocationPeople,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try Again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_locationPeople.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.people_outline,
+                size: 48,
+                color: Color(0xFF06B6D4),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text('No people assigned', style: AppTypography.title),
+              const SizedBox(height: 8),
+              Text(
+                'People with an active assignment to this location will appear here.',
+                textAlign: TextAlign.center,
+                style: AppTypography.body,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadLocationPeople,
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'People at this Location',
+                  style: AppTypography.title,
+                ),
+              ),
+              Text(
+                '${_locationPeople.length} '
+                '${_locationPeople.length == 1 ? 'person' : 'people'}',
+                style: AppTypography.body,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ..._locationPeople.map((person) {
+            final preferredName =
+                person['preferred_name']?.toString().trim() ?? '';
+            final firstName = person['first_name']?.toString().trim() ?? '';
+            final lastName = person['last_name']?.toString().trim() ?? '';
+
+            final displayName = [
+              preferredName.isNotEmpty ? preferredName : firstName,
+              lastName,
+            ].where((part) => part.isNotEmpty).join(' ');
+
+            final name = displayName.isEmpty ? 'Unnamed person' : displayName;
+            final role = person['role']?.toString() ?? '—';
+            final groups = person['groups']?.toString() ?? '—';
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: ListTile(
+                leading: const CircleAvatar(child: Icon(Icons.person_outline)),
+                title: Text(name),
+                subtitle: Text('Role: $role\nGroups: $groups'),
+                isThreeLine: true,
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 
   Widget _buildPlaceholderTab(String title) {

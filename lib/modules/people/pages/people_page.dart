@@ -10,7 +10,8 @@ import 'package:charitask/modules/foundation/domain/models/functional_role_assig
 import 'package:charitask/modules/people/data/repositories/people_repository_impl.dart';
 
 import 'package:charitask/modules/people/data/services/functional_role_credential_requirement_service.dart';
-
+import 'package:charitask/modules/people/data/services/compliance_requirement_service.dart';
+import 'package:charitask/modules/people/domain/models/compliance_requirement.dart';
 import 'package:charitask/modules/people/data/services/people_service.dart';
 
 import 'package:charitask/modules/people/data/services/person_credential_service.dart';
@@ -27,7 +28,7 @@ import 'package:charitask/modules/people/domain/services/credential_compliance_e
 
 import 'package:charitask/modules/people/pages/add_person_page.dart';
 
-import 'package:charitask/modules/people/pages/compliance_page.dart';
+import 'package:charitask/modules/people/pages/compliance_record_detail_page.dart';
 
 import 'package:charitask/modules/people/pages/edit_person_page.dart';
 
@@ -45,6 +46,8 @@ import 'package:charitask/platform/authorization/authorization_service.dart';
 
 import 'package:charitask/modules/people/widgets/people_filters_dialog.dart';
 import 'package:charitask/modules/people/widgets/people_filter_engine.dart';
+import 'package:charitask/modules/people/domain/models/compliance_requirement_type.dart';
+import 'package:charitask/modules/people/domain/models/compliance_rule_settings.dart';
 
 class PeoplePage extends StatefulWidget {
   final String organizationId;
@@ -165,6 +168,8 @@ class _PeoplePageState extends State<PeoplePage> {
       List<FunctionalRoleAssignment> activeRoleAssignments = [];
 
       List<FunctionalRoleCredentialRequirement> credentialRequirements = [];
+      List<ComplianceRequirement> reusableRequirements = [];
+      var reusableRequirementsLoaded = false;
 
       var roleDataAvailable = false;
 
@@ -222,6 +227,20 @@ class _PeoplePageState extends State<PeoplePage> {
             requirementsLoaded = true;
           } catch (error) {
             debugPrint('Unable to load credential requirements: $error');
+          }
+
+          try {
+            reusableRequirements = await ComplianceRequirementService()
+                .getRequirements(
+                  organizationId: widget.organizationId,
+                  activeOnly: true,
+                );
+
+            reusableRequirementsLoaded = true;
+          } catch (error) {
+            debugPrint(
+              'Unable to load reusable compliance requirements: $error',
+            );
           }
         }
       } catch (error) {
@@ -375,7 +394,9 @@ class _PeoplePageState extends State<PeoplePage> {
 
       final complianceByPerson = <String, CredentialComplianceResult>{};
 
-      if (roleDataAvailable && requirementsLoaded) {
+      if (roleDataAvailable &&
+          requirementsLoaded &&
+          reusableRequirementsLoaded) {
         const evaluator = CredentialComplianceEvaluator();
 
         for (final person in people) {
@@ -390,6 +411,7 @@ class _PeoplePageState extends State<PeoplePage> {
               .toList();
 
           final activeRoleIds = personAssignments
+              .where((assignment) => assignment.isActive)
               .map((assignment) => assignment.functionalRoleId)
               .toSet();
 
@@ -400,18 +422,249 @@ class _PeoplePageState extends State<PeoplePage> {
               )
               .toList();
 
-          complianceByPerson[personId] = evaluator.evaluate(
+          final credentials = credentialsByPerson[personId] ?? const [];
+
+          final legacyResult = evaluator.evaluate(
             assignments: personAssignments,
-
             requirements: personRequirements,
-
-            credentials: credentialsByPerson[personId] ?? const [],
-
+            credentials: credentials,
             canViewCredentials: canViewCredentials && credentialsLoaded,
-
             canViewBackgroundChecks: canViewBackgroundChecks,
-
             roleNamesById: roleNamesById,
+          );
+
+          final rawPersonType =
+              person['person_type']?.toString().trim().toLowerCase() ?? '';
+
+          final rawMemberships = person['group_memberships'];
+          final activeGroupIds = <String>{};
+
+          if (rawMemberships is List) {
+            for (final rawMembership in rawMemberships) {
+              if (rawMembership is! Map) continue;
+
+              final membership = Map<String, dynamic>.from(rawMembership);
+              final membershipStatus = membership['status']
+                  ?.toString()
+                  .trim()
+                  .toLowerCase();
+
+              if (membershipStatus != 'active') continue;
+
+              final groupId = membership['group_id']?.toString();
+              if (groupId != null && groupId.isNotEmpty) {
+                activeGroupIds.add(groupId);
+              }
+            }
+          }
+
+          final reusableAssessments = <CredentialRequirementAssessment>[];
+
+          for (final requirement in reusableRequirements) {
+            if (!requirement.isActive) continue;
+
+            // These requirement types are managed by specialized compliance
+            // workflows, not the PersonCredential records evaluated here.
+            if (requirement.requirementType ==
+                    ComplianceRequirementType.agreementAcknowledgement ||
+                requirement.requirementType ==
+                    ComplianceRequirementType.medicalClearance) {
+              continue;
+            }
+
+            final requiredRoleIds = requirement.roleAssignments
+                .where((assignment) => assignment.isRequired)
+                .map((assignment) => assignment.functionalRoleId)
+                .toSet();
+
+            final matchesRole = requiredRoleIds.any(activeRoleIds.contains);
+
+            final matchesPersonType = requirement.personTypes.any(
+              (type) => type.trim().toLowerCase() == rawPersonType,
+            );
+
+            final matchesGroup = requirement.groupIds.any(
+              activeGroupIds.contains,
+            );
+
+            // A requirement with no targeting rules applies to nobody.
+            // If multiple targeting dimensions are configured, any matching
+            // dimension makes the requirement applicable.
+            final hasTargeting =
+                requiredRoleIds.isNotEmpty ||
+                requirement.personTypes.isNotEmpty ||
+                requirement.groupIds.isNotEmpty;
+
+            if (!hasTargeting ||
+                !(matchesRole || matchesPersonType || matchesGroup)) {
+              continue;
+            }
+
+            final CredentialCategory? requiredCategory =
+                requirement.credentialCategory ??
+                switch (requirement.requirementType) {
+                  ComplianceRequirementType.backgroundCheck =>
+                    CredentialCategory.backgroundCheck,
+                  ComplianceRequirementType.training =>
+                    CredentialCategory.training,
+                  ComplianceRequirementType.certificationLicense => null,
+                  ComplianceRequirementType.otherLegacy => null,
+                  ComplianceRequirementType.agreementAcknowledgement => null,
+                  ComplianceRequirementType.medicalClearance => null,
+                };
+
+            // Without an explicit category, certification/license and legacy
+            // requirements cannot safely be matched to an arbitrary credential.
+            if (requiredCategory == null) {
+              continue;
+            }
+
+            final isBackgroundCheck =
+                requiredCategory == CredentialCategory.backgroundCheck;
+
+            final canCheckRequirement =
+                canViewCredentials &&
+                credentialsLoaded &&
+                (!isBackgroundCheck || canViewBackgroundChecks);
+
+            final matchingCredentials = credentials.where((credential) {
+              if (credential.category != requiredCategory) return false;
+
+              final credentialName = credential.credentialName
+                  .trim()
+                  .toLowerCase();
+              final requiredName = requirement.name.trim().toLowerCase();
+
+              // Match the specific named requirement, not just any credential
+              // in the same category. For example, CPR cannot satisfy CORI.
+              return credentialName == requiredName ||
+                  credentialName.contains(requiredName) ||
+                  requiredName.contains(credentialName);
+            }).toList();
+
+            final matchingCredential = matchingCredentials.firstOrNull;
+
+            final CredentialRequirementItemStatus itemStatus;
+
+            if (!canCheckRequirement) {
+              itemStatus = CredentialRequirementItemStatus.accessRestricted;
+            } else if (matchingCredentials.isEmpty) {
+              itemStatus = CredentialRequirementItemStatus.missing;
+            } else {
+              final usableCredential = matchingCredentials
+                  .cast<PersonCredential?>()
+                  .firstWhere((credential) {
+                    if (credential == null ||
+                        !credential.isVerifiedAndCurrent) {
+                      return false;
+                    }
+
+                    if (requirement.rules.requireDocumentUpload) {
+                      // The credential model does not establish whether required
+                      // documents have been uploaded and accepted.
+                      return false;
+                    }
+
+                    return true;
+                  }, orElse: () => null);
+
+              if (usableCredential != null) {
+                itemStatus = CredentialRequirementItemStatus.satisfied;
+              } else if (matchingCredentials.any(
+                (credential) =>
+                    credential.isExpired &&
+                    requirement.rules.expirationMode !=
+                        ComplianceExpirationMode.neverExpires,
+              )) {
+                itemStatus = CredentialRequirementItemStatus.expired;
+              } else {
+                itemStatus = CredentialRequirementItemStatus.reviewRequired;
+              }
+            }
+
+            String roleName = 'Organization requirement';
+
+            final matchingRoleId = requiredRoleIds
+                .where(activeRoleIds.contains)
+                .firstOrNull;
+
+            if (matchingRoleId != null) {
+              roleName = roleNamesById[matchingRoleId] ?? 'Functional role';
+            } else if (matchesPersonType) {
+              roleName = person['person_type']?.toString() ?? 'Person type';
+            } else if (matchesGroup) {
+              roleName = 'Group requirement';
+            }
+
+            reusableAssessments.add(
+              CredentialRequirementAssessment(
+                requirement: null,
+                roleName: roleName,
+                status: itemStatus,
+                matchingCredential: matchingCredential,
+                reusableRequirementName: requirement.name,
+                reusableRequirementDescription: requirement.description,
+                reusableRequirementCategory: requiredCategory.label,
+              ),
+            );
+          }
+
+          final allAssessments = [
+            ...legacyResult.requirementAssessments,
+            ...reusableAssessments,
+          ];
+
+          final satisfied = allAssessments
+              .where(
+                (item) =>
+                    item.status == CredentialRequirementItemStatus.satisfied,
+              )
+              .length;
+          final missing = allAssessments
+              .where(
+                (item) =>
+                    item.status == CredentialRequirementItemStatus.missing,
+              )
+              .length;
+          final expired = allAssessments
+              .where(
+                (item) =>
+                    item.status == CredentialRequirementItemStatus.expired,
+              )
+              .length;
+          final review = allAssessments
+              .where(
+                (item) =>
+                    item.status ==
+                    CredentialRequirementItemStatus.reviewRequired,
+              )
+              .length;
+          final restricted = allAssessments.any(
+            (item) =>
+                item.status == CredentialRequirementItemStatus.accessRestricted,
+          );
+
+          final overallStatus = allAssessments.isEmpty
+              ? CredentialComplianceStatus.noRequirements
+              : restricted
+              ? CredentialComplianceStatus.accessRestricted
+              : expired > 0
+              ? CredentialComplianceStatus.expired
+              : missing > 0
+              ? CredentialComplianceStatus.missingRequired
+              : review > 0
+              ? CredentialComplianceStatus.reviewRequired
+              : CredentialComplianceStatus.valid;
+
+          complianceByPerson[personId] = CredentialComplianceResult(
+            status: overallStatus,
+            totalRequirements: allAssessments.length,
+            satisfiedRequirements: satisfied,
+            missingRequirements: missing,
+            expiredRequirements: expired,
+            reviewRequirements: review,
+            accessRestricted: restricted,
+            requirementAssessments: allAssessments,
           );
         }
       }
@@ -623,18 +876,14 @@ class _PeoplePageState extends State<PeoplePage> {
 
   Future<void> _viewCredentialCompliance(
     String personId,
-
     String personName,
-
     CredentialComplianceResult compliance,
   ) async {
     final selectedRequirement =
         await showDialog<CredentialRequirementAssessment>(
           context: context,
-
           builder: (dialogContext) => CredentialComplianceDetailsDialog(
             personName: personName,
-
             compliance: compliance,
           ),
         );
@@ -643,13 +892,10 @@ class _PeoplePageState extends State<PeoplePage> {
 
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => CompliancePage(
+        builder: (_) => ComplianceRecordDetailPage(
           organizationId: widget.organizationId,
-
-          initialPersonId: personId,
-
-          initialPersonName: personName,
-
+          personId: personId,
+          personName: personName,
           initialRequirementAssessment: selectedRequirement,
         ),
       ),

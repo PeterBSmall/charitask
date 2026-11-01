@@ -12,6 +12,7 @@ import 'package:charitask/modules/locations/widgets/locations_hero.dart';
 import 'package:charitask/modules/locations/widgets/locations_kpi_row.dart';
 import 'package:charitask/modules/locations/widgets/locations_section.dart';
 import 'package:charitask/modules/locations/widgets/location_filters.dart';
+import 'package:charitask/modules/groups/data/services/group_service.dart';
 
 class LocationsPage extends StatefulWidget {
   final String organizationId;
@@ -24,6 +25,7 @@ class LocationsPage extends StatefulWidget {
 
 class _LocationsPageState extends State<LocationsPage> {
   final LocationService _locationService = LocationService();
+  final GroupService _groupService = GroupService();
   final PeopleService _peopleService = PeopleService(Supabase.instance.client);
   final AuthorizationService _authorizationService = AuthorizationService(
     Supabase.instance.client,
@@ -35,6 +37,7 @@ class _LocationsPageState extends State<LocationsPage> {
   String? _errorMessage;
   List<Location> _locations = [];
   Map<String, int> _peopleCounts = {};
+  Map<String, int> _groupCounts = {};
   String _searchQuery = '';
   String? _selectedType;
   String? _selectedStatus;
@@ -65,6 +68,7 @@ class _LocationsPageState extends State<LocationsPage> {
       );
 
       final peopleCounts = <String, int>{};
+      final groupCounts = <String, int>{};
 
       final peopleCountResults = await Future.wait(
         locations.map(
@@ -77,6 +81,12 @@ class _LocationsPageState extends State<LocationsPage> {
 
       for (var i = 0; i < locations.length; i++) {
         peopleCounts[locations[i].id] = peopleCountResults[i];
+
+        groupCounts[locations[i].id] = await _groupService
+            .getActiveGroupCountForLocation(
+              organizationId: widget.organizationId,
+              locationId: locations[i].id,
+            );
       }
 
       if (!mounted) return;
@@ -84,6 +94,7 @@ class _LocationsPageState extends State<LocationsPage> {
       setState(() {
         _locations = locations;
         _peopleCounts = peopleCounts;
+        _groupCounts = groupCounts;
 
         _canCreate = canCreate;
         _isLoading = false;
@@ -239,6 +250,7 @@ class _LocationsPageState extends State<LocationsPage> {
           child: LocationsSection(
             locations: filteredLocations,
             peopleCounts: _peopleCounts,
+            groupCounts: _groupCounts,
             onLocationTap: _openLocation,
           ),
         ),

@@ -229,7 +229,7 @@ class CredentialComplianceDetailsDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${assessment.requirement.category.label} · '
+                      '${assessment.reusableRequirementCategory ?? assessment.requirement?.category.label ?? 'Compliance'} · '
                       '${assessment.roleName}',
                       style: const TextStyle(
                         color: _muted,
@@ -266,11 +266,17 @@ class CredentialComplianceDetailsDialog extends StatelessWidget {
               ),
             ],
           ),
-          if (assessment.requirement.description?.trim().isNotEmpty ==
+          if ((assessment.reusableRequirementDescription ??
+                      assessment.requirement?.description)
+                  ?.trim()
+                  .isNotEmpty ==
               true) ...[
             const SizedBox(height: 8),
             Text(
-              assessment.requirement.description!.trim(),
+              (assessment.reusableRequirementDescription ??
+                      assessment.requirement?.description ??
+                      '')
+                  .trim(),
               style: const TextStyle(color: _muted, fontSize: 12, height: 1.45),
             ),
           ],

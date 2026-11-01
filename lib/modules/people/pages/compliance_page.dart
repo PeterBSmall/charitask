@@ -3,7 +3,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:charitask/modules/foundation/data/services/functional_role_service.dart';
 import 'package:charitask/modules/foundation/domain/models/functional_role.dart';
+import 'package:charitask/modules/foundation/domain/models/location.dart';
+import 'package:charitask/modules/locations/data/services/location_service.dart';
 import 'package:charitask/modules/people/data/repositories/people_repository_impl.dart';
+import 'package:charitask/modules/people/data/services/compliance_receipt_service.dart';
+import 'package:charitask/modules/people/data/services/compliance_review_service.dart';
 import 'package:charitask/modules/people/data/services/compliance_requirement_service.dart';
 import 'package:charitask/modules/people/data/services/people_service.dart';
 import 'package:charitask/modules/people/data/services/person_compliance_agreement_service.dart';
@@ -19,6 +23,7 @@ import 'package:charitask/modules/people/domain/repositories/people_repository.d
 import 'package:charitask/modules/people/domain/services/credential_compliance_evaluator.dart';
 import 'package:charitask/modules/people/widgets/edit_person/edit_person_credentials.dart';
 import 'package:charitask/platform/authorization/authorization_service.dart';
+import 'package:charitask/modules/people/pages/compliance_receipts_page.dart';
 
 class CompliancePage extends StatefulWidget {
   const CompliancePage({
@@ -53,6 +58,9 @@ class _CompliancePageState extends State<CompliancePage>
   late final PersonComplianceAgreementService _agreementService;
   late final PersonMedicalClearanceService _medicalClearanceService;
   late final PeopleRepository _peopleRepository;
+  late final LocationService _locationService;
+  late final ComplianceReceiptService _receiptService;
+  late final ComplianceReviewService _reviewService;
 
   List<FunctionalRole> _roles = [];
   List<ComplianceRequirement> _requirements = [];
@@ -62,6 +70,7 @@ class _CompliancePageState extends State<CompliancePage>
   List<PersonComplianceAgreementAcknowledgement> _agreementAcknowledgements =
       [];
   List<PersonMedicalClearanceRecord> _medicalClearanceRecords = [];
+  List<Location> _receiptLocations = [];
   String? _selectedPersonId;
   String? _selectedPersonName;
   bool _canViewRequirements = false;
@@ -73,6 +82,22 @@ class _CompliancePageState extends State<CompliancePage>
   bool _canManageAgreements = false;
   bool _canViewMedicalClearance = false;
   bool _canManageMedicalClearance = false;
+  bool _canViewReceipts = false;
+  bool _canViewCredentials = false;
+  bool _canViewReviews = false;
+  bool _canReceiveReceipts = false;
+  bool _canReviewReceipts = false;
+  bool _canManageReviews = false;
+  bool _canDecideReviews = false;
+  bool _canViewReviewAudit = false;
+  bool _isLoadingReceipts = false;
+  bool _isSavingReceipt = false;
+  List<Map<String, dynamic>> _receiptSubmissions = [];
+  List<Map<String, dynamic>> _reviews = [];
+  bool _isLoadingReviews = false;
+  int _reviewRequestVersion = 0;
+  String? _reviewLoadError;
+  String _reviewStatusFilter = 'all';
   bool _isLoadingPersonRecords = false;
   bool _isLoading = true;
   bool _isSavingRequirement = false;
@@ -84,15 +109,34 @@ class _CompliancePageState extends State<CompliancePage>
   void initState() {
     super.initState();
     final hasInitialRecord = widget.initialPersonId != null;
+    final isReusableRequirement =
+        widget.initialRequirementAssessment != null &&
+        widget.initialRequirementAssessment!.requirement == null;
+    if (isReusableRequirement) {
+      _requirementSearch = widget.initialRequirementAssessment!.displayName;
+    }
+
     _tabController = TabController(
-      length: 3,
+      length: 7,
       vsync: this,
-      initialIndex: hasInitialRecord ? 2 : 0,
+      initialIndex: isReusableRequirement
+          ? 0
+          : hasInitialRecord
+          ? 2
+          : 0,
     );
+    _tabController.addListener(() {
+      if (_tabController.index == 6 &&
+          !_tabController.indexIsChanging &&
+          !_isLoadingReviews) {
+        _loadReviews();
+      }
+    });
     _selectedPersonId = widget.initialPersonId;
     _selectedPersonName = widget.initialPersonName;
 
     final supabase = Supabase.instance.client;
+
     _authorization = AuthorizationService(supabase);
     _roleService = FunctionalRoleService(supabase: supabase);
     _requirementService = ComplianceRequirementService(supabase: supabase);
@@ -100,6 +144,9 @@ class _CompliancePageState extends State<CompliancePage>
     _medicalClearanceService = PersonMedicalClearanceService(
       supabase: supabase,
     );
+    _locationService = LocationService(supabase: supabase);
+    _receiptService = ComplianceReceiptService(supabase: supabase);
+    _reviewService = ComplianceReviewService(supabase: supabase);
     _peopleRepository = PeopleRepositoryImpl(PeopleService(supabase));
     _loadModule();
   }
@@ -133,6 +180,14 @@ class _CompliancePageState extends State<CompliancePage>
         _hasPermission('compliance.medical_clearance.view'),
         _hasPermission('compliance.medical_clearance.manage'),
         _hasPermission('groups.view'),
+        _hasPermission('compliance.receipts.view'),
+        _hasPermission('compliance.receipts.receive'),
+        _hasPermission('compliance.receipts.review'),
+        _hasPermission('credentials.view'),
+        _hasPermission('compliance.reviews.view'),
+        _hasPermission('compliance.reviews.manage'),
+        _hasPermission('compliance.reviews.decide'),
+        _hasPermission('compliance.reviews.audit.view'),
       ]);
       final canViewRequirements = permissions[0];
       final canEditRequirements = permissions[1];
@@ -142,6 +197,14 @@ class _CompliancePageState extends State<CompliancePage>
       final canViewMedicalClearance = permissions[5];
       final canManageMedicalClearance = permissions[6];
       final canViewGroups = permissions[7];
+      final canViewReceipts = permissions[8];
+      final canReceiveReceipts = permissions[9];
+      final canReviewReceipts = permissions[10];
+      final canViewCredentials = permissions[11];
+      final canViewReviews = permissions[12];
+      final canManageReviews = permissions[13];
+      final canDecideReviews = permissions[14];
+      final canViewReviewAudit = permissions[15];
 
       List<FunctionalRole> roles = [];
       List<ComplianceRequirement> requirements = [];
@@ -200,6 +263,16 @@ class _CompliancePageState extends State<CompliancePage>
         _canManageAgreements = canManageAgreements;
         _canViewMedicalClearance = canViewMedicalClearance;
         _canManageMedicalClearance = canManageMedicalClearance;
+
+        _canViewReceipts = canViewReceipts;
+        _canReceiveReceipts = canReceiveReceipts;
+        _canReviewReceipts = canReviewReceipts;
+        _canViewCredentials = canViewCredentials;
+        _canViewReviews = canViewReviews;
+        _canManageReviews = canManageReviews;
+        _canDecideReviews = canDecideReviews;
+        _canViewReviewAudit = canViewReviewAudit;
+
         _isLoading = false;
         _errorMessage = null;
 
@@ -215,6 +288,8 @@ class _CompliancePageState extends State<CompliancePage>
       if (_selectedPersonId != null) {
         await _loadPersonComplianceRecords();
       }
+
+      await _loadReceiptData();
     } catch (error) {
       debugPrint('Compliance module failed to load: $error');
       if (!mounted) {
@@ -224,6 +299,97 @@ class _CompliancePageState extends State<CompliancePage>
         _isLoading = false;
         _errorMessage = 'Compliance could not be loaded. Please try again.';
       });
+    }
+  }
+
+  Future<void> _loadReviews() async {
+    final requestVersion = ++_reviewRequestVersion;
+
+    if (!_canViewCredentials || !_canViewReviews) {
+      if (!mounted || requestVersion != _reviewRequestVersion) return;
+      setState(() {
+        _reviews = [];
+        _reviewLoadError = null;
+        _isLoadingReviews = false;
+      });
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoadingReviews = true;
+        _reviewLoadError = null;
+      });
+    }
+
+    try {
+      final reviews = await _reviewService.getReviews(
+        organizationId: widget.organizationId,
+        status: _reviewStatusFilter,
+      );
+
+      if (!mounted || requestVersion != _reviewRequestVersion) return;
+      setState(() {
+        _reviews = reviews;
+        _isLoadingReviews = false;
+        _reviewLoadError = null;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Compliance reviews failed to load: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted || requestVersion != _reviewRequestVersion) return;
+      setState(() {
+        _isLoadingReviews = false;
+        _reviewLoadError = 'Reviews could not be loaded. Please try again.';
+      });
+    }
+  }
+
+  Future<void> _loadReceiptData() async {
+    if (!_canViewReceipts && !_canReviewReceipts && !_canReceiveReceipts) {
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoadingReceipts = true;
+      });
+    }
+
+    try {
+      final results = await Future.wait<dynamic>([
+        (_canViewReceipts || _canReviewReceipts)
+            ? _receiptService.getReceipts(organizationId: widget.organizationId)
+            : Future.value(<Map<String, dynamic>>[]),
+        _canReceiveReceipts
+            ? _locationService.getLocations(
+                organizationId: widget.organizationId,
+              )
+            : Future.value(<Location>[]),
+      ]);
+
+      if (!mounted) return;
+
+      setState(() {
+        _receiptSubmissions = List<Map<String, dynamic>>.from(results[0]);
+        _receiptLocations = List<Location>.from(results[1]);
+        _isLoadingReceipts = false;
+      });
+    } catch (error) {
+      debugPrint('Compliance receipt data failed to load: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingReceipts = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Receipt data could not be loaded. Please try again.'),
+        ),
+      );
     }
   }
 
@@ -502,6 +668,18 @@ class _CompliancePageState extends State<CompliancePage>
         builder: (_) => const _RequirementCreationDialog(),
       );
       if (choice == null || !mounted) return;
+      if (choice == _RequirementCreationChoice.useExisting) {
+        final selectedRequirement = await showDialog<ComplianceRequirement>(
+          context: context,
+          builder: (_) =>
+              _ExistingRequirementPickerDialog(requirements: _requirements),
+        );
+
+        if (selectedRequirement == null || !mounted) return;
+
+        await _openRequirementEditor(requirement: selectedRequirement);
+        return;
+      }
       if (choice == _RequirementCreationChoice.useTemplate) {
         if (_templates.isEmpty) {
           _showMessage('No active compliance templates are available.');
@@ -978,24 +1156,29 @@ class _CompliancePageState extends State<CompliancePage>
           ],
         ),
         const SizedBox(height: 16),
-        TextField(
-          onChanged: (value) => setState(() => _requirementSearch = value),
-          decoration: InputDecoration(
-            hintText: 'Search requirements, person types, roles, or groups',
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: _requirementSearch.isEmpty
-                ? null
-                : IconButton(
-                    tooltip: 'Clear search',
-                    onPressed: () => setState(() => _requirementSearch = ''),
-                    icon: const Icon(Icons.close),
-                  ),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _border),
+        Material(
+          color: Colors.transparent,
+          child: TextField(
+            onChanged: (value) => setState(() => _requirementSearch = value),
+            decoration: InputDecoration(
+              hintText: 'Search requirements, person types, roles, or groups',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _requirementSearch.isEmpty
+                  ? null
+                  : IconButton(
+                      tooltip: 'Clear search',
+                      onPressed: () => setState(() => _requirementSearch = ''),
+                      icon: const Icon(Icons.close),
+                    ),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: _border),
+              ),
             ),
           ),
         ),
@@ -1226,84 +1409,108 @@ class _CompliancePageState extends State<CompliancePage>
 
   Widget _buildRecords() {
     final selectedId = _selectedPersonId;
+
     if (selectedId != null) {
       final selectedPerson = _people.where(
         (person) => person['id']?.toString() == selectedId,
       );
+
       final displayName =
           _selectedPersonName ??
           (selectedPerson.isNotEmpty
               ? _personName(selectedPerson.first)
               : 'Selected person');
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                tooltip: 'Back to people',
-                onPressed: () => setState(() {
-                  _selectedPersonId = null;
-                  _selectedPersonName = null;
-                }),
-                icon: const Icon(Icons.arrow_back),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: _navy,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    const Text(
-                      'Credential records and supporting documentation',
-                      style: TextStyle(fontSize: 13, color: _muted),
-                    ),
-                  ],
+
+      return Material(
+        color: Colors.transparent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  tooltip: 'Back to people',
+                  onPressed: () => setState(() {
+                    _selectedPersonId = null;
+                    _selectedPersonName = null;
+                  }),
+                  icon: const Icon(Icons.arrow_back),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          EditPersonCredentials(
-            key: ValueKey(
-              'credentials-$selectedId-${widget.initialRequirementAssessment?.requirement.id ?? 'all'}',
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: _navy,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      const Text(
+                        'Credential records and supporting documentation',
+                        style: TextStyle(fontSize: 13, color: _muted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            organizationId: widget.organizationId,
-            personId: selectedId,
-            initialRequirementAssessment: widget.initialRequirementAssessment,
-          ),
-          const SizedBox(height: 18),
-          _buildSpecializedComplianceRecords(),
-        ],
+            const SizedBox(height: 16),
+            EditPersonCredentials(
+              key: ValueKey(
+                'credentials-$selectedId-'
+                '${widget.initialRequirementAssessment?.requirement?.id ?? 'all'}',
+              ),
+              organizationId: widget.organizationId,
+              personId: selectedId,
+              initialRequirementAssessment: widget.initialRequirementAssessment,
+            ),
+            const SizedBox(height: 18),
+            _buildSpecializedComplianceRecords(),
+          ],
+        ),
       );
     }
 
+    return _buildPersonSelector(
+      title: 'Compliance Records',
+      description:
+          'Choose a person to view or manage their credentials. '
+          'This does not open their general profile editor.',
+    );
+  }
+
+  Widget _buildPersonSelector({
+    required String title,
+    required String description,
+  }) {
     if (!_canViewPeople) {
       return _emptyState(
         Icons.lock_outline,
         'People list restricted',
-        'You need people view permission to choose a person. Use a compliance link from a person record if your access permits credential management.',
+        'You need people view permission to choose a person. '
+            'Use a compliance link from a person record if your access '
+            'permits credential management.',
       );
     }
 
     final query = _peopleSearch.trim().toLowerCase();
+
     final filtered =
         _people.where((person) {
           if (query.isEmpty) return true;
+
           final values = [
             person['first_name'],
             person['last_name'],
             person['preferred_name'],
             person['email'],
           ];
+
           return values.any(
             (value) => value?.toString().toLowerCase().contains(query) == true,
           );
@@ -1316,18 +1523,18 @@ class _CompliancePageState extends State<CompliancePage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Compliance Records',
-          style: TextStyle(
+        Text(
+          title,
+          style: const TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w800,
             color: _navy,
           ),
         ),
         const SizedBox(height: 5),
-        const Text(
-          'Choose a person to view or manage their credentials. This does not open their general profile editor.',
-          style: TextStyle(fontSize: 13, height: 1.45, color: _muted),
+        Text(
+          description,
+          style: const TextStyle(fontSize: 13, height: 1.45, color: _muted),
         ),
         const SizedBox(height: 14),
         TextField(
@@ -1358,6 +1565,7 @@ class _CompliancePageState extends State<CompliancePage>
           ...filtered.map((person) {
             final id = person['id']?.toString() ?? '';
             final name = _personName(person);
+
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
@@ -1393,6 +1601,106 @@ class _CompliancePageState extends State<CompliancePage>
               ),
             );
           }),
+      ],
+    );
+  }
+
+  Widget _buildAgreements() {
+    if (_selectedPersonId == null) {
+      return _buildPersonSelector(
+        title: 'Agreement Acknowledgments',
+        description:
+            'Choose a person to view or manage their agreement acknowledgments.',
+      );
+    }
+
+    final selectedPerson = _people.where(
+      (person) => person['id']?.toString() == _selectedPersonId,
+    );
+
+    final displayName =
+        _selectedPersonName ??
+        (selectedPerson.isNotEmpty
+            ? _personName(selectedPerson.first)
+            : 'Selected person');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Agreements for $displayName',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: _navy,
+                ),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () => setState(() {
+                _selectedPersonId = null;
+                _selectedPersonName = null;
+              }),
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('Change Person'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildAgreementRecordsCard(),
+      ],
+    );
+  }
+
+  Widget _buildMedicalClearance() {
+    if (_selectedPersonId == null) {
+      return _buildPersonSelector(
+        title: 'Medical Clearance',
+        description:
+            'Choose a person to view or manage their medical-clearance records.',
+      );
+    }
+
+    final selectedPerson = _people.where(
+      (person) => person['id']?.toString() == _selectedPersonId,
+    );
+
+    final displayName =
+        _selectedPersonName ??
+        (selectedPerson.isNotEmpty
+            ? _personName(selectedPerson.first)
+            : 'Selected person');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Medical Clearance for $displayName',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: _navy,
+                ),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () => setState(() {
+                _selectedPersonId = null;
+                _selectedPersonName = null;
+              }),
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('Change Person'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildMedicalClearanceRecordsCard(),
       ],
     );
   }
@@ -1683,6 +1991,181 @@ class _CompliancePageState extends State<CompliancePage>
       style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
     ),
   );
+  Widget _buildReceipts() {
+    return ComplianceReceiptsPage(
+      organizationId: widget.organizationId,
+      embedded: true,
+    );
+  }
+
+  Widget _buildReviews() {
+    final canAccessReviews = _canViewCredentials && _canViewReviews;
+
+    if (!canAccessReviews) {
+      return _emptyState(
+        Icons.lock_outline,
+        'Reviews restricted',
+        'You need compliance review permission to access this queue.',
+      );
+    }
+
+    const filters = <MapEntry<String, String>>[
+      MapEntry('all', 'All'),
+      MapEntry('pending', 'Pending'),
+      MapEntry('in_review', 'In Review'),
+      MapEntry('approved', 'Approved'),
+      MapEntry('needs_update', 'Update Requested'),
+      MapEntry('rejected', 'Rejected'),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 10,
+          children: [
+            const Text(
+              'Credential Reviews',
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.w800,
+                color: _navy,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: _isLoadingReviews ? null : _loadReviews,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Review submitted credentials and track their decision status.',
+          style: TextStyle(fontSize: 13, color: _muted, height: 1.4),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: filters.map((filter) {
+            final selected = _reviewStatusFilter == filter.key;
+            return ChoiceChip(
+              label: Text(filter.value),
+              selected: selected,
+              onSelected: (value) {
+                if (!value || _reviewStatusFilter == filter.key) return;
+                setState(() => _reviewStatusFilter = filter.key);
+                _loadReviews();
+              },
+              selectedColor: const Color(0xFFEDE9FE),
+              labelStyle: TextStyle(
+                color: selected ? _purple : _muted,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+              side: BorderSide(
+                color: selected ? _purple.withValues(alpha: .35) : _border,
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 18),
+        if (_isLoadingReviews)
+          const Padding(
+            padding: EdgeInsets.all(36),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_reviewLoadError != null)
+          _emptyState(
+            Icons.error_outline,
+            'Could not load reviews',
+            _reviewLoadError!,
+          )
+        else if (_reviews.isEmpty)
+          _emptyState(
+            Icons.fact_check_outlined,
+            'No reviews found',
+            _reviewStatusFilter == 'all'
+                ? 'There are no review records available to you yet.'
+                : 'No reviews match the selected status.',
+          )
+        else
+          ..._reviews.map((review) {
+            final status =
+                review['status']?.toString().replaceAll('_', ' ') ?? 'Unknown';
+            final priority = review['priority']?.toString() ?? 'normal';
+            final reviewId = review['id']?.toString() ?? '';
+            final dueAt = review['due_at']?.toString();
+
+            return Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: _border),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _chip(
+                        status.toUpperCase(),
+                        status.toLowerCase() == 'approved'
+                            ? const Color(0xFF15803D)
+                            : status.toLowerCase() == 'rejected'
+                            ? const Color(0xFFB91C1C)
+                            : _cyan,
+                      ),
+                      _chip(
+                        'Priority: $priority',
+                        priority.toLowerCase() == 'high'
+                            ? const Color(0xFFB91C1C)
+                            : _muted,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Review ${reviewId.isEmpty ? '' : '#${reviewId.length > 8 ? reviewId.substring(0, 8) : reviewId}'}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: _navy,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Person ID: ${review['person_id'] ?? 'Not available'}',
+                    style: const TextStyle(fontSize: 12, color: _muted),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Credential ID: ${review['credential_id'] ?? 'Not available'}',
+                    style: const TextStyle(fontSize: 12, color: _muted),
+                  ),
+                  if (dueAt != null && dueAt.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Due: ${dueAt.length >= 10 ? dueAt.substring(0, 10) : dueAt}',
+                      style: const TextStyle(fontSize: 12, color: _muted),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
+      ],
+    );
+  }
 
   Widget _emptyState(IconData icon, String title, String description) =>
       Container(
@@ -1750,8 +2233,24 @@ class _CompliancePageState extends State<CompliancePage>
                     text: 'Overview',
                   ),
                   Tab(
+                    icon: Icon(Icons.description_outlined, size: 18),
+                    text: 'Agreements',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.medical_services_outlined, size: 18),
+                    text: 'Medical Clearance',
+                  ),
+                  Tab(
                     icon: Icon(Icons.folder_shared_outlined, size: 18),
                     text: 'Records',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.receipt_long_outlined, size: 18),
+                    text: 'Receipts',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.fact_check_outlined, size: 18),
+                    text: 'Reviews',
                   ),
                 ],
               ),
@@ -1778,7 +2277,15 @@ class _CompliancePageState extends State<CompliancePage>
                     case 1:
                       return _buildOverview();
                     case 2:
+                      return _buildAgreements();
+                    case 3:
+                      return _buildMedicalClearance();
+                    case 4:
                       return _buildRecords();
+                    case 5:
+                      return _buildReceipts();
+                    case 6:
+                      return _buildReviews();
                     default:
                       return _buildRequirements();
                   }
@@ -2042,7 +2549,7 @@ class _MedicalClearanceEditorDialogState
   }
 }
 
-enum _RequirementCreationChoice { createNew, useTemplate }
+enum _RequirementCreationChoice { useExisting, useTemplate, createNew }
 
 class _RequirementCreationDialog extends StatelessWidget {
   const _RequirementCreationDialog();
@@ -2062,8 +2569,19 @@ class _RequirementCreationDialog extends StatelessWidget {
           children: [
             _choiceCard(
               context,
+              icon: Icons.search,
+              title: 'Use Existing Requirement',
+              description:
+                  'Search your organization’s requirements and edit an existing one.',
+              onTap: () => Navigator.of(
+                context,
+              ).pop(_RequirementCreationChoice.useExisting),
+            ),
+            const SizedBox(height: 12),
+            _choiceCard(
+              context,
               icon: Icons.library_books_outlined,
-              title: 'Use Template',
+              title: 'Create from Template',
               description:
                   'Start with a recommended requirement, then customize it for your organization.',
               onTap: () => Navigator.of(
@@ -2074,7 +2592,7 @@ class _RequirementCreationDialog extends StatelessWidget {
             _choiceCard(
               context,
               icon: Icons.add_circle_outline,
-              title: 'Create New',
+              title: 'Create Custom Requirement',
               description: 'Define a custom requirement from scratch.',
               onTap: () => Navigator.of(
                 context,
@@ -2265,6 +2783,104 @@ class _TemplatePickerDialog extends StatelessWidget {
                   );
                 },
               ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ExistingRequirementPickerDialog extends StatefulWidget {
+  const _ExistingRequirementPickerDialog({required this.requirements});
+
+  final List<ComplianceRequirement> requirements;
+
+  @override
+  State<_ExistingRequirementPickerDialog> createState() =>
+      _ExistingRequirementPickerDialogState();
+}
+
+class _ExistingRequirementPickerDialogState
+    extends State<_ExistingRequirementPickerDialog> {
+  String _search = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final query = _search.trim().toLowerCase();
+
+    final filtered =
+        widget.requirements.where((requirement) {
+          return requirement.isActive &&
+              (requirement.name.toLowerCase().contains(query) ||
+                  requirement.requirementType.label.toLowerCase().contains(
+                    query,
+                  ) ||
+                  (requirement.description ?? '').toLowerCase().contains(
+                    query,
+                  ));
+        }).toList()..sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
+
+    return AlertDialog(
+      title: const Text('Use Existing Requirement'),
+      content: SizedBox(
+        width: 520,
+        height: 480,
+        child: Column(
+          children: [
+            TextField(
+              autofocus: true,
+              onChanged: (value) {
+                setState(() => _search = value);
+              },
+              decoration: InputDecoration(
+                hintText: 'Search requirements...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _search.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Clear search',
+                        onPressed: () {
+                          setState(() => _search = '');
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: filtered.isEmpty
+                  ? const Center(child: Text('No matching requirements found.'))
+                  : ListView.separated(
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final requirement = filtered[index];
+
+                        return ListTile(
+                          leading: const Icon(Icons.fact_check_outlined),
+                          title: Text(requirement.name),
+                          subtitle: Text(
+                            requirement.requirementType.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            Navigator.of(context).pop(requirement);
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -2793,8 +3409,10 @@ class _ComplianceRequirementEditorDialogState
         TextFormField(
           controller: _nameController,
           decoration: const InputDecoration(
-            labelText: 'Requirement Name *',
-            hintText: 'e.g. CPR Certification',
+            labelText: 'Custom Requirement Name *',
+            hintText: 'e.g. Polymax Confidentiality Agreement',
+            helperText:
+                'Customize the name for your organization. The selected template remains unchanged.',
             border: OutlineInputBorder(),
           ),
           textCapitalization: TextCapitalization.words,
@@ -3350,37 +3968,52 @@ class _ComplianceRequirementEditorDialogState
             ),
           ),
         ],
+
         if (showRenewal) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           const Text(
-            'Renewal Period',
+            'Renewal Schedule',
             style: TextStyle(color: _navy, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
+          const Text(
+            'Set how often this credential must be renewed. '
+            'Leave the interval blank if there is no fixed renewal cycle.',
+            style: TextStyle(color: _muted, fontSize: 12),
+          ),
+          const SizedBox(height: 10),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 120,
+                width: 112,
                 child: TextFormField(
                   controller: _renewalController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    hintText: '2',
-                    labelText: 'Every',
+                    labelText: 'Interval',
+                    hintText: 'e.g. 2',
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (value) {
                     final parsed = int.tryParse(value.trim());
-                    setState(() => _setRule(renewalPeriodValue: parsed ?? -1));
+                    setState(() {
+                      _setRule(
+                        renewalPeriodValue: value.trim().isEmpty
+                            ? -1
+                            : (parsed ?? -1),
+                      );
+                    });
                   },
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<ComplianceRenewalPeriodUnit>(
                   initialValue: _rules.renewalPeriodUnit,
                   isExpanded: true,
                   decoration: const InputDecoration(
+                    labelText: 'Unit',
                     border: OutlineInputBorder(),
                   ),
                   items: ComplianceRenewalPeriodUnit.values
@@ -3391,13 +4024,17 @@ class _ComplianceRequirementEditorDialogState
                         ),
                       )
                       .toList(),
-                  onChanged: (value) =>
-                      setState(() => _setRule(renewalPeriodUnit: value)),
+                  onChanged: (value) {
+                    setState(() {
+                      _setRule(renewalPeriodUnit: value);
+                    });
+                  },
                 ),
               ),
             ],
           ),
         ],
+
         const SizedBox(height: 18),
         const Text(
           'Verification',
