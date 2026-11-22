@@ -14,6 +14,8 @@ import 'package:charitask/modules/groups/pages/group_members_page.dart';
 import 'package:charitask/modules/groups/widgets/edit_group_dialog.dart';
 import 'package:charitask/modules/groups/pages/archived_groups_page.dart';
 import 'package:charitask/modules/groups/widgets/duplicate_group_dialog.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../platform/authorization/authorization.dart';
 
 class GroupsPage extends StatefulWidget {
   final String organizationId;
@@ -27,6 +29,15 @@ class GroupsPage extends StatefulWidget {
 class _GroupsPageState extends State<GroupsPage> {
   final GroupService _groupService = GroupService();
   final TextEditingController _searchController = TextEditingController();
+
+  final AuthorizationService _authorizationService = AuthorizationService(
+    Supabase.instance.client,
+  );
+
+  bool _canCreate = false;
+  bool _canEdit = false;
+  bool _canManage = false;
+  bool _checkingPermissions = true;
 
   bool _isLoading = true;
   String? _errorMessage;
@@ -57,6 +68,50 @@ class _GroupsPageState extends State<GroupsPage> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _checkingPermissions = true;
+
+      // Fail closed while permissions are being refreshed.
+      _canCreate = false;
+      _canEdit = false;
+      _canManage = false;
+    });
+
+    var canCreate = false;
+    var canEdit = false;
+    var canManage = false;
+
+    // Load permissions independently so a permission-check failure
+    // does not prevent the Groups page from loading.
+    try {
+      final results = await Future.wait([
+        _authorizationService.hasPermission(
+          organizationId: widget.organizationId,
+          permissionKey: 'groups.create',
+        ),
+        _authorizationService.hasPermission(
+          organizationId: widget.organizationId,
+          permissionKey: 'groups.edit',
+        ),
+        _authorizationService.hasPermission(
+          organizationId: widget.organizationId,
+          permissionKey: 'groups.manage',
+        ),
+      ]);
+
+      canCreate = results[0];
+      canEdit = results[1];
+      canManage = results[2];
+    } catch (error) {
+      debugPrint('GroupsPage permission check failed: $error');
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _canCreate = canCreate;
+      _canEdit = canEdit;
+      _canManage = canManage;
+      _checkingPermissions = false;
     });
 
     try {
@@ -227,7 +282,8 @@ class _GroupsPageState extends State<GroupsPage> {
                             runSpacing: 8,
                             children: [
                               _buildArchivedGroupsButton(),
-                              _buildAddGroupButton(),
+                              if (!_checkingPermissions && _canCreate)
+                                _buildAddGroupButton(),
                             ],
                           ),
                         ),
@@ -250,7 +306,8 @@ class _GroupsPageState extends State<GroupsPage> {
                           runSpacing: 8,
                           children: [
                             _buildArchivedGroupsButton(),
-                            _buildAddGroupButton(),
+                            if (!_checkingPermissions && _canCreate)
+                              _buildAddGroupButton(),
                           ],
                         ),
                       ],
@@ -410,11 +467,19 @@ class _GroupsPageState extends State<GroupsPage> {
               return GroupCard(
                 group: group,
                 onTap: () => _openGroup(group),
-                onEdit: () => _editGroup(group),
-                onManageMembers: () => _manageMembers(group),
+                onEdit: !_checkingPermissions && _canEdit
+                    ? () => _editGroup(group)
+                    : null,
+                onManageMembers: !_checkingPermissions && _canManage
+                    ? () => _manageMembers(group)
+                    : null,
                 onViewActivity: () => _viewActivity(group),
-                onDuplicate: () => _duplicateGroup(group),
-                onArchive: () => _archiveGroup(group),
+                onDuplicate: !_checkingPermissions && _canCreate
+                    ? () => _duplicateGroup(group)
+                    : null,
+                onArchive: !_checkingPermissions && _canEdit
+                    ? () => _archiveGroup(group)
+                    : null,
               );
             },
           );
@@ -432,11 +497,19 @@ class _GroupsPageState extends State<GroupsPage> {
             GroupListCard(
               group: groups[index],
               onTap: () => _openGroup(groups[index]),
-              onEdit: () => _editGroup(groups[index]),
-              onManageMembers: () => _manageMembers(groups[index]),
+              onEdit: !_checkingPermissions && _canEdit
+                  ? () => _editGroup(groups[index])
+                  : null,
+              onManageMembers: !_checkingPermissions && _canManage
+                  ? () => _manageMembers(groups[index])
+                  : null,
               onViewActivity: () => _viewActivity(groups[index]),
-              onDuplicate: () => _duplicateGroup(groups[index]),
-              onArchive: () => _archiveGroup(groups[index]),
+              onDuplicate: !_checkingPermissions && _canCreate
+                  ? () => _duplicateGroup(groups[index])
+                  : null,
+              onArchive: !_checkingPermissions && _canEdit
+                  ? () => _archiveGroup(groups[index])
+                  : null,
             ),
             if (index < groups.length - 1) const SizedBox(height: 10),
           ],

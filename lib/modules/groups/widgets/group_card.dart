@@ -247,13 +247,11 @@ class GroupCard extends StatelessWidget {
   }
 
   Widget _buildMenu() {
-    return PopupMenuButton<_GroupCardAction>(
-      tooltip: 'Group actions',
-      padding: EdgeInsets.zero,
-      icon: const Icon(Icons.more_vert_rounded, color: _gray),
-      onSelected: _handleAction,
-      itemBuilder: (context) => const [
-        PopupMenuItem(
+    final items = <PopupMenuEntry<_GroupCardAction>>[];
+
+    if (onEdit != null) {
+      items.add(
+        const PopupMenuItem(
           value: _GroupCardAction.edit,
           child: ListTile(
             contentPadding: EdgeInsets.zero,
@@ -261,7 +259,12 @@ class GroupCard extends StatelessWidget {
             title: Text('Edit Group'),
           ),
         ),
-        PopupMenuItem(
+      );
+    }
+
+    if (onManageMembers != null) {
+      items.add(
+        const PopupMenuItem(
           value: _GroupCardAction.manageMembers,
           child: ListTile(
             contentPadding: EdgeInsets.zero,
@@ -269,8 +272,13 @@ class GroupCard extends StatelessWidget {
             title: Text('Manage Members'),
           ),
         ),
-        PopupMenuDivider(),
-        PopupMenuItem(
+      );
+    }
+
+    if (onViewActivity != null) {
+      if (items.isNotEmpty) items.add(const PopupMenuDivider());
+      items.add(
+        const PopupMenuItem(
           value: _GroupCardAction.viewActivity,
           child: ListTile(
             contentPadding: EdgeInsets.zero,
@@ -278,7 +286,13 @@ class GroupCard extends StatelessWidget {
             title: Text('View Activity'),
           ),
         ),
-        PopupMenuItem(
+      );
+    }
+
+    if (onDuplicate != null) {
+      if (items.isNotEmpty) items.add(const PopupMenuDivider());
+      items.add(
+        const PopupMenuItem(
           value: _GroupCardAction.duplicate,
           child: ListTile(
             contentPadding: EdgeInsets.zero,
@@ -286,8 +300,13 @@ class GroupCard extends StatelessWidget {
             title: Text('Duplicate Group'),
           ),
         ),
-        PopupMenuDivider(),
-        PopupMenuItem(
+      );
+    }
+
+    if (onArchive != null) {
+      if (items.isNotEmpty) items.add(const PopupMenuDivider());
+      items.add(
+        const PopupMenuItem(
           value: _GroupCardAction.archive,
           child: ListTile(
             contentPadding: EdgeInsets.zero,
@@ -295,7 +314,15 @@ class GroupCard extends StatelessWidget {
             title: Text('Archive Group'),
           ),
         ),
-      ],
+      );
+    }
+
+    return PopupMenuButton<_GroupCardAction>(
+      tooltip: 'Group actions',
+      padding: EdgeInsets.zero,
+      icon: const Icon(Icons.more_vert_rounded, color: _gray),
+      onSelected: _handleAction,
+      itemBuilder: (context) => items,
     );
   }
 
